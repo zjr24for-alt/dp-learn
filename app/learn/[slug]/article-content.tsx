@@ -56,11 +56,11 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-blue-400 pl-4 py-1 my-3 text-zinc-600 italic">$1</blockquote>')
       .replace(/^---$/gm, '<hr class="my-6 border-zinc-200">')
-      .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-zinc-700">$1</li>')
-      .replace(/\n\n/g, '</p><p class="text-zinc-700 leading-relaxed mb-3">')
+      .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-zinc-800">$1</li>')
+      .replace(/\n\n/g, '</p><p class="text-zinc-800 leading-relaxed mb-3">')
       .replace(/\n/g, '<br/>');
 
-    html = '<p class="text-zinc-700 leading-relaxed mb-3">' + html + '</p>';
+    html = '<p class="text-zinc-800 leading-relaxed mb-3">' + html + '</p>';
     html = html.replace(/<p class="[^"]*"><\/p>/g, '');
     return html;
   };
