@@ -1,33 +1,43 @@
-// arXiv API client — 纯客户端调用，无需 API Key
-// API 文档: https://info.arxiv.org/help/api/
+// 论文搜索客户端 — 使用 Semantic Scholar API（免费、支持 CORS、无需密钥）
+// 文档: https://api.semanticscholar.org/api-docs/
 
 export interface ArxivPaper {
-  id: string; // arxiv ID (e.g. "2301.12345")
+  id: string; // Semantic Scholar paper ID
   title: string;
   summary: string; // 摘要
   authors: string[];
-  published: string; // ISO date
-  updated: string;
-  categories: string[]; // e.g. ["cond-mat.mtrl-sci", "physics.comp-ph"]
+  published: string; // 年份
+  categories: string[]; // fields of study
   primaryCategory: string;
   pdfUrl: string;
   abstractUrl: string;
-  comment?: string; // 备注（如 "Accepted at NeurIPS 2023"）
+  arxivId?: string; // arXiv ID（如果有的话）
   doi?: string;
+  citationCount?: number;
+  venue?: string;
 }
 
 export interface ArxivSearchParams {
   query: string;
-  maxResults?: number; // max 100
-  start?: number; // 分页偏移
+  maxResults?: number;
+  start?: number;
   sortBy?: "relevance" | "lastUpdatedDate" | "submittedDate";
   sortOrder?: "ascending" | "descending";
-  category?: string; // 限制分类
+  category?: string;
 }
 
-const ARXIV_API = "https://export.arxiv.org/api/query";
+const S2_API = "https://api.semanticscholar.org/graph/v1/paper/search";
 
-// 与 DP 相关的预设分类
+// 将 arXiv 分类映射到 Semantic Scholar fieldsOfStudy
+const CATEGORY_TO_FIELD: Record<string, string> = {
+  "cond-mat.mtrl-sci": "Materials Science",
+  "physics.comp-ph": "Physics",
+  "cs.LG": "Computer Science",
+  "physics.chem-ph": "Chemistry",
+  "cond-mat.stat-mech": "Physics",
+  "cond-mat.mes-hall": "Physics",
+};
+
 export const DP_CATEGORIES = [
   { value: "", label: "全部" },
   { value: "cond-mat.mtrl-sci", label: "材料科学" },
@@ -46,111 +56,83 @@ export const DP_PRESET_QUERIES = [
   { label: "VASP + ML", query: "VASP machine learning ab initio" },
 ];
 
+function parseAuthorName(raw: string): string {
+  // Semantic Scholar returns "Last, First" or just "Last"
+  const parts = raw.split(",").map((s) => s.trim());
+  if (parts.length === 2) {
+    return `${parts[1]} ${parts[0]}`;
+  }
+  return raw;
+}
+
 export async function searchArxiv(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
-  const maxResults = Math.min(params.maxResults || 20, 100);
-  const start = params.start || 0;
-  const sortBy = params.sortBy || "relevance";
-  const sortOrder = params.sortOrder || "descending";
+  const limit = Math.min(params.maxResults || 20, 100);
+  const offset = params.start || 0;
 
-  let searchQuery = params.query.trim();
-  if (params.category) {
-    searchQuery = `(${searchQuery}) AND cat:${params.category}`;
-  }
+  const url = new URL(S2_API);
+  url.searchParams.set("query", params.query.trim());
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("offset", String(offset));
 
-  const url = new URL(ARXIV_API);
-  url.searchParams.set("search_query", searchQuery);
-  url.searchParams.set("start", String(start));
-  url.searchParams.set("max_results", String(maxResults));
-  url.searchParams.set("sortBy", sortBy);
-  url.searchParams.set("sortOrder", sortOrder);
-
-  // arXiv API 不支持 CORS，浏览器直接调用会被拦截
-  // 使用 CORS 代理中转，带超时和多代理容错
-  const arxivUrl = url.toString();
-  const proxies = [
-    `https://corsproxy.io/?url=${encodeURIComponent(arxivUrl)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(arxivUrl)}`,
+  // 请求的字段
+  const fields = [
+    "paperId",
+    "externalIds",
+    "title",
+    "abstract",
+    "authors",
+    "year",
+    "publicationVenue",
+    "citationCount",
+    "url",
+    "openAccessPdf",
+    "fieldsOfStudy",
+    "publicationDate",
   ];
+  url.searchParams.set("fields", fields.join(","));
 
-  let res: Response | null = null;
-  let lastError = "";
-
-  for (const proxyUrl of proxies) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
-      res = await fetch(proxyUrl, { signal: controller.signal });
-      clearTimeout(timeout);
-      if (res.ok) break;
-    } catch (e: any) {
-      lastError = e.message || "fetch failed";
-    }
+  // 分类过滤
+  if (params.category && CATEGORY_TO_FIELD[params.category]) {
+    url.searchParams.set("fieldsOfStudy", CATEGORY_TO_FIELD[params.category]);
   }
 
-  if (!res || !res.ok) {
-    throw new Error(`arXiv 搜索失败（网络或代理不可用）: ${lastError}`);
-  }
+  const res = await fetch(url.toString());
 
   if (!res.ok) {
-    throw new Error(`arXiv API 请求失败 (${res.status})`);
+    throw new Error(`Semantic Scholar API 请求失败 (${res.status})`);
   }
 
-  const xmlText = await res.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xmlText, "text/xml");
+  const data = await res.json();
+  const totalResults = data.total || 0;
+  const rawPapers = data.data || [];
 
-  // Parse total results
-  const totalResultsEl = doc.querySelector("opensearch|totalResults, totalResults");
-  const totalResults = totalResultsEl ? parseInt(totalResultsEl.textContent || "0") : 0;
+  const papers: ArxivPaper[] = rawPapers.map((p: any) => {
+    const arxivId = p.externalIds?.ArXiv || undefined;
+    const doi = p.externalIds?.DOI || undefined;
+    const fieldsOfStudy: string[] = p.fieldsOfStudy || [];
+    const primaryCat = fieldsOfStudy[0] || "N/A";
 
-  // Parse entries
-  const entries = doc.querySelectorAll("entry");
-  const papers: ArxivPaper[] = [];
-
-  for (const entry of entries) {
-    const id = entry.querySelector("id")?.textContent?.replace("http://arxiv.org/abs/", "") || "";
-    const title = entry.querySelector("title")?.textContent?.replace(/\s+/g, " ").trim() || "Untitled";
-    const summary = entry.querySelector("summary")?.textContent?.replace(/\s+/g, " ").trim() || "";
-
-    const authorEls = entry.querySelectorAll("author name");
-    const authors = Array.from(authorEls).map((a) => a.textContent || "").filter(Boolean);
-
-    const published = entry.querySelector("published")?.textContent || "";
-    const updated = entry.querySelector("updated")?.textContent || "";
-
-    const categoryEls = entry.querySelectorAll("category");
-    const categories: string[] = [];
-    let primaryCategory = "";
-    for (const cat of categoryEls) {
-      const term = cat.getAttribute("term") || "";
-      if (term) categories.push(term);
-      if (cat.getAttribute("scheme")?.includes("primary") || !primaryCategory) {
-        primaryCategory = term;
-      }
-    }
-
-    const comment = entry.querySelector("arxiv|comment, comment")?.textContent || undefined;
-    const doiEl = entry.querySelector("arxiv|doi, doi");
-    const doi = doiEl?.textContent || undefined;
-
-    papers.push({
-      id,
-      title,
-      summary,
-      authors,
-      published,
-      updated,
-      categories,
-      primaryCategory,
-      pdfUrl: `https://arxiv.org/pdf/${id}`,
-      abstractUrl: `https://arxiv.org/abs/${id}`,
-      comment,
+    return {
+      id: p.paperId || "",
+      title: p.title || "Untitled",
+      summary: p.abstract || "暂无摘要",
+      authors: (p.authors || []).map((a: any) => parseAuthorName(a.name)),
+      published: p.year?.toString() || p.publicationDate || "",
+      categories: fieldsOfStudy,
+      primaryCategory: primaryCat,
+      pdfUrl: p.openAccessPdf?.url || (arxivId ? `https://arxiv.org/pdf/${arxivId}` : p.url || "#"),
+      abstractUrl: arxivId
+        ? `https://arxiv.org/abs/${arxivId}`
+        : p.url || `https://www.semanticscholar.org/paper/${p.paperId}`,
+      arxivId,
       doi,
-    });
-  }
+      citationCount: p.citationCount,
+      venue: p.publicationVenue?.name || undefined,
+    };
+  });
 
   return { papers, totalResults };
 }

@@ -75,17 +75,6 @@ export function PaperSearch() {
     }, 50);
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
-  };
-
-  const categoryLabel = (cat: string) => {
-    const found = DP_CATEGORIES.find((c) => c.value === cat);
-    return found ? found.label : cat;
-  };
-
   return (
     <div className="space-y-6">
       {/* Search form */}
@@ -291,15 +280,27 @@ export function PaperSearch() {
                         <div className="flex items-center gap-2 mt-1.5 text-xs text-zinc-400 flex-wrap">
                           <span>{paper.authors.slice(0, 3).join(", ")}{paper.authors.length > 3 ? " et al." : ""}</span>
                           <span>·</span>
-                          <span>{formatDate(paper.published)}</span>
-                          <span>·</span>
-                          <span className="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500">
-                            {categoryLabel(paper.primaryCategory)}
-                          </span>
-                          {paper.comment && (
+                          <span>{paper.published}</span>
+                          {paper.venue && (
                             <>
                               <span>·</span>
-                              <span className="text-amber-600">{paper.comment}</span>
+                              <span className="text-zinc-500 italic">{paper.venue}</span>
+                            </>
+                          )}
+                          <span>·</span>
+                          <span className="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500">
+                            {paper.primaryCategory}
+                          </span>
+                          {paper.citationCount !== undefined && (
+                            <>
+                              <span>·</span>
+                              <span className="text-zinc-500">被引 {paper.citationCount} 次</span>
+                            </>
+                          )}
+                          {paper.arxivId && (
+                            <>
+                              <span>·</span>
+                              <span className="text-zinc-400">arXiv:{paper.arxivId}</span>
                             </>
                           )}
                         </div>
