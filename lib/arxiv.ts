@@ -67,7 +67,32 @@ export async function searchArxiv(params: ArxivSearchParams): Promise<{
   url.searchParams.set("sortBy", sortBy);
   url.searchParams.set("sortOrder", sortOrder);
 
-  const res = await fetch(url.toString());
+  // arXiv API 不支持 CORS，浏览器直接调用会被拦截
+  // 使用 CORS 代理中转，带超时和多代理容错
+  const arxivUrl = url.toString();
+  const proxies = [
+    `https://corsproxy.io/?url=${encodeURIComponent(arxivUrl)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(arxivUrl)}`,
+  ];
+
+  let res: Response | null = null;
+  let lastError = "";
+
+  for (const proxyUrl of proxies) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      res = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (res.ok) break;
+    } catch (e: any) {
+      lastError = e.message || "fetch failed";
+    }
+  }
+
+  if (!res || !res.ok) {
+    throw new Error(`arXiv 搜索失败（网络或代理不可用）: ${lastError}`);
+  }
 
   if (!res.ok) {
     throw new Error(`arXiv API 请求失败 (${res.status})`);
