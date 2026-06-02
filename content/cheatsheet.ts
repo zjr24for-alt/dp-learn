@@ -250,4 +250,92 @@ while true; do
 done`,
     tags: ["监控", "脚本", "dpgen"],
   },
+
+  // ====== OVITO / 可视化 ======
+  {
+    id: "cmd-ovito-python",
+    category: "command",
+    label: "OVITO Python 管线",
+    description: "导入 LAMMPS dump 并进行 PTM 结构分析",
+    code: "from ovito.io import import_file\nfrom ovito.modifiers import PolyhedralTemplateMatchingModifier\n\npipeline = import_file('dump.lammpstrj')\npipeline.modifiers.append(PolyhedralTemplateMatchingModifier())",
+    tags: ["ovito", "python", "PTM"],
+  },
+  {
+    id: "cmd-ovito-dxa",
+    category: "command",
+    label: "DXA 位错分析",
+    description: "Python 脚本做位错提取与密度统计",
+    code: "from ovito.modifiers import DislocationAnalysisModifier\n\npipeline.modifiers.append(DislocationAnalysisModifier())\ndata = pipeline.compute()\nL = data.attributes['DislocationAnalysis.total_line_length']\nV = data.attributes['DislocationAnalysis.cell_volume']\nprint(f'Dislocation density: {L/V:.3e} A^-2')",
+    tags: ["ovito", "DXA", "位错"],
+  },
+  {
+    id: "cmd-ovito-tachyon",
+    category: "command",
+    label: "Tachyon 高质量渲染",
+    description: "使用 OVITO Tachyon 渲染发表级图像",
+    code: "from ovito.vis import Viewport, TachyonRenderer\n\nvp = Viewport(type=Viewport.Type.Perspective)\nvp.render_image(size=(1920,1080), filename='render.png',\n  renderer=TachyonRenderer(ambient_occlusion=True, shadows=True))",
+    tags: ["ovito", "渲染", "Tachyon"],
+  },
+
+  // ====== ASE / 结构操作 ======
+  {
+    id: "cmd-ase-build",
+    category: "command",
+    label: "ASE 构建超胞/表面",
+    description: "用 ASE 创建晶体结构、切表面、做超胞",
+    code: "from ase.build import bulk, fcc111, make_supercell\n\ncu = bulk('Cu', 'fcc', a=3.61)\ncu_sc = cu * (3, 3, 3)  # 超胞\ncu111 = fcc111('Cu', a=3.61, size=(2,2,4), vacuum=10.0)  # 表面",
+    tags: ["ase", "结构", "表面"],
+  },
+  {
+    id: "cmd-ase-relax",
+    category: "command",
+    label: "ASE 结构弛豫",
+    description: "对接 VASP/GPAW 做 BFGS 弛豫",
+    code: "from ase.optimize import BFGS\nfrom ase.calculators.vasp import Vasp\n\natoms.calc = Vasp(xc='PBE', encut=500, kpts=(4,4,1), directory='relax')\nopt = BFGS(atoms)\nopt.run(fmax=0.02)  # eV/A",
+    tags: ["ase", "弛豫", "DFT"],
+  },
+
+  // ====== LAMMPS / MD ======
+  {
+    id: "cmd-lmp-npt",
+    category: "command",
+    label: "LAMMPS NPT 分子动力学",
+    description: "等温等压系综 MD 运行（含弛豫）",
+    code: "units metal\ntimestep 0.001\nvelocity all create 300 12345\nfix npt all npt temp 300 300 0.1 iso 0 0 1.0\nrun 100000",
+    tags: ["lammps", "NPT", "MD"],
+  },
+  {
+    id: "cmd-lmp-minimize",
+    category: "command",
+    label: "LAMMPS 能量最小化",
+    description: "MD 前先做能量最小化消除坏接触",
+    code: "minimize 1.0e-10 1.0e-10 10000 100000",
+    tags: ["lammps", "最小化", "MD"],
+  },
+
+  // ====== DFT 收敛参数 ======
+  {
+    id: "param-encut-convergence",
+    category: "param",
+    label: "ENCUT 截断能",
+    description: "PBE 泛函推荐 ENCUT = 1.3 × max(ENMAX)，弹性常数建议 1.5×",
+    code: 'ENCUT = 500  # 1.3 × ENMAX\n# 收敛测试: for ENCUT in 300 400 500 600',
+    tags: ["dft", "encut", "收敛"],
+  },
+  {
+    id: "param-kpoint-density",
+    category: "param",
+    label: "K 点密度",
+    description: "k_i × a_i ≈ 30-40 Å 为精确计算，能带用高对称路径，DOS 加密 2-3×",
+    code: "# vaspkit -task 102 生成 KPOINTS\n# 输入密度 ~0.04 (精确) 或 ~0.03 (DOS)",
+    tags: ["dft", "kpoints", "收敛"],
+  },
+  {
+    id: "param-smearing",
+    category: "param",
+    label: "ISMEAR / SIGMA",
+    description: "半导体 ISMEAR=0, SIGMA=0.05；金属 ISMEAR=1；能带/DOS 用 ISMEAR=-5 (四面体)",
+    code: "ISMEAR = 0    # 半导体: Gaussian\nSIGMA = 0.05\nISMEAR = 1    # 金属: Methfessel-Paxton\nISMEAR = -5   # DOS/能带: 四面体方法",
+    tags: ["dft", "smearing", "VASP"],
+  },
 ];

@@ -15,7 +15,10 @@ export type Category =
   | "vasp-hpc"
   | "env-config"
   | "linux-tips"
-  | "methodology";
+  | "methodology"
+  | "comp-materials"
+  | "atomistic-sim"
+  | "ovito-tips";
 
 export const CATEGORY_META: Record<Category, { label: string; icon: string; color: string }> = {
   "dpgen-workflow": { label: "DP-GEN 工作流", icon: "🔄", color: "bg-blue-100 text-blue-800" },
@@ -24,6 +27,9 @@ export const CATEGORY_META: Record<Category, { label: string; icon: string; colo
   "env-config": { label: "环境配置", icon: "⚙️", color: "bg-orange-100 text-orange-800" },
   "linux-tips": { label: "Linux 速查", icon: "🐧", color: "bg-cyan-100 text-cyan-800" },
   methodology: { label: "学习方法论", icon: "💡", color: "bg-pink-100 text-pink-800" },
+  "comp-materials": { label: "计算材料学", icon: "🔬", color: "bg-indigo-100 text-indigo-800" },
+  "atomistic-sim": { label: "原子模拟", icon: "🧪", color: "bg-teal-100 text-teal-800" },
+  "ovito-tips": { label: "OVITO 可视化", icon: "👁️", color: "bg-amber-100 text-amber-800" },
 };
 
 // ====== 速查表 ======

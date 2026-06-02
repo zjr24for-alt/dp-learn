@@ -5,6 +5,9 @@ import { vaspHpcArticles } from "./vasp-hpc";
 import { envConfigArticles } from "./env-config";
 import { linuxTipsArticles } from "./linux-tips";
 import { methodologyArticles } from "./methodology";
+import { compMaterialsArticles } from "./comp-materials";
+import { atomisticSimArticles } from "./atomistic-sim";
+import { ovitoTipsArticles } from "./ovito-tips";
 import { cheatsheetItems } from "./cheatsheet";
 import { officialDocs } from "./official-docs/index";
 
@@ -16,6 +19,9 @@ export const allArticles: Article[] = [
   ...envConfigArticles,
   ...linuxTipsArticles,
   ...methodologyArticles,
+  ...compMaterialsArticles,
+  ...atomisticSimArticles,
+  ...ovitoTipsArticles,
 ];
 
 /** 按类别获取文章 */
