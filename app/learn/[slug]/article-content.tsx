@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
 import { buildSearchIndex } from "@/lib/search";
 import { CATEGORY_META } from "@/lib/types";
 import { ProgressCheck } from "@/components/progress-bar";
 import Link from "next/link";
 
-export function ArticleContent({ slug }: { slug: string }) {
+export function ArticleContent({ slug: serverSlug }: { slug: string }) {
+  const params = useParams();
+  // 优先从客户端路由 params 获取，静态导出下更可靠
+  const slug = (params?.slug as string) || serverSlug;
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
