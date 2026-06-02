@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #fafafa;
+  --foreground: #18181b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* KaTeX overrides */
+.katex {
+  font-size: 1.05em;
+}
+
+/* Code block styling */
+pre {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: #f4f4f5;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: #f4f4f5;
+  padding: 0.125em 0.375em;
+  border-radius: 0.25rem;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
