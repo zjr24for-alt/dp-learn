@@ -1,5 +1,8 @@
 // 服务端 DeepSeek API 代理 — 避免浏览器 CORS 限制
 // POST /api/ai  —  body + Authorization 透传到 api.deepseek.com
+// 注意：GitHub Pages 静态导出下此路由不可用，仅 dev/Vercel 部署生效
+
+export const dynamic = "force-static";
 
 export async function POST(request: Request) {
   try {
