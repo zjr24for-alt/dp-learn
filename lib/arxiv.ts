@@ -34,14 +34,37 @@ export const DP_CATEGORIES = [
   { value: "physics.comp-ph", label: "计算物理" },
   { value: "cs.LG", label: "机器学习" },
   { value: "physics.chem-ph", label: "化学物理" },
+  { value: "cond-mat.mes-hall", label: "介观物理" },
+  { value: "cond-mat.str-el", label: "强关联" },
+  { value: "physics.atm-clus", label: "原子/团簇" },
+  { value: "cond-mat.soft", label: "软物质" },
 ];
 
 export const DP_PRESET_QUERIES = [
+  // === DP 生态 ===
   { label: "Deep Potential", query: "deep potential molecular dynamics" },
   { label: "ML Potential", query: "machine learning interatomic potential" },
   { label: "DP-GEN", query: "dp-gen active learning framework" },
-  { label: "DeePMD", query: "deepmd neural network potential" },
+  { label: "DeePMD", query: "deepmd-kit neural network potential" },
+  // === DFT 计算 ===
   { label: "VASP + ML", query: "VASP machine learning first principles" },
+  { label: "DFT 高通量", query: "high-throughput density functional theory screening" },
+  { label: "能带结构", query: "band structure topological insulator" },
+  { label: "表面催化", query: "surface catalysis DFT reaction mechanism" },
+  // === 动力学/热力学 ===
+  { label: "相变", query: "phase transition molecular dynamics simulation" },
+  { label: "扩散/输运", query: "diffusion transport coefficient molecular dynamics" },
+  { label: "热导率", query: "thermal conductivity phonon lattice dynamics" },
+  { label: "弹性/力学", query: "elastic constants mechanical properties simulation" },
+  // === 材料体系 ===
+  { label: "锂电池", query: "lithium ion battery electrode diffusion" },
+  { label: "钙钛矿", query: "perovskite solar cell stability" },
+  { label: "高熵合金", query: "high entropy alloy mechanical properties" },
+  { label: "二维材料", query: "two dimensional materials graphene MXene" },
+  // === ML 方法 ===
+  { label: "图神经网络", query: "graph neural network atomistic representation" },
+  { label: "等变网络", query: "equivariant neural network molecular" },
+  { label: "主动学习", query: "active learning materials discovery" },
 ];
 
 // ====== arXiv API (via CORS proxy) ======
@@ -305,43 +328,53 @@ async function searchOpenAlex(params: ArxivSearchParams): Promise<{
   return { papers, totalResults };
 }
 
-// ====== 统一入口（三路容错） ======
+// ====== 统一入口（三路容错 + 进度回调） ======
 
-export async function searchArxiv(params: ArxivSearchParams): Promise<{
+export type SearchProgress = {
+  source: string;
+  status: "searching" | "done" | "failed";
+  count?: number;
+};
+
+export async function searchArxiv(
+  params: ArxivSearchParams,
+  onProgress?: (p: SearchProgress) => void,
+): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
-  // 并行尝试三条线路，取第一个成功的结果
-  const [arxivResult, s2Result, oaResult] = await Promise.allSettled([
-    searchArxivDirect(params),
-    searchSemanticScholar(params),
-    searchOpenAlex(params),
-  ]);
+  // 用 Promise.any 取第一个成功结果，同时汇报每条线路状态
+  const sources = [
+    { name: "arXiv", fn: () => searchArxivDirect(params) },
+    { name: "Semantic Scholar", fn: () => searchSemanticScholar(params) },
+    { name: "OpenAlex", fn: () => searchOpenAlex(params) },
+  ];
 
-  // arXiv 成功
-  if (arxivResult.status === "fulfilled") {
-    return arxivResult.value;
+  let settled = false;
+  const errors: string[] = [];
+
+  const wrapped = sources.map(async (s) => {
+    onProgress?.({ source: s.name, status: "searching" });
+    try {
+      const result = await s.fn();
+      if (!settled) {
+        onProgress?.({ source: s.name, status: "done", count: result.papers.length });
+      }
+      settled = true;
+      return result;
+    } catch (e: any) {
+      onProgress?.({ source: s.name, status: "failed" });
+      errors.push(`- ${s.name}: ${e.message}`);
+      throw e;
+    }
+  });
+
+  // Promise.any — 第一个成功就返回
+  try {
+    return await Promise.any(wrapped);
+  } catch {
+    throw new Error(
+      `论文搜索失败，三条路线均不可用：\n${errors.join("\n")}\n\n可能原因：网络问题或 API 限流，请稍后重试。`
+    );
   }
-
-  // Semantic Scholar 成功
-  if (s2Result.status === "fulfilled") {
-    return s2Result.value;
-  }
-
-  // OpenAlex 成功
-  if (oaResult.status === "fulfilled") {
-    return oaResult.value;
-  }
-
-  // 三条线路都失败
-  const arxivErr = arxivResult.reason?.message || "未知错误";
-  const s2Err = s2Result.reason?.message || "未知错误";
-  const oaErr = oaResult.reason?.message || "未知错误";
-  throw new Error(
-    `论文搜索失败，三条路线均不可用：\n` +
-    `- arXiv: ${arxivErr}\n` +
-    `- Semantic Scholar: ${s2Err}\n` +
-    `- OpenAlex: ${oaErr}\n\n` +
-    `可能原因：网络问题或 API 限流，请稍后重试。`
-  );
 }

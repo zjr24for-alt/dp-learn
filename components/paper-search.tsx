@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { searchArxiv, DP_CATEGORIES, DP_PRESET_QUERIES, type ArxivPaper } from "@/lib/arxiv";
+import { searchArxiv, DP_CATEGORIES, DP_PRESET_QUERIES, type ArxivPaper, type SearchProgress } from "@/lib/arxiv";
 import {
   addToReadingList,
   removeFromReadingList,
@@ -21,58 +21,57 @@ export function PaperSearch() {
   const [readingList, setReadingList] = useState<ReadingListItem[]>([]);
   const [showReadingList, setShowReadingList] = useState(false);
   const [selectedPaper, setSelectedPaper] = useState<ArxivPaper | null>(null);
+  const [progress, setProgress] = useState<SearchProgress[]>([]);
 
   const refreshReadingList = useCallback(() => {
     setReadingList(getReadingList());
   }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
+  const doSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
     setLoading(true);
     setError("");
+    setProgress([]);
+    setPapers([]);
 
     try {
-      const result = await searchArxiv({
-        query: query.trim(),
-        maxResults: 20,
-        category: category || undefined,
-        sortBy: "relevance",
-        sortOrder: "descending",
-      });
+      const result = await searchArxiv(
+        {
+          query: searchQuery.trim(),
+          maxResults: 20,
+          category: category || undefined,
+          sortBy: "relevance",
+          sortOrder: "descending",
+        },
+        (p) => setProgress((prev) => {
+          // 更新或追加进度
+          const idx = prev.findIndex((x) => x.source === p.source);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = p;
+            return next;
+          }
+          return [...prev, p];
+        }),
+      );
       setPapers(result.papers);
       setTotalResults(result.totalResults);
       refreshReadingList();
     } catch (err: any) {
       setError(err.message || "搜索失败");
-      setPapers([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    doSearch(query);
+  };
+
   const handlePreset = (presetQuery: string) => {
     setQuery(presetQuery);
-    // Auto-search with preset
-    setTimeout(async () => {
-      setLoading(true);
-      try {
-        const result = await searchArxiv({
-          query: presetQuery,
-          maxResults: 20,
-          category: category || undefined,
-          sortBy: "relevance",
-        });
-        setPapers(result.papers);
-        setTotalResults(result.totalResults);
-        refreshReadingList();
-      } catch (err: any) {
-        setError(err.message || "搜索失败");
-      } finally {
-        setLoading(false);
-      }
-    }, 50);
+    setTimeout(() => doSearch(presetQuery), 50);
   };
 
   return (
@@ -346,15 +345,50 @@ export function PaperSearch() {
         </div>
       )}
 
-      {/* Loading */}
+      {/* Loading / Progress */}
       {loading && (
-        <div className="text-center py-16">
-          <div className="inline-flex gap-1.5">
-            <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" />
-            <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-            <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+        <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+            </div>
+            <span className="text-sm font-medium text-zinc-700">正在搜索论文...</span>
           </div>
-          <p className="text-sm text-zinc-400 mt-3">正在搜索 arXiv...</p>
+          {/* 进度条 */}
+          <div className="flex gap-1 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+            <div
+              className="bg-blue-500 rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(10, progress.filter(p => p.status === "done").length * 33)}%` }}
+            />
+          </div>
+          {/* 各线路状态 */}
+          <div className="flex flex-wrap gap-2">
+            {["arXiv", "Semantic Scholar", "OpenAlex"].map((name) => {
+              const p = progress.find((x) => x.source === name);
+              if (!p || p.status === "searching") {
+                return (
+                  <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                    {name} 搜索中...
+                  </span>
+                );
+              }
+              if (p.status === "done") {
+                return (
+                  <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100">
+                    ✓ {name} 找到 {p.count} 篇
+                  </span>
+                );
+              }
+              return (
+                <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-500 border border-red-100">
+                  ✕ {name} 失败
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
