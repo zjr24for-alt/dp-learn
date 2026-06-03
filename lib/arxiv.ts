@@ -68,8 +68,8 @@ async function searchArxivDirect(params: ArxivSearchParams): Promise<{
   apiUrl.searchParams.set("sortBy", sortBy);
   apiUrl.searchParams.set("sortOrder", sortOrder);
 
-  // 通过自有 Vercel 代理中转（remember-better 项目提供，稳定可靠）
-  const proxyUrl = `https://remember-better-jr17.vercel.app/api/arxiv?${apiUrl.searchParams.toString()}`;
+  // 通过自建 API 路由中转（服务端直连 arXiv，无 CORS 问题）
+  const proxyUrl = `/api/arxiv?${apiUrl.searchParams.toString()}`;
   const res = await fetch(proxyUrl);
 
   if (!res.ok) {
@@ -153,7 +153,27 @@ async function searchSemanticScholar(params: ArxivSearchParams): Promise<{
   ];
   url.searchParams.set("fields", fields.join(","));
 
-  const res = await fetch(url.toString());
+  return await fetchAndParseS2(url.toString());
+}
+
+/** S2 请求 + 解析，先尝试服务端代理，被限流则浏览器直连 */
+async function fetchAndParseS2(externalUrl: string): Promise<{
+  papers: ArxivPaper[];
+  totalResults: number;
+}> {
+  let res: Response;
+  const proxyUrl = `/api/semantic-scholar?${new URL(externalUrl).searchParams.toString()}`;
+
+  try {
+    res = await fetch(proxyUrl);
+    // 代理返回 429，尝试浏览器直连 S2（S2 支持 CORS，客户端 IP 额度可能不同）
+    if (res.status === 429) {
+      res = await fetch(externalUrl);
+    }
+  } catch {
+    // 代理不可达（静态导出场景），浏览器直连
+    res = await fetch(externalUrl);
+  }
 
   if (res.status === 429) {
     throw new Error("Semantic Scholar 请求太频繁，请稍后再试");
@@ -163,6 +183,10 @@ async function searchSemanticScholar(params: ArxivSearchParams): Promise<{
   }
 
   const data = await res.json();
+  return parseS2Response(data);
+}
+
+function parseS2Response(data: any): { papers: ArxivPaper[]; totalResults: number } {
   const rawPapers = data.data || [];
 
   const papers: ArxivPaper[] = rawPapers.map((p: any) => {

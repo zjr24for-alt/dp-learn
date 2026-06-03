@@ -3,7 +3,7 @@
  * API Key 存储在 localStorage，由用户在 /qa 页面配置。
  */
 
-const DEEPSEEK_API = "https://api.deepseek.com/v1/chat/completions";
+const DEEPSEEK_API = "/api/ai";
 
 export function getApiKey(): string | null {
   if (typeof window === "undefined") return null;

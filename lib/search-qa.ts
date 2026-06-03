@@ -1,9 +1,9 @@
-import { search } from "./search";
+import Fuse from "fuse.js";
 import type { DocEntry, Article, CheatsheetItem } from "./types";
 
 /**
  * 合并所有知识源（文章 + 官方文档 + 速查表），
- * 检索 Top-N 最相关内容片段。
+ * 用 Fuse.js 模糊检索 Top-N 最相关内容片段。
  */
 export interface QASnippet {
   title: string;
@@ -13,6 +13,17 @@ export interface QASnippet {
   source: string;
 }
 
+interface QADocument {
+  type: "article" | "doc" | "cheatsheet";
+  title: string;
+  snippet: string;
+  url?: string;
+  isOfficial: boolean;
+  source: string;
+  // 用于 Fuse 检索的拼接字段
+  searchText: string;
+}
+
 export function retrieveRelevant(
   question: string,
   articles: Article[],
@@ -20,77 +31,66 @@ export function retrieveRelevant(
   cheatsheets: CheatsheetItem[],
   topK = 5
 ): QASnippet[] {
-  const results: { item: QASnippet; score: number }[] = [];
+  if (!question.trim()) return [];
 
-  // Simple TF-IDF-like scoring (fuse.js would be better but here we do direct matching)
-  const queryTerms = question.toLowerCase().split(/\s+/);
+  // 构建 Fuse 可搜索的文档列表
+  const documents: QADocument[] = [];
 
-  function scoreText(text: string): number {
-    const lower = text.toLowerCase();
-    let s = 0;
-    for (const term of queryTerms) {
-      if (term.length < 2) continue;
-      const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-      const matches = lower.match(regex);
-      if (matches) s += matches.length;
-    }
-    return s;
-  }
-
-  // Search articles
   for (const article of articles) {
-    const s = scoreText(article.title + " " + article.summary + " " + article.content);
-    if (s > 0) {
-      results.push({
-        item: {
-          title: article.title,
-          snippet: article.summary || article.content.slice(0, 200),
-          url: `/learn/${article.slug}`,
-          isOfficial: false,
-          source: article.category,
-        },
-        score: s,
-      });
-    }
+    documents.push({
+      type: "article",
+      title: article.title,
+      snippet: article.summary || article.content.slice(0, 200),
+      url: `/learn/${article.slug}`,
+      isOfficial: false,
+      source: article.category,
+      searchText: `${article.title} ${article.summary} ${article.content}`,
+    });
   }
 
-  // Search official docs
   for (const doc of docs) {
-    const s = scoreText(doc.title + " " + doc.summary + " " + doc.content);
-    if (s > 0) {
-      results.push({
-        item: {
-          title: `[${doc.source.toUpperCase()}] ${doc.title}`,
-          snippet: doc.summary,
-          url: doc.url,
-          isOfficial: true,
-          source: doc.source,
-        },
-        score: s * 1.2, // Boost official docs slightly
-      });
-    }
+    documents.push({
+      type: "doc",
+      title: `[${doc.source.toUpperCase()}] ${doc.title}`,
+      snippet: doc.summary,
+      url: doc.url,
+      isOfficial: true,
+      source: doc.source,
+      searchText: `${doc.title} ${doc.summary} ${doc.content}`,
+    });
   }
 
-  // Search cheatsheets
   for (const cs of cheatsheets) {
-    const s = scoreText(cs.label + " " + cs.description + " " + cs.code);
-    if (s > 0) {
-      results.push({
-        item: {
-          title: `📋 ${cs.label}`,
-          snippet: `${cs.description}\n\`\`\`\n${cs.code}\n\`\`\``,
-          url: "/cheatsheet",
-          isOfficial: false,
-          source: "cheatsheet",
-        },
-        score: s,
-      });
-    }
+    documents.push({
+      type: "cheatsheet",
+      title: `📋 ${cs.label}`,
+      snippet: `${cs.description}\n\`\`\`\n${cs.code}\n\`\`\``,
+      url: "/cheatsheet",
+      isOfficial: false,
+      source: "cheatsheet",
+      searchText: `${cs.label} ${cs.description} ${cs.code}`,
+    });
   }
 
-  // Sort by score descending, take top K
-  results.sort((a, b) => b.score - a.score);
-  return results.slice(0, topK).map((r) => r.item);
+  const fuse = new Fuse(documents, {
+    keys: [{ name: "title", weight: 2 }, { name: "searchText", weight: 1 }],
+    threshold: 0.6,
+    distance: 200,
+    includeScore: true,
+    minMatchCharLength: 1,
+    // 忽略大小写，中文也能模糊匹配
+    ignoreLocation: true,
+  });
+
+  const results = fuse.search(question.trim());
+
+  return results.slice(0, topK).map((r) => ({
+    title: r.item.title,
+    snippet: r.item.snippet,
+    url: r.item.url,
+    isOfficial: r.item.isOfficial,
+    source: r.item.source,
+  }));
 }
 
 /**

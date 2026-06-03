@@ -81,10 +81,13 @@ export function PaperSearch() {
       <form onSubmit={handleSearch} className="space-y-3">
         <div className="flex gap-2">
           <input
+            id="paper-search-query"
+            name="query"
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索 arXiv 论文（如 deep potential molecular dynamics）..."
+            autoComplete="on"
             className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
           />
           <button
@@ -99,8 +102,11 @@ export function PaperSearch() {
         {/* Filters row */}
         <div className="flex items-center gap-2 flex-wrap">
           <select
+            id="paper-search-category"
+            name="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            autoComplete="on"
             className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
           >
             {DP_CATEGORIES.map((c) => (

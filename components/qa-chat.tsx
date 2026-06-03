@@ -63,13 +63,16 @@ export function QAChat() {
 
     // Retrieve relevant snippets
     const snippets = retrieveRelevant(question, allArticles, officialDocs, cheatsheetItems, 5);
+    console.log("[QA] snippets:", snippets.length, "hasApiKey:", hasApiKey());
 
-    if (snippets.length === 0) {
+    if (snippets.length === 0 && !hasApiKey()) {
+      console.log("[QA] 分支: 无结果+无Key → 提示");
+      // 无知识库结果 + 无 AI → 提示用户
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "抱歉，我在知识库中没有找到与您问题相关的内容。请尝试换一种问法，或直接查看[知识库](/learn)页面。",
+          content: "抱歉，我在知识库中没有找到与您问题相关的内容。\n\n💡 配置 DeepSeek API Key 后，即使知识库没有相关内容，AI 也可以基于自身知识回答。点击上方「⚙️ 配置 API Key」即可设置。",
           sources: [],
           mode: "search-only",
         },
@@ -80,29 +83,34 @@ export function QAChat() {
 
     // If API key is configured, use AI
     if (hasApiKey()) {
-      const context = buildContext(snippets);
+      console.log("[QA] 分支: AI增强 snippets=", snippets.length);
+      const context = snippets.length > 0
+        ? buildContext(snippets)
+        : "（知识库中未找到相关内容，请基于你的训练知识回答）";
+
       const response = await askAI(question, context);
+      console.log("[QA] AI response error:", response.error || "none");
 
       if (response.error) {
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: `AI 调用失败: ${response.error}\n\n以下为知识库检索结果：\n\n${snippets.map((s, i) => `**${i + 1}. ${s.title}**\n${s.snippet}\n${s.url ? `🔗 ${s.url}` : ""}`).join("\n\n")}`,
+            content: `AI 调用失败: ${response.error}${snippets.length > 0 ? `\n\n以下为知识库检索结果：\n\n${snippets.map((s, i) => `**${i + 1}. ${s.title}**\n${s.snippet}\n${s.url ? `🔗 ${s.url}` : ""}`).join("\n\n")}` : ""}`,
             sources: snippets,
             mode: "search-only",
           },
         ]);
       } else {
-        const sourceList = snippets
-          .map((s, i) => `- [${s.title}](${s.url || "#"}${s.isOfficial ? " (官方文档)" : ""})`)
-          .join("\n");
+        const sourceBlock = snippets.length > 0
+          ? `\n\n---\n📚 **参考来源：**\n${snippets.map((s, i) => `- [${s.title}](${s.url || "#"}${s.isOfficial ? " (官方文档)" : ""})`).join("\n")}`
+          : "\n\n---\n⚠️ *知识库中未找到相关内容，以上回答来自 AI 自身知识，请注意核实。*";
 
         setMessages((prev) => [
           ...prev,
           {
             role: "assistant",
-            content: response.answer + `\n\n---\n📚 **参考来源：**\n${sourceList}`,
+            content: response.answer + sourceBlock,
             sources: snippets,
             mode: "ai-enhanced",
           },
@@ -155,10 +163,13 @@ export function QAChat() {
         <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50">
           <div className="flex gap-2">
             <input
+              id="api-key-input"
+              name="apiKey"
               type="password"
               value={apiKeyInput}
               onChange={(e) => setApiKeyInput(e.target.value)}
               placeholder="输入 DeepSeek API Key (sk-...)"
+              autoComplete="off"
               className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900"
             />
             <button
@@ -218,10 +229,13 @@ export function QAChat() {
       <form onSubmit={handleSubmit} className="border-t border-zinc-100 p-4">
         <div className="flex gap-2">
           <input
+            id="qa-chat-input"
+            name="question"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="问一个关于 DP-GEN / DeePMD / VASP / LAMMPS 的问题..."
+            autoComplete="on"
             className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
             disabled={loading}
           />

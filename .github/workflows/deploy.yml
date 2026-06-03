@@ -20,6 +20,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          STATIC_EXPORT: "true"
 
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4

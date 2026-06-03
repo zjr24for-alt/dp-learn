@@ -86,10 +86,13 @@ export function SearchBar({ onSearch }: Props) {
         </svg>
         <input
           ref={inputRef}
+          id="knowledge-search"
+          name="search"
           type="text"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder='搜索知识库... (Ctrl+K)'
+          autoComplete="on"
           className="w-full pl-10 pr-4 py-2 rounded-lg border border-zinc-300 bg-white text-sm
                      placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
         />
