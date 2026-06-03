@@ -73,7 +73,13 @@ async function searchArxivDirect(params: ArxivSearchParams): Promise<{
   const res = await fetch(proxyUrl);
 
   if (!res.ok) {
-    throw new Error(`代理请求失败 (${res.status})`);
+    // 代理返回 JSON 错误（429/502）
+    let errMsg = `代理请求失败 (${res.status})`;
+    try {
+      const errData = await res.json();
+      if (errData.error) errMsg = errData.error;
+    } catch {}
+    throw new Error(errMsg);
   }
 
   const xmlText = await res.text();
@@ -156,7 +162,7 @@ async function searchSemanticScholar(params: ArxivSearchParams): Promise<{
   return await fetchAndParseS2(url.toString());
 }
 
-/** S2 请求 + 解析，先尝试服务端代理，被限流则浏览器直连 */
+/** S2 请求 + 解析，优先浏览器直连（S2 支持 CORS），回退代理 */
 async function fetchAndParseS2(externalUrl: string): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
@@ -164,15 +170,16 @@ async function fetchAndParseS2(externalUrl: string): Promise<{
   let res: Response;
   const proxyUrl = `/api/semantic-scholar?${new URL(externalUrl).searchParams.toString()}`;
 
+  // S2 支持 CORS，优先浏览器直连（用户 IP 不会被 Vercel 共享 IP 拖累）
   try {
-    res = await fetch(proxyUrl);
-    // 代理返回 429，尝试浏览器直连 S2（S2 支持 CORS，客户端 IP 额度可能不同）
-    if (res.status === 429) {
-      res = await fetch(externalUrl);
-    }
+    res = await fetch(externalUrl, { signal: AbortSignal.timeout(15_000) });
   } catch {
-    // 代理不可达（静态导出场景），浏览器直连
-    res = await fetch(externalUrl);
+    // 浏览器直连失败（网络问题），回退代理
+    try {
+      res = await fetch(proxyUrl, { signal: AbortSignal.timeout(15_000) });
+    } catch {
+      throw new Error("Semantic Scholar 无法访问，请检查网络");
+    }
   }
 
   if (res.status === 429) {
@@ -225,21 +232,29 @@ export async function searchArxiv(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
-  // 先尝试 arXiv（通过 CORS 代理）
-  try {
-    return await searchArxivDirect(params);
-  } catch (e1: any) {
-    console.warn("arXiv 搜索失败，尝试 Semantic Scholar:", e1.message);
-    // 回退到 Semantic Scholar
-    try {
-      return await searchSemanticScholar(params);
-    } catch (e2: any) {
-      throw new Error(
-        `论文搜索失败，两条路线均不可用：\n` +
-        `- arXiv: ${e1.message}\n` +
-        `- Semantic Scholar: ${e2.message}\n\n` +
-        `请稍后重试或检查网络连接。`
-      );
-    }
+  // 并行尝试两条线路，取第一个成功的结果
+  const [arxivResult, s2Result] = await Promise.allSettled([
+    searchArxivDirect(params),
+    searchSemanticScholar(params),
+  ]);
+
+  // arXiv 成功
+  if (arxivResult.status === "fulfilled") {
+    return arxivResult.value;
   }
+
+  // Semantic Scholar 成功
+  if (s2Result.status === "fulfilled") {
+    return s2Result.value;
+  }
+
+  // 两条线路都失败
+  const arxivErr = arxivResult.reason?.message || "未知错误";
+  const s2Err = s2Result.reason?.message || "未知错误";
+  throw new Error(
+    `论文搜索失败，两条路线均不可用：\n` +
+    `- arXiv: ${arxivErr}\n` +
+    `- Semantic Scholar: ${s2Err}\n\n` +
+    `可能原因：arXiv/S2 对当前 IP 限流，请稍后重试。`
+  );
 }
