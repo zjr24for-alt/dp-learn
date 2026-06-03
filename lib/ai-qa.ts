@@ -11,7 +11,10 @@ export function getApiKey(): string | null {
 }
 
 export function setApiKey(key: string): void {
-  localStorage.setItem("dp-learn-deepseek-key", key);
+  // 滤除中文输入法常见混入的零宽空格、全角字符等非 ASCII 字符，
+  // 否则浏览器 fetch 会拒绝非 ISO-8859-1 的 header 值
+  const clean = key.trim().replace(/[^\x20-\x7E]/g, "");
+  localStorage.setItem("dp-learn-deepseek-key", clean);
 }
 
 export function clearApiKey(): void {
@@ -28,10 +31,12 @@ export interface AIResponse {
 }
 
 export async function askAI(question: string, context: string): Promise<AIResponse> {
-  const apiKey = getApiKey();
+  let apiKey = getApiKey();
   if (!apiKey) {
     return { answer: "", error: "未配置 API Key" };
   }
+  // 防御：清洗已存储的旧 key 中可能的非 ASCII 字符
+  apiKey = apiKey.trim().replace(/[^\x20-\x7E]/g, "");
 
   const systemPrompt = `你是 DP（Deep Potential）学习助教，专门帮助计算材料科学研究生理解 DP-GEN、DeePMD、VASP、LAMMPS 相关概念和操作。
 
