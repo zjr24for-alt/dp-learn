@@ -3,10 +3,11 @@
 import { useEffect, useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
-import { CATEGORY_META, type Category } from "@/lib/types";
-import { buildSearchIndex, search } from "@/lib/search";
+import { CATEGORY_META, type Category, type Article } from "@/lib/types";
+import { buildSearchIndex, search, appendToSearchIndex } from "@/lib/search";
 import { SearchBar } from "@/components/search-bar";
 import { ArticleCard } from "@/components/article-card";
+import { getAllUserArticles } from "@/lib/user-content-store";
 
 function LearnContent() {
   const searchParams = useSearchParams();
@@ -14,13 +15,35 @@ function LearnContent() {
 
   const [activeCategory, setActiveCategory] = useState<Category | "all">(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userArticles, setUserArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     buildSearchIndex(buildAllSearchIndex());
+    getAllUserArticles().then((articles) => {
+      setUserArticles(articles);
+      // 将用户文章追加到搜索索引
+      if (articles.length > 0) {
+        appendToSearchIndex(
+          articles.map((a) => ({
+            id: a.slug,
+            title: a.title,
+            content: a.summary + " " + a.content.slice(0, 500),
+            category: a.category,
+            url: `/learn/${a.slug}`,
+            type: "article" as const,
+          }))
+        );
+      }
+    });
   }, []);
 
+  // 合并内置文章和用户文章
+  const mergedArticles = useMemo(() => {
+    return [...allArticles, ...userArticles];
+  }, [userArticles]);
+
   const filteredArticles = useMemo(() => {
-    let articles = allArticles;
+    let articles = mergedArticles;
 
     if (activeCategory !== "all") {
       articles = articles.filter((a) => a.category === activeCategory);
@@ -29,11 +52,23 @@ function LearnContent() {
     if (searchQuery.trim()) {
       const results = search(searchQuery);
       const slugs = new Set(results.filter((r) => r.type === "article").map((r) => r.id));
-      articles = articles.filter((a) => slugs.has(a.slug));
+      // 也匹配用户文章（它们不在搜索索引中，但 slug 可能匹配）
+      const userSlugs = new Set(
+        userArticles
+          .filter(
+            (a) =>
+              a.title.includes(searchQuery) ||
+              a.summary.includes(searchQuery) ||
+              a.tags.some((t) => t.includes(searchQuery))
+          )
+          .map((a) => a.slug)
+      );
+      const allSlugs = new Set([...slugs, ...userSlugs]);
+      articles = articles.filter((a) => allSlugs.has(a.slug));
     }
 
     return articles;
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, mergedArticles, userArticles]);
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);

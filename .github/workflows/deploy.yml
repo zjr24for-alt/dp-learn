@@ -19,6 +19,8 @@ jobs:
           cache: npm
 
       - run: npm ci
+      # GitHub Pages 静态导出不支持 API 路由，构建前移除
+      - run: rm -rf app/api
       - run: npm run build
         env:
           STATIC_EXPORT: "true"

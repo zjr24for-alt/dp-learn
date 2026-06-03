@@ -49,8 +49,9 @@ export default function CheatsheetPage() {
         onChange={(e) => setSearchText(e.target.value)}
         placeholder="筛选速查条目..."
         autoComplete="on"
-        className="w-full max-w-md px-4 py-2 rounded-lg border border-zinc-300 text-sm
+        className="w-full max-w-md px-4 py-2 rounded-lg border border-zinc-300 text-sm bg-white
                    placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent mb-4"
+        style={{ backgroundColor: "#fff", color: "#18181b" }}
       />
 
       {/* Filter tabs */}

@@ -48,30 +48,26 @@ pre code {
   padding: 0;
 }
 
-/* 覆盖浏览器 autofill 的默认深色背景 */
+/* 覆盖浏览器 autofill 的默认深色背景 —— 全局生效 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
 textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  box-shadow: 0 0 0 1000px white inset !important;
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
   -webkit-text-fill-color: #18181b !important;
+  background-color: #ffffff !important;
+  color: #18181b !important;
   caret-color: #18181b !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-input.dark-autofill:-webkit-autofill,
-input.dark-autofill:-webkit-autofill:hover,
-input.dark-autofill:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
-  box-shadow: 0 0 0 1000px #18181b inset !important;
-  -webkit-text-fill-color: #fafafa !important;
-  caret-color: #fafafa !important;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
 }
 
 /* Scrollbar styling */

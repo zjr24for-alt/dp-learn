@@ -119,20 +119,48 @@ max_devi_f = max(σ_f)  # 每个原子的力标准差的最大值
 \`\`\`python
 import dpdata
 import numpy as np
+from pathlib import Path
 
-# 收集所有 OUTCAR
+# ── 收集所有 OUTCAR ──────────────────────────────────────────────
+# DP-GEN 每轮 FP 标注后，task 目录下会有 OUTCAR 文件
 systems = []
+failed_tasks = []  # 记录失败的 task
+
 for task_dir in sorted(Path("iter.000000/02.fp").glob("task.*")):
     outcar = task_dir / "OUTCAR"
-    if outcar.exists():
-        s = dpdata.LabeledSystem(str(outcar), fmt="vasp/outcar")
-        systems.append(s)
+    if not outcar.exists():
+        failed_tasks.append(task_dir.name)
+        continue
 
-# 合并并保存
+    try:
+        # fmt="vasp/outcar" 告诉 dpdata 按 VASP OUTCAR 格式解析
+        # 解析内容：能量(eV)、力(eV/Å)、应力(kB)
+        s = dpdata.LabeledSystem(str(outcar), fmt="vasp/outcar")
+        if len(s) > 0:  # 确保有有效帧
+            systems.append(s)
+        else:
+            failed_tasks.append(task_dir.name)
+    except Exception as e:
+        # OUTCAR 不完整（VASP 崩溃/超时）时会解析失败
+        print(f"跳过 {task_dir.name}: {e}")
+        failed_tasks.append(task_dir.name)
+
+print(f"成功: {len(systems)} 个 task, 失败: {len(failed_tasks)} 个")
+
+# ── 合并并保存 ───────────────────────────────────────────────────
+# dpdata 用 append() 做帧级拼接（不是数组级拼接）
 merged = systems[0]
 for s in systems[1:]:
     merged.append(s)
 
+# to_deepmd_npy() 生成 DeePMD 训练所需的 numpy 文件
+# 输出目录结构：
+#   set.001/
+#   ├── box.npy      # 晶胞向量 (n_frames, 9)
+#   ├── coord.npy    # 原子坐标 (n_frames, n_atoms*3)
+#   ├── energy.npy   # 总能量 (n_frames,)
+#   ├── force.npy    # 原子力 (n_frames, n_atoms*3)
+#   └── virial.npy   # 应力张量 (n_frames, 9)
 merged.to_deepmd_npy("set.001")
 \`\`\`
 

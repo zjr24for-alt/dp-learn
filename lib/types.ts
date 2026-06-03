@@ -6,7 +6,10 @@ export interface Article {
   summary: string;
   content: string; // Markdown
   tags: string[];
-  sourceFiles: string[]; // 来源文件
+  sourceFiles?: string[]; // 来源文件（用户文章可选）
+  isUserArticle?: boolean; // 用户通过编辑器创建的文章
+  createdAt?: string; // ISO date
+  updatedAt?: string; // ISO date
 }
 
 export type Category =
@@ -53,7 +56,7 @@ export interface ProgressEntry {
 // ====== 官方文档摘要 ======
 export interface DocEntry {
   id: string;
-  source: "deepmd" | "vasp" | "lammps";
+  source: "deepmd" | "vasp" | "lammps" | "dpdata";
   title: string;
   summary: string; // 中文摘要
   content: string; // 详细内容（用于搜索）

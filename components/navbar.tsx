@@ -7,6 +7,7 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { href: "/", label: "首页", icon: "🏠" },
   { href: "/learn", label: "知识库", icon: "📚" },
+  { href: "/contribute", label: "写笔记", icon: "✏️" },
   { href: "/cheatsheet", label: "速查表", icon: "📋" },
   { href: "/papers", label: "论文", icon: "📄" },
   { href: "/qa", label: "问答", icon: "💬" },

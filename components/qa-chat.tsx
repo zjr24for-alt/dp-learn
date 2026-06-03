@@ -4,7 +4,11 @@ import { useState, useRef, useEffect } from "react";
 import type { QASnippet } from "@/lib/search-qa";
 import { retrieveRelevant, buildContext } from "@/lib/search-qa";
 import { askAI, hasApiKey, setApiKey, clearApiKey, getApiKey } from "@/lib/ai-qa";
+import type { HistoryMessage } from "@/lib/ai-qa";
 import { allArticles, cheatsheetItems, officialDocs } from "@/content/index";
+import { getAllUserArticles } from "@/lib/user-content-store";
+import { renderMarkdown } from "@/lib/render-markdown";
+import type { Article } from "@/lib/types";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -26,9 +30,12 @@ export function QAChat() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [keyConfigured, setKeyConfigured] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const [userArticles, setUserArticles] = useState<Article[]>([]);
+  const MAX_HISTORY = 5; // 保留最近 5 轮对话
 
   useEffect(() => {
     setKeyConfigured(hasApiKey());
+    getAllUserArticles().then(setUserArticles);
   }, []);
 
   useEffect(() => {
@@ -37,16 +44,42 @@ export function QAChat() {
 
   const handleSaveKey = () => {
     if (apiKeyInput.trim()) {
-      setApiKey(apiKeyInput.trim());
-      setKeyConfigured(true);
-      setShowKeyInput(false);
-      setApiKeyInput("");
+      const ok = setApiKey(apiKeyInput.trim());
+      if (ok) {
+        setKeyConfigured(true);
+        setShowKeyInput(false);
+        setApiKeyInput("");
+      } else {
+        setApiKeyInput("");
+        // placeholder 会提示重新输入
+      }
     }
   };
 
   const handleClearKey = () => {
     clearApiKey();
     setKeyConfigured(false);
+  };
+
+  /** 从 messages 中提取最近 N 轮对话历史（排除 system 消息） */
+  const buildHistory = (): HistoryMessage[] => {
+    const historyMsgs = messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .slice(-(MAX_HISTORY * 2)); // 每轮 = user + assistant
+    return historyMsgs.map((m) => ({
+      role: m.role as "user" | "assistant",
+      // 历史消息只保留纯文本，去掉末尾的来源引用块
+      content: m.content.replace(/\n\n---\n📚[\s\S]*$/, "").trim(),
+    }));
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      {
+        role: "system",
+        content: "你好！我是 DP 学习助教。你可以问我关于 DP-GEN、DeePMD、VASP、LAMMPS 的任何问题。\n\n我会先在知识库（你的笔记 + 官方文档）中检索相关内容，然后给你回答。\n\n💡 配置 DeepSeek API Key 可以获得更智能的整合回答。",
+      },
+    ]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,12 +94,11 @@ export function QAChat() {
     const userMsg: Message = { role: "user", content: question };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Retrieve relevant snippets
-    const snippets = retrieveRelevant(question, allArticles, officialDocs, cheatsheetItems, 5);
-    console.log("[QA] snippets:", snippets.length, "hasApiKey:", hasApiKey());
+    // Retrieve relevant snippets（合并内置文章和用户文章）
+    const mergedArticles = [...allArticles, ...userArticles];
+    const snippets = retrieveRelevant(question, mergedArticles, officialDocs, cheatsheetItems, 5);
 
     if (snippets.length === 0 && !hasApiKey()) {
-      console.log("[QA] 分支: 无结果+无Key → 提示");
       // 无知识库结果 + 无 AI → 提示用户
       setMessages((prev) => [
         ...prev,
@@ -83,13 +115,12 @@ export function QAChat() {
 
     // If API key is configured, use AI
     if (hasApiKey()) {
-      console.log("[QA] 分支: AI增强 snippets=", snippets.length);
       const context = snippets.length > 0
         ? buildContext(snippets)
         : "（知识库中未找到相关内容，请基于你的训练知识回答）";
 
-      const response = await askAI(question, context);
-      console.log("[QA] AI response error:", response.error || "none");
+      const history = buildHistory();
+      const response = await askAI(question, context, history);
 
       if (response.error) {
         setMessages((prev) => [
@@ -137,7 +168,7 @@ export function QAChat() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] border border-zinc-200 rounded-xl bg-white">
+    <div className="flex flex-col h-[600px] max-h-[80vh] border border-zinc-200 rounded-xl bg-white">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
         <div className="flex items-center gap-2">
@@ -156,6 +187,22 @@ export function QAChat() {
             </button>
           )}
         </div>
+        <div className="flex items-center gap-2">
+          {messages.length > 1 && (
+            <span className="text-xs text-zinc-400">
+              {Math.floor((messages.filter(m => m.role === "user").length))} 轮对话
+            </span>
+          )}
+          {messages.length > 2 && (
+            <button
+              onClick={handleClearChat}
+              className="text-xs text-zinc-400 hover:text-zinc-600 px-2 py-0.5 rounded hover:bg-zinc-100"
+              title="清空对话历史"
+            >
+              🗑️ 清空
+            </button>
+          )}
+        </div>
       </div>
 
       {/* API Key input */}
@@ -170,7 +217,8 @@ export function QAChat() {
               onChange={(e) => setApiKeyInput(e.target.value)}
               placeholder="输入 DeepSeek API Key (sk-...)"
               autoComplete="off"
-              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900"
+              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900 bg-white"
+              style={{ backgroundColor: "#fff", color: "#18181b" }}
             />
             <button
               onClick={handleSaveKey}
@@ -190,20 +238,14 @@ export function QAChat() {
             <div
               className={`max-w-[85%] rounded-xl px-4 py-3 text-sm ${
                 msg.role === "user"
-                  ? "bg-zinc-900 text-white"
+                  ? "bg-blue-100 text-blue-900"
                   : msg.role === "system"
                   ? "bg-blue-50 text-blue-800 border border-blue-100"
                   : "bg-zinc-100 text-zinc-800"
               }`}
             >
               <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-blue-600"
-                   dangerouslySetInnerHTML={{
-                     __html: msg.content
-                       .replace(/\n/g, "<br/>")
-                       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-                       .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-                       .replace(/`([^`]+)`/g, "<code>$1</code>"),
-                   }}
+                   dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
               />
               {msg.mode === "ai-enhanced" && (
                 <span className="inline-block mt-2 text-xs text-zinc-400">✨ AI 生成</span>
@@ -234,9 +276,10 @@ export function QAChat() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="问一个关于 DP-GEN / DeePMD / VASP / LAMMPS 的问题..."
+            placeholder="提问... 支持追问，AI 会记住上下文"
             autoComplete="on"
-            className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+            style={{ backgroundColor: "#fff", color: "#18181b" }}
             disabled={loading}
           />
           <button
@@ -248,7 +291,7 @@ export function QAChat() {
           </button>
         </div>
         <p className="text-xs text-zinc-400 mt-2">
-          试试问："DP-GEN 的 candidate 比例多少算健康？" 或 "VASP 报 KPOINTS float bug 怎么办？"
+          💡 支持多轮对话，AI 会记住最近 {MAX_HISTORY} 轮上下文。试试追问："能再详细说说吗？" 或 "PyTorch 版本怎么写？"
         </p>
       </form>
     </div>

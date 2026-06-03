@@ -3,20 +3,37 @@
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
-import { CATEGORY_META, type Category } from "@/lib/types";
+import { CATEGORY_META, type Category, type Article } from "@/lib/types";
 import type { SearchIndexItem } from "@/lib/types";
-import { buildSearchIndex, search as doSearch } from "@/lib/search";
+import { buildSearchIndex, search as doSearch, appendToSearchIndex } from "@/lib/search";
 import { SearchBar } from "@/components/search-bar";
 import { ArticleCard } from "@/components/article-card";
 import { getCategoryProgress } from "@/lib/progress-store";
+import { getAllUserArticles } from "@/lib/user-content-store";
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
+  const [userArticles, setUserArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     setMounted(true);
     const idx = buildAllSearchIndex();
     buildSearchIndex(idx);
+    getAllUserArticles().then((articles) => {
+      setUserArticles(articles);
+      if (articles.length > 0) {
+        appendToSearchIndex(
+          articles.map((a) => ({
+            id: a.slug,
+            title: a.title,
+            content: a.summary + " " + a.content.slice(0, 500),
+            category: a.category,
+            url: `/learn/${a.slug}`,
+            type: "article" as const,
+          }))
+        );
+      }
+    });
   }, []);
 
   const handleSearch = useCallback((query: string): SearchIndexItem[] => {
@@ -24,7 +41,8 @@ export default function HomePage() {
   }, []);
 
   const categories = Object.entries(CATEGORY_META) as [Category, (typeof CATEGORY_META)[Category]][];
-  const recentArticles = allArticles.slice(0, 6);
+  const allMerged = [...allArticles, ...userArticles];
+  const recentArticles = allMerged.slice(0, 6);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -57,6 +75,12 @@ export default function HomePage() {
             className="px-4 py-2 rounded-lg border border-zinc-300 text-zinc-700 text-sm font-medium hover:bg-zinc-50 transition-colors"
           >
             💬 智能问答
+          </Link>
+          <Link
+            href="/contribute"
+            className="px-4 py-2 rounded-lg border border-zinc-300 text-zinc-700 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          >
+            ✏️ 写笔记
           </Link>
         </div>
       </section>
@@ -96,7 +120,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-zinc-900">知识条目</h2>
           <Link href="/learn" className="text-sm text-zinc-500 hover:text-zinc-900">
-            查看全部 ({allArticles.length}) →
+            查看全部 ({allMerged.length}) →
           </Link>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -112,7 +136,7 @@ export default function HomePage() {
           <div className="text-3xl mb-3">📚</div>
           <h3 className="font-semibold text-zinc-900 mb-2">结构化知识</h3>
           <p className="text-sm text-zinc-500">
-            {allArticles.length} 篇实战笔记，涵盖 DP-GEN 工作流到 VASP 调错，按类别组织
+            {allMerged.length} 篇实战笔记，涵盖 DP-GEN 工作流到 VASP 调错，按类别组织
           </p>
         </div>
         <div className="border border-zinc-200 rounded-xl p-6 bg-white text-center">

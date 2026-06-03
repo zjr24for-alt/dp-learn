@@ -88,7 +88,8 @@ export function PaperSearch() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索 arXiv 论文（如 deep potential molecular dynamics）..."
             autoComplete="on"
-            className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
+            className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+            style={{ backgroundColor: "#fff", color: "#18181b" }}
           />
           <button
             type="submit"

@@ -5,21 +5,54 @@ import { useParams } from "next/navigation";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
 import { buildSearchIndex } from "@/lib/search";
 import { CATEGORY_META } from "@/lib/types";
+import type { Article } from "@/lib/types";
 import { ProgressCheck } from "@/components/progress-bar";
+import { readingTime as calcReadingTime } from "@/components/reading-time";
+import { renderMarkdown } from "@/lib/render-markdown";
+import { getUserArticle, deleteUserArticle } from "@/lib/user-content-store";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function ArticleContent({ slug: serverSlug }: { slug: string }) {
   const params = useParams();
-  // 优先从客户端路由 params 获取，静态导出下更可靠
+  const router = useRouter();
   const slug = (params?.slug as string) || serverSlug;
   const [mounted, setMounted] = useState(false);
+  const [userArticle, setUserArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
     buildSearchIndex(buildAllSearchIndex());
+    // 代码块复制按钮事件委托
+    const handler = (e: Event) => {
+      const btn = (e.target as HTMLElement).closest(".copy-btn") as HTMLElement | null;
+      if (!btn) return;
+      const code = btn.dataset.code || "";
+      navigator.clipboard?.writeText(code).catch(() => {});
+      btn.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+      setTimeout(() => { btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>'; }, 1500);
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
   }, []);
 
-  const article = useMemo(() => allArticles.find((a) => a.slug === slug), [slug]);
+  // 查找内置文章
+  const builtinArticle = useMemo(() => allArticles.find((a) => a.slug === slug), [slug]);
+
+  // 如果内置文章未命中，从 IndexedDB 加载用户文章
+  useEffect(() => {
+    if (builtinArticle) {
+      setLoading(false);
+      return;
+    }
+    getUserArticle(slug).then((a) => {
+      setUserArticle(a);
+      setLoading(false);
+    });
+  }, [slug, builtinArticle]);
+
+  const article = builtinArticle || userArticle;
 
   const navArticles = useMemo(() => {
     if (!article) return { prev: null, next: null };
@@ -30,6 +63,20 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
       next: idx < sameCategory.length - 1 ? sameCategory[idx + 1] : null,
     };
   }, [article, slug]);
+
+  const handleDelete = async () => {
+    if (!confirm("确定要删除这篇笔记吗？此操作不可撤销。")) return;
+    await deleteUserArticle(slug);
+    router.push("/learn");
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+        <div className="animate-pulse text-zinc-400">加载中...</div>
+      </div>
+    );
+  }
 
   if (!article) {
     return (
@@ -45,66 +92,7 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
   }
 
   const meta = CATEGORY_META[article.category];
-
-  const renderContent = (content: string) => {
-    // Step 0: Extract code blocks to protect them from further processing
-    const codeBlocks: string[] = [];
-    let text = content.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-      const idx = codeBlocks.length;
-      codeBlocks.push(
-        `<pre class="bg-zinc-200 rounded-lg p-4 overflow-x-auto text-sm mb-5 border border-zinc-300"><code class="text-zinc-900 text-sm">${code.trim()}</code></pre>`
-      );
-      return `%%CODEBLOCK_${idx}%%`;
-    });
-
-    // Step 1: Convert markdown tables to HTML
-    text = text.replace(
-      /(?:^\|(.+)\|\n)^\|(?:[-: |]+)\|\n((?:^\|.+\|\n?)+)/gm,
-      (_, header, body) => {
-        const headers = header.split('|').map((h: string) => h.trim());
-        const rows = body.trim().split('\n').map((row: string) =>
-          row.split('|').filter((c: string) => c).map((c: string) => c.trim())
-        );
-        const thead = `<tr>${headers.map((h: string) => `<th class="border border-zinc-300 bg-zinc-200 px-3 py-2 text-left text-sm font-semibold text-zinc-900">${h}</th>`).join('')}</tr>`;
-        const tbody = rows.map((r: string[]) =>
-          `<tr>${r.map((c: string) => `<td class="border border-zinc-200 px-3 py-2 text-sm text-zinc-900">${c}</td>`).join('')}</tr>`
-        ).join('');
-        return `<div class="overflow-x-auto mb-5"><table class="w-full border-collapse border border-zinc-200 rounded-lg">${thead}${tbody}</table></div>`;
-      }
-    );
-
-    // Step 2: Headings, blockquotes, lists, hr
-    text = text
-      .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-8 mb-3 text-zinc-900">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-10 mb-4 text-zinc-900 border-b border-zinc-200 pb-2">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-10 mb-5 text-zinc-900">$1</h1>')
-      .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-zinc-400 bg-zinc-50 pl-4 py-2 my-4 text-zinc-700">$1</blockquote>')
-      .replace(/^---$/gm, '<hr class="my-8 border-zinc-300">')
-      .replace(/^- (.+)$/gm, '<li class="ml-5 list-disc text-zinc-900 leading-relaxed">$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-5 list-decimal text-zinc-900 leading-relaxed">$2</li>');
-
-    // Step 3: Inline formatting (bold, inline code, links)
-    text = text
-      .replace(/`([^`]+)`/g, '<code class="bg-zinc-200 text-zinc-900 px-1.5 py-0.5 rounded text-sm font-medium">$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-zinc-900">$1</strong>');
-
-    // Step 4: Paragraphs — double newline = paragraph break
-    text = text
-      .replace(/\n\n+/g, '</p><p class="text-zinc-900 leading-relaxed mb-4">')
-      .replace(/\n/g, '<br/>');
-
-    // Wrap in initial paragraph
-    text = '<p class="text-zinc-900 leading-relaxed mb-4">' + text + '</p>';
-
-    // Step 5: Restore code blocks
-    text = text.replace(/%%CODEBLOCK_(\d+)%%/g, (_, i) => codeBlocks[parseInt(i)]);
-
-    // Clean up empty paragraphs
-    text = text.replace(/<p class="[^"]*"><\/p>/g, '');
-    text = text.replace(/<p class="[^"]*">(\s*<br\/>\s*)+<\/p>/g, '');
-
-    return text;
-  };
+  const isUser = article.isUserArticle;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -120,13 +108,45 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
 
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-3">
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.color}`}>
-            {meta.icon} {meta.label}
-          </span>
+          {isUser ? (
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+              📝 我的笔记
+            </span>
+          ) : (
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.color}`}>
+              {meta.icon} {meta.label}
+            </span>
+          )}
           {mounted && <ProgressCheck slug={article.slug} />}
+          {isUser && (
+            <Link
+              href={`/contribute?edit=${article.slug}`}
+              className="text-xs text-blue-600 hover:underline ml-auto"
+            >
+              ✏️ 编辑
+            </Link>
+          )}
+          {isUser && (
+            <button
+              onClick={handleDelete}
+              className="text-xs text-red-500 hover:text-red-700"
+            >
+              🗑️ 删除
+            </button>
+          )}
         </div>
         <h1 className="text-3xl font-bold text-zinc-900 mb-3">{article.title}</h1>
-        <p className="text-zinc-600">{article.summary}</p>
+        <div className="flex items-center gap-4 mb-3">
+          <p className="text-zinc-600">{article.summary}</p>
+        </div>
+        <div className="flex items-center gap-4 text-xs text-zinc-400 mb-4">
+          <span>预计阅读 {calcReadingTime(article.content)} 分钟</span>
+          <span>{article.content.length} 字符</span>
+          <span>{article.tags.length} 个标签</span>
+          {isUser && article.updatedAt && (
+            <span>更新于 {new Date(article.updatedAt).toLocaleDateString("zh-CN")}</span>
+          )}
+        </div>
         <div className="flex items-center gap-2 mt-4 flex-wrap">
           {article.tags.map((tag) => (
             <span key={tag} className="text-xs text-zinc-500 bg-zinc-200 px-2 py-0.5 rounded">
@@ -134,7 +154,7 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
             </span>
           ))}
         </div>
-        {article.sourceFiles.length > 0 && (
+        {article.sourceFiles && article.sourceFiles.length > 0 && (
           <p className="text-xs text-zinc-500 mt-3">
             来源：{article.sourceFiles.join(", ")}
           </p>
@@ -143,14 +163,16 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
 
       <article
         className="prose prose-zinc max-w-none"
-        dangerouslySetInnerHTML={{ __html: renderContent(article.content) }}
+        dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
       />
 
-      <div className="mt-10 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
-        <p className="text-sm text-zinc-600">
-          📝 本文来自你的 dp备忘录 项目，源文件：{article.sourceFiles.join(", ")}
-        </p>
-      </div>
+      {!isUser && article.sourceFiles && article.sourceFiles.length > 0 && (
+        <div className="mt-10 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+          <p className="text-sm text-zinc-600">
+            📝 本文来自你的 dp备忘录 项目，源文件：{article.sourceFiles.join(", ")}
+          </p>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-zinc-200">
         {navArticles.prev ? (

@@ -68,19 +68,99 @@ Descriptor 类型选择：
     id: "deepmd-freeze",
     source: "deepmd",
     title: "模型冻结：dp freeze",
-    summary: "将训练 checkpoint 导出为 .pb 文件用于推理",
-    content: `dp freeze 命令用于将训练产生的 checkpoint 导出为单一的 .pb 文件。
-基本用法：dp freeze -o graph.pb
+    summary: "将训练 checkpoint 导出为 .pb/.pth 文件用于推理",
+    content: `dp freeze 命令用于将训练产生的 checkpoint 导出为单一的模型文件。
+
+TensorFlow 后端：dp freeze -o model.pb
+PyTorch 后端：dp --pt freeze -o model.pth
+
 选项：
 - -o: 输出文件名
 - --united-model: 导出单个统一模型
 - --iteration: 指定 checkpoint 步数
+- --head: 多任务训练时指定 head
 
-.pb 文件可用于：
-- LAMMPS pair_style deepmd
-- dp test / dp compress
-- dpgen 的 model_devi 阶段`,
+模型压缩（推荐生产环境使用）：
+dp compress -i model.pb -o model-compressed.pb
+dp --pt compress -i model.pth -o model-compressed.pth
+压缩使用五阶多项式查表 + 算子合并，可获得 2-4x 加速，精度损失极小`,
     url: "https://docs.deepmodeling.com/projects/deepmd/en/latest/operation/freeze.html",
-    tags: ["deepmd", "dp freeze", "模型导出", ".pb"],
+    tags: ["deepmd", "dp freeze", "模型导出", "compress", "压缩"],
+  },
+  {
+    id: "deepmd-sel-determination",
+    source: "deepmd",
+    title: "如何确定 sel 参数：dp neighbor-stat",
+    summary: "用 neighbor-stat 命令统计训练数据的最大近邻数，科学确定 sel 值",
+    content: `sel 参数设定截断半径内每种原子的最大近邻数。
+
+确定方法：
+1. 运行 dp neighbor-stat 统计训练数据
+   dp --pt neighbor-stat -s data -r 6.0 -t O H
+   输出 max_nbor_size: [38, 72]
+   含义：O 最多38个近邻，H 最多72个近邻
+
+2. sel 应设为比统计值更高的值（留余量给 MD 极端构型）
+   如统计值 [38, 72]，建议设 sel: [46, 92]
+
+注意事项：
+- sel 太小：能量不守恒，精度下降
+- sel 太大：计算变慢，内存增加
+- rcut 没有半盒子大小限制（DeePMD 自动处理 PBC 镜像）`,
+    url: "https://docs.deepmodeling.com/projects/deepmd/en/latest/model/sel.html",
+    tags: ["deepmd", "sel", "近邻数", "neighbor-stat"],
+  },
+  {
+    id: "deepmd-pretrained-models",
+    source: "deepmd",
+    title: "预训练大模型：DPA-2/DPA-3",
+    summary: "使用 dp pretrained 下载官方预训练大模型，可直接推理或微调",
+    content: `DeePMD-kit 提供预训练大模型（DPA-2/DPA-3 系列），可直接使用或微调。
+
+下载命令：
+dp pretrained download DPA-3.3-1M
+dp pretrained download DPA-3.2-5M
+dp pretrained download DPA-3.1-3M
+
+Python 中使用（自动下载）：
+from deepmd.infer import DeepPot
+pot = DeepPot("DPA-3.2-5M")
+
+DPA-2 特点：
+- 基于 attention 的描述符架构
+- 三通道：单原子通道 + 旋转不变对通道 + 旋转等变对通道
+- 支持多任务预训练
+- 精度高于传统 se_e2_a`,
+    url: "https://docs.deepmodeling.com/projects/deepmd/en/latest/model/pretrained.html",
+    tags: ["deepmd", "DPA-2", "DPA-3", "预训练", "pretrained"],
+  },
+  {
+    id: "deepmd-lcurve-guide",
+    source: "deepmd",
+    title: "lcurve.out 训练曲线解读",
+    summary: "训练输出的 lcurve.out 文件各列含义：step, rmse_val/trn, rmse_e, rmse_f, lr",
+    content: `lcurve.out 是 DeePMD-kit 训练过程中输出的学习曲线文件。
+
+列含义（从左到右）：
+1. step: 训练步数
+2. rmse_val: 验证集总损失
+3. rmse_trn: 训练集总损失
+4. rmse_e_val: 验证集能量 RMSE (eV/atom, 按原子数归一化)
+5. rmse_e_trn: 训练集能量 RMSE
+6. rmse_f_val: 验证集力 RMSE (eV/Å)
+7. rmse_f_trn: 训练集力 RMSE
+8. lr: 当前学习率
+
+正常训练特征：
+- loss 持续下降
+- val 和 trn 的 loss 接近
+- loss_f 最终 < 0.1 eV/Å
+
+异常情况：
+- loss 震荡 → 学习率太大
+- loss 跳高 → 数据有异常帧
+- val >> trn → 过拟合`,
+    url: "https://docs.deepmodeling.com/projects/deepmd/en/latest/train/training.html",
+    tags: ["deepmd", "lcurve", "训练曲线", "loss"],
   },
 ];

@@ -8,13 +8,21 @@ import { methodologyArticles } from "./methodology";
 import { compMaterialsArticles } from "./comp-materials";
 import { atomisticSimArticles } from "./atomistic-sim";
 import { ovitoTipsArticles } from "./ovito-tips";
+import { dpgenHandsonArticles } from "./dpgen-handson";
+import { deepmdQuickstartArticles } from "./deepmd-quickstart";
+import { lammpsDeepmdArticles } from "./lammps-deepmd";
+import { dpdataGuideArticles } from "./dpdata-guide";
+import { deepmdTuningArticles } from "./deepmd-tuning";
+import { machineConfigArticles } from "./machine-config";
 import { cheatsheetItems } from "./cheatsheet";
 import { officialDocs } from "./official-docs/index";
 
 /** 全部文章 */
 export const allArticles: Article[] = [
   ...dpgenWorkflowArticles,
+  ...dpgenHandsonArticles,
   ...deepmdTrainingArticles,
+  ...deepmdQuickstartArticles,
   ...vaspHpcArticles,
   ...envConfigArticles,
   ...linuxTipsArticles,
@@ -22,6 +30,10 @@ export const allArticles: Article[] = [
   ...compMaterialsArticles,
   ...atomisticSimArticles,
   ...ovitoTipsArticles,
+  ...lammpsDeepmdArticles,
+  ...dpdataGuideArticles,
+  ...deepmdTuningArticles,
+  ...machineConfigArticles,
 ];
 
 /** 按类别获取文章 */
@@ -48,7 +60,7 @@ export function buildAllSearchIndex(): SearchIndexItem[] {
     items.push({
       id: article.slug,
       title: article.title,
-      content: article.summary + " " + article.content.slice(0, 500),
+      content: article.summary + " " + (article.tags || []).join(" ") + " " + article.content.slice(0, 2000),
       category: article.category,
       url: `/learn/${article.slug}`,
       type: "article",

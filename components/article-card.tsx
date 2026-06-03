@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import type { Article } from "@/lib/types";
 import { CATEGORY_META } from "@/lib/types";
@@ -7,7 +8,7 @@ interface Props {
   article: Article;
 }
 
-export function ArticleCard({ article }: Props) {
+export const ArticleCard = memo(function ArticleCard({ article }: Props) {
   const meta = CATEGORY_META[article.category];
 
   return (
@@ -15,9 +16,15 @@ export function ArticleCard({ article }: Props) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.color}`}>
-              {meta.icon} {meta.label}
-            </span>
+            {article.isUserArticle ? (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                📝 我的笔记
+              </span>
+            ) : (
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${meta.color}`}>
+                {meta.icon} {meta.label}
+              </span>
+            )}
             <ProgressCheck slug={article.slug} />
           </div>
           <Link href={`/learn/${article.slug}`} className="block">
@@ -37,4 +44,4 @@ export function ArticleCard({ article }: Props) {
       </div>
     </div>
   );
-}
+});

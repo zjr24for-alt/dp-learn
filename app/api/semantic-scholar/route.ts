@@ -2,7 +2,6 @@
 // GET /api/semantic-scholar?query=...&limit=...&offset=...&fields=...
 // 注意：GitHub Pages 静态导出下此路由不可用，仅 dev/Vercel 部署生效
 
-export const dynamic = "force-static";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
