@@ -1,6 +1,7 @@
-// 论文搜索客户端 — 双路容错
-// 主路: arXiv API via CORS 代理（浏览器可用）
-// 备路: Semantic Scholar API（原生CORS，但免费额度低）
+// 论文搜索客户端 — 三路容错
+// 主路: arXiv API via 服务端代理
+// 备路: Semantic Scholar API（浏览器直连 + 代理回退）
+// 第三路: OpenAlex API（免费无认证，浏览器直连）
 
 export interface ArxivPaper {
   id: string;
@@ -226,16 +227,95 @@ function parseS2Response(data: any): { papers: ArxivPaper[]; totalResults: numbe
   return { papers, totalResults: data.total || 0 };
 }
 
-// ====== 统一入口（双路容错） ======
+// ====== OpenAlex API (第三路 — 免费无认证，浏览器直连) ======
+
+const OPENALEX_API = "https://api.openalex.org/works";
+
+async function searchOpenAlex(params: ArxivSearchParams): Promise<{
+  papers: ArxivPaper[];
+  totalResults: number;
+}> {
+  const perPage = Math.min(params.maxResults || 20, 50);
+  const page = Math.floor((params.start || 0) / perPage) + 1;
+
+  const url = new URL(OPENALEX_API);
+  url.searchParams.set("search", params.query.trim());
+  url.searchParams.set("per_page", String(perPage));
+  url.searchParams.set("page", String(page));
+  // 按相关性排序（默认），filter by concept if category specified
+  if (params.category) {
+    // OpenAlex concept mapping for arXiv categories
+    const conceptMap: Record<string, string> = {
+      "cond-mat.mtrl-sci": "C154945302",   // Materials Science
+      "physics.comp-ph": "C191209702",      // Computational Physics
+      "cs.LG": "C119857082",                // Machine Learning
+      "physics.chem-ph": "C138885662",      // Physical Chemistry
+    };
+    const conceptId = conceptMap[params.category];
+    if (conceptId) {
+      url.searchParams.set("filter", `concepts.id:${conceptId}`);
+    }
+  }
+
+  const res = await fetch(url.toString(), {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (res.status === 429) {
+    throw new Error("OpenAlex 请求太频繁");
+  }
+  if (!res.ok) {
+    throw new Error(`OpenAlex 请求失败 (${res.status})`);
+  }
+
+  const data = await res.json();
+  const results = data.results || [];
+  const totalResults = data.meta?.count || 0;
+
+  const papers: ArxivPaper[] = results.map((w: any) => {
+    const arxivId = w.ids?.arxiv_id
+      ? w.ids.arxiv_id.replace(/^.*\//, "")
+      : undefined;
+    const doi = w.doi ? w.doi.replace("https://doi.org/", "") : undefined;
+    const authors = (w.authorships || []).map((a: any) => a.author?.display_name || "").filter(Boolean);
+    const year = w.publication_year?.toString() || "";
+    const concepts = (w.concepts || []).map((c: any) => c.display_name);
+    const primaryCategory = concepts[0] || "N/A";
+
+    return {
+      id: w.id?.replace("https://openalex.org/", "openalex:") || `oa:${Math.random()}`,
+      title: w.title || "Untitled",
+      summary: w.abstract || "暂无摘要",
+      authors,
+      published: year,
+      categories: concepts,
+      primaryCategory,
+      pdfUrl: w.open_access?.oa_url || (arxivId ? `https://arxiv.org/pdf/${arxivId}` : "#"),
+      abstractUrl: arxivId
+        ? `https://arxiv.org/abs/${arxivId}`
+        : w.id || "#",
+      arxivId,
+      doi,
+      citationCount: w.cited_by_count,
+      venue: w.primary_location?.source?.display_name || undefined,
+    };
+  });
+
+  return { papers, totalResults };
+}
+
+// ====== 统一入口（三路容错） ======
 
 export async function searchArxiv(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
-  // 并行尝试两条线路，取第一个成功的结果
-  const [arxivResult, s2Result] = await Promise.allSettled([
+  // 并行尝试三条线路，取第一个成功的结果
+  const [arxivResult, s2Result, oaResult] = await Promise.allSettled([
     searchArxivDirect(params),
     searchSemanticScholar(params),
+    searchOpenAlex(params),
   ]);
 
   // arXiv 成功
@@ -248,13 +328,20 @@ export async function searchArxiv(params: ArxivSearchParams): Promise<{
     return s2Result.value;
   }
 
-  // 两条线路都失败
+  // OpenAlex 成功
+  if (oaResult.status === "fulfilled") {
+    return oaResult.value;
+  }
+
+  // 三条线路都失败
   const arxivErr = arxivResult.reason?.message || "未知错误";
   const s2Err = s2Result.reason?.message || "未知错误";
+  const oaErr = oaResult.reason?.message || "未知错误";
   throw new Error(
-    `论文搜索失败，两条路线均不可用：\n` +
+    `论文搜索失败，三条路线均不可用：\n` +
     `- arXiv: ${arxivErr}\n` +
-    `- Semantic Scholar: ${s2Err}\n\n` +
-    `可能原因：arXiv/S2 对当前 IP 限流，请稍后重试。`
+    `- Semantic Scholar: ${s2Err}\n` +
+    `- OpenAlex: ${oaErr}\n\n` +
+    `可能原因：网络问题或 API 限流，请稍后重试。`
   );
 }
