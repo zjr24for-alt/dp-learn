@@ -172,24 +172,22 @@ export async function askAI(
 - dpdata 读取 OUTCAR 时建议用 try-except 包裹（VASP 崩溃时 OUTCAR 不完整）
 - 合并多源数据时注意 type_map 一致性（元素顺序必须相同）`;
 
-// 当前轮次的 user prompt（包含知识库检索结果）
-const userPrompt = `知识库检索结果：
+  // 当前轮次的 user prompt（包含知识库检索结果）
+  const userPrompt = `知识库检索结果：
 ${context}
 
 
 用户问题：${question}`;
 
-  try {
-    // 构建完整消息列表：system + 历史对话 + 当前问题
-    const messages: { role: string; content: string }[] = [
-      { role: "system", content: systemPrompt },
-      // 展开历史对话（最近 N 轮）
-      ...history.map((h) => ({ role: h.role, content: h.content })),
-      // 当前轮次
-      { role: "user", content: userPrompt },
-    ];
+  // 构建消息列表：system + 历史对话 + 当前问题
+  const messages: { role: string; content: string }[] = [
+    { role: "system", content: systemPrompt },
+    ...history.map((h) => ({ role: h.role, content: h.content })),
+    { role: "user", content: userPrompt },
+  ];
 
-    const res = await fetch(DEEPSEEK_API, {
+  try {
+    const res = await fetch("/api/ai", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -205,7 +203,7 @@ ${context}
 
     if (!res.ok) {
       const errText = await res.text();
-      return { answer: "", error: `API 调用失败 (${res.status}): ${errText.slice(0, 200)}` };
+      return { answer: "", error: `API 调用失败 (${res.status}): ${errText.slice(0, 300)}` };
     }
 
     const data = await res.json();

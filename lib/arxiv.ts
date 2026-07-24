@@ -71,7 +71,7 @@ export const DP_PRESET_QUERIES = [
 
 const ARXIV_API = "https://export.arxiv.org/api/query";
 
-async function searchArxivDirect(params: ArxivSearchParams): Promise<{
+export async function searchArxivDirect(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
@@ -164,7 +164,7 @@ async function searchArxivDirect(params: ArxivSearchParams): Promise<{
 
 const S2_API = "https://api.semanticscholar.org/graph/v1/paper/search";
 
-async function searchSemanticScholar(params: ArxivSearchParams): Promise<{
+export async function searchSemanticScholar(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
@@ -254,7 +254,7 @@ function parseS2Response(data: any): { papers: ArxivPaper[]; totalResults: numbe
 
 const OPENALEX_API = "https://api.openalex.org/works";
 
-async function searchOpenAlex(params: ArxivSearchParams): Promise<{
+export async function searchOpenAlex(params: ArxivSearchParams): Promise<{
   papers: ArxivPaper[];
   totalResults: number;
 }> {
