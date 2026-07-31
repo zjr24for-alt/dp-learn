@@ -53,6 +53,25 @@ const DEFAULT_PARAM = `{
   "init_data_sys": ["bulk_300k", "bulk_600k", "bulk_1000k"],
   "sys_configs_prefix": "/home/kobe/TiC_aimd_64/dpgen/sys_configs",
   "sys_configs": [["bulk_64/POSCAR"]],
+  "init_fp_style": "vasp",
+  "init_bulk": {
+    "stages": [1, 2, 3, 4],
+    "from_poscar": true,
+    "from_poscar_path": "/home/kobe/TiC_aimd_64/dpgen/sys_configs/bulk_64/POSCAR",
+    "super_cell": [1, 1, 1],
+    "elements": ["Ti", "C"],
+    "potcars": ["/home/kobe/TiC_aimd_64/dpgen/POTCAR_Ti", "/home/kobe/TiC_aimd_64/dpgen/POTCAR_C"],
+    "relax_incar": "/home/kobe/TiC_aimd_64/dpgen/INCAR_rlx",
+    "md_incar": "/home/kobe/TiC_aimd_64/dpgen/INCAR_md",
+    "scale": [1.0, 0.98, 1.02],
+    "skip_relax": false,
+    "pert_numb": 2,
+    "pert_box": 0.03,
+    "pert_atom": 0.01,
+    "md_nstep": 5,
+    "coll_ndata": 5000,
+    "type_map": ["Ti", "C"]
+  },
   "numb_models": 4,
   "dp_train_skip_neighbor_stat": true,
   "default_training_param": {
@@ -156,6 +175,7 @@ export default function ConfigBuilderPage() {
   const [assistOpen, setAssistOpen] = useState(false);
   const [assistMode, setAssistMode] = useState<AiAssistMode>("prompt");
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [materialNote, setMaterialNote] = useState("");
 
   // Switch machine segment（不重置内容）
   const switchMachineSegment = useCallback((seg: MachineSegment) => {
@@ -258,11 +278,17 @@ export default function ConfigBuilderPage() {
   };
 
   const buildPrompt = useCallback((): string => {
-    if (activeTab === "param") return buildParamPrompt(paramJson);
+    if (activeTab === "param") return buildParamPrompt(paramJson, materialNote);
     if (activeTab === "machine") return buildMachinePrompt(machineSegment, machineJsons[machineSegment]);
-    if (activeTab === "incar") return buildIncarPrompt(incarText);
-    return scriptTab === "lammps" ? buildLammpsPrompt(lammpsText) : buildSubmitPrompt(submitText);
-  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab]);
+    if (activeTab === "incar") return buildIncarPrompt(incarText, paramJson, materialNote);
+    return scriptTab === "lammps"
+      ? buildLammpsPrompt(lammpsText, paramJson, materialNote)
+      : buildSubmitPrompt(submitText);
+  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab, materialNote]);
+
+  // 材料备注仅在材料相关提示词（param / incar / lammps）下显示
+  const materialNoteRelevant =
+    activeTab !== "machine" && !(activeTab === "scripts" && scriptTab === "submit");
 
   const openAssist = useCallback((mode: AiAssistMode) => {
     setAssistMode(mode);
@@ -499,6 +525,9 @@ export default function ConfigBuilderPage() {
         prompt={buildPrompt()}
         extractKind={getExtractKind()}
         onFill={handleAssistFill}
+        materialNote={materialNote}
+        onMaterialNoteChange={setMaterialNote}
+        showMaterialNote={assistMode === "prompt" && materialNoteRelevant}
       />
     </div>
   );

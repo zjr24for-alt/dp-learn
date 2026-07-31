@@ -14,9 +14,13 @@ interface AiAssistProps {
   prompt: string;
   extractKind: ExtractKind;
   onFill: (value: string, ok: boolean, message: string) => void;
+  /** 材料备注：并入提示词（仅材料相关提示词显示） */
+  materialNote?: string;
+  onMaterialNoteChange?: (v: string) => void;
+  showMaterialNote?: boolean;
 }
 
-export function AiAssist({ open, onClose, mode, title, prompt, extractKind, onFill }: AiAssistProps) {
+export function AiAssist({ open, onClose, mode, title, prompt, extractKind, onFill, materialNote, onMaterialNoteChange, showMaterialNote }: AiAssistProps) {
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState("");
   const [fillMsg, setFillMsg] = useState<string | null>(null);
@@ -79,6 +83,20 @@ export function AiAssist({ open, onClose, mode, title, prompt, extractKind, onFi
               <p className="text-xs text-slate-500 mb-2">
                 复制下面的提示词，粘贴到 matchat 提问。AI 返回答案后，点「📥 回贴答案」把答案粘贴回来即可自动填入。
               </p>
+              {showMaterialNote && (
+                <div className="mb-3">
+                  <label className="block text-xs text-slate-500 mb-1">
+                    材料备注（可选）<span className="text-slate-400">— 将并入提示词，如目标性质 / 特定温区 / 合金组分</span>
+                  </label>
+                  <textarea
+                    value={materialNote ?? ""}
+                    onChange={(e) => onMaterialNoteChange?.(e.target.value)}
+                    placeholder="例如：目标验证扩散系数；组分 Al0.3CoCrFeNi；关注 1200 K 高温"
+                    className="w-full h-16 text-xs border border-slate-200 rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-blue-300 resize-none"
+                    spellCheck={false}
+                  />
+                </div>
+              )}
               <textarea
                 readOnly
                 value={prompt}

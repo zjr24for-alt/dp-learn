@@ -175,6 +175,69 @@ export function validateParamJson(jsonText: string): ValidationResult {
     }
   }
 
+  // init_bulk（可选，存在时才检查）
+  if (p.init_bulk !== undefined) {
+    if (!isObj(p.init_bulk)) {
+      ctx.add("error", "init_bulk 必须是一个对象", "init_bulk");
+    } else {
+      const ib = p.init_bulk;
+      const ibPath = "init_bulk";
+      if (!isArr(ib.stages) || ib.stages.length === 0) {
+        ctx.add("error", "init_bulk 缺少必需的 stages（运行阶段）", `${ibPath}.stages`);
+      }
+      if (!isArr(ib.super_cell) || ib.super_cell.length !== 3) {
+        ctx.add("error", "init_bulk 缺少必需的 super_cell（3 元素超胞倍数，如 [2,2,2]）", `${ibPath}.super_cell`);
+      }
+      if (!isArr(ib.scale) || ib.scale.length === 0) {
+        ctx.add("error", "init_bulk 缺少必需的 scale（缩放因子列表）", `${ibPath}.scale`);
+      }
+      if (isArr(ib.elements)) {
+        if (typeMapLen > 0 && ib.elements.length !== typeMapLen) {
+          ctx.add("error", `init_bulk.elements 长度 (${ib.elements.length}) 与 type_map (${typeMapLen}) 不一致`, `${ibPath}.elements`);
+        }
+      } else {
+        ctx.add("error", "init_bulk 缺少必需的 elements", `${ibPath}.elements`);
+      }
+      // from_poscar 互斥逻辑
+      const fromPoscar = toBool(ib.from_poscar);
+      if (fromPoscar === true) {
+        if (typeof ib.from_poscar_path !== "string" || ib.from_poscar_path.trim() === "") {
+          ctx.add("error", "init_bulk.from_poscar=true 时必须提供 from_poscar_path", `${ibPath}.from_poscar_path`);
+        }
+      } else {
+        if (ib.cell_type === undefined) {
+          ctx.add("warning", "init_bulk 未设 from_poscar=true，建议提供 cell_type（初始晶型）", `${ibPath}.cell_type`);
+        }
+        if (ib.latt === undefined) {
+          ctx.add("warning", "init_bulk 未设 from_poscar=true，建议提供 latt（晶格常数 Å）", `${ibPath}.latt`);
+        }
+      }
+      // stages 依赖的 INCAR
+      const stages = isArr(ib.stages) ? ib.stages.map((s) => toNum(s)).filter((s): s is number => s !== null) : [];
+      if (stages.includes(1) && (typeof ib.relax_incar !== "string" || ib.relax_incar.trim() === "")) {
+        ctx.add("warning", "init_bulk stages 含 1（弛豫）但缺少 relax_incar（需独立弛豫 INCAR，与 INCAR_fp 不同）", `${ibPath}.relax_incar`);
+      }
+      if (stages.includes(3) && (typeof ib.md_incar !== "string" || ib.md_incar.trim() === "")) {
+        ctx.add("warning", "init_bulk stages 含 3（AIMD）但缺少 md_incar（需独立 AIMD INCAR，NSW>0）", `${ibPath}.md_incar`);
+      }
+      // 建议显式设置的数值字段
+      for (const f of ["skip_relax", "pert_numb", "pert_box", "pert_atom", "md_nstep", "coll_ndata"] as const) {
+        if (ib[f] === undefined) {
+          ctx.add("warning", `init_bulk 缺少 ${f}（建议显式设置）`, `${ibPath}.${f}`);
+        }
+      }
+      // type_map 与顶层一致
+      if (isArr(ib.type_map) && ib.type_map.length > 0 && (ib.type_map.length !== typeMapLen || ib.type_map.some((t, i) => t !== typeMap[i]))) {
+        ctx.add("error", "init_bulk.type_map 与顶层 type_map 不一致（长度或顺序）", `${ibPath}.type_map`);
+      }
+    }
+  }
+
+  // init_fp_style
+  if (p.init_fp_style !== undefined && typeof p.init_fp_style === "string" && !["vasp", "abacus"].includes(p.init_fp_style.toLowerCase())) {
+    ctx.add("warning", `init_fp_style 非法: "${p.init_fp_style}"（合法值: vasp/abacus）`, "init_fp_style");
+  }
+
   // model_devi_f_trust_lo / hi
   const trustLo = p.model_devi_f_trust_lo;
   const trustHi = p.model_devi_f_trust_hi;
