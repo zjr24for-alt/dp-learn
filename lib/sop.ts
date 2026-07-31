@@ -19,6 +19,15 @@ export interface SopInlineNote {
   code?: string;
 }
 
+/** 文件来源：已有（外部/上游） | 需准备（手动创建/下载） | 产出（本阶段生成） */
+export type SopFileSource = "existing" | "prepare" | "generate";
+
+export interface SopRequiredFile {
+  name: string;
+  purpose: string;
+  source: SopFileSource;
+}
+
 export interface SopStage {
   num: string;
   icon: string;
@@ -31,6 +40,8 @@ export interface SopStage {
   links?: { href: string; label: string }[];
   command?: string;
   inlineNotes?: SopInlineNote[];
+  /** 本阶段需要准备 / 产出的文件清单 */
+  files?: SopRequiredFile[];
 }
 
 export const SOP_STAGES: SopStage[] = [
@@ -57,6 +68,11 @@ export const SOP_STAGES: SopStage[] = [
         code: "# 以 32 原子、截断半径 10 Å 的 SQS 为例（命令随 ATAT 版本略有差异）\nmcsqs -n 32 -rc 10.0\ncorrdump -rnd -c > sqs_pair.out\ncell2vasp < sqs.out > POSCAR",
       },
     ],
+    files: [
+      { name: "CIF / 晶胞参数", purpose: "初始晶体结构来源（数据库/文献），简单体系直接可用", source: "prepare" },
+      { name: "sqs.out（高熵合金）", purpose: "ATAT mcsqs 生成的 SQS 结构，cell2vasp 转 POSCAR", source: "prepare" },
+      { name: "POSCAR", purpose: "本阶段产出：VASP 约定结构文件，Å 单位、无悬挂原子", source: "generate" },
+    ],
   },
   {
     num: "2",
@@ -71,6 +87,13 @@ export const SOP_STAGES: SopStage[] = [
       { slug: "deepmd-training-params", label: "DeePMD 训练参数详解" },
       { slug: "dft-materials-intro", label: "DFT 与材料计算基础（ENCUT/k 点收敛）" },
       { slug: "kpoints-float-bug-fix", label: "KPOINTS Float Bug 修复（dpgen 源码修改）" },
+    ],
+    files: [
+      { name: "param.json", purpose: "DP-GEN 工作流参数（含 init_bulk 段），由配置构建器生成/校验", source: "generate" },
+      { name: "machine.json", purpose: "train / model_devi / fp 三段机器配置，构建器导出", source: "generate" },
+      { name: "INCAR_fp", purpose: "VASP 静态单点标注参数（KSPACING + KGAMMA），构建器生成", source: "generate" },
+      { name: "POTCAR / fp_pp_files", purpose: "赝势文件，顺序需与 type_map 一致（fp_pp_files 指向）", source: "prepare" },
+      { name: "INCAR_rlx / INCAR_md（init_bulk）", purpose: "init_bulk 弛豫与 AIMD 用 INCAR（与 INCAR_fp 不同），需自行准备", source: "prepare" },
     ],
   },
   {
@@ -99,6 +122,12 @@ export const SOP_STAGES: SopStage[] = [
         ],
       },
     ],
+    files: [
+      { name: "POSCAR（阶段 1 产出）", purpose: "init_bulk 的 from_poscar_path 指向的初始结构", source: "prepare" },
+      { name: "param.json + machine.json（阶段 2）", purpose: "运行 dpgen run 的工作流与机器配置", source: "prepare" },
+      { name: "INCAR_rlx / INCAR_md", purpose: "init_bulk 内部弛豫与 AIMD 用 INCAR", source: "prepare" },
+      { name: "data/init 或 init_data/set.xxx", purpose: "本阶段产出：初始数据集（训练用）", source: "generate" },
+    ],
   },
   {
     num: "4",
@@ -114,6 +143,11 @@ export const SOP_STAGES: SopStage[] = [
       { slug: "dpdata-dpgen-integration", label: "dpdata 在 DP-GEN 中的应用（人工并入数据）" },
     ],
     links: [{ href: "/learn/dpgen-troubleshooting", label: "常见错误排查" }],
+    files: [
+      { name: "param.json + machine.json", purpose: "阶段 2 的配置，主动学习迭代全程复用", source: "prepare" },
+      { name: "graph.pb", purpose: "每轮训练冻结的 committee 模型（numb_models 个），供 model_devi 探索", source: "generate" },
+      { name: "iter.XXXXXX/02.fp/ 标注数据", purpose: "FP 标注结果，回流后并入训练集（OUTCAR → set.xxx）", source: "generate" },
+    ],
   },
   {
     num: "5",
@@ -130,6 +164,12 @@ export const SOP_STAGES: SopStage[] = [
       { slug: "ovito-cna-ptm", label: "晶体结构识别：CNA 与 PTM" },
     ],
     links: [{ href: "/cheatsheet", label: "速查：cmd-dp-test · 模型测试" }],
+    files: [
+      { name: "graph.pb", purpose: "冻结势函数模型（阶段 4 产出），dp test 的输入", source: "prepare" },
+      { name: "测试数据集", purpose: "独立于训练集的 DFT/LAMMPS 参考数据，用于 RMSE 评估", source: "prepare" },
+      { name: "lcurve.out", purpose: "训练过程收敛曲线，判断 loss 是否收敛", source: "prepare" },
+      { name: "验证结果", purpose: "弹性常数 / 声子 / 缺陷形成能 / NEB 计算结果", source: "generate" },
+    ],
     inlineNotes: [
       {
         title: "DFT 缺陷形成能（vacancy / interstitial）",

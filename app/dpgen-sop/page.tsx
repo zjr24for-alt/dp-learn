@@ -2,7 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ALL_SOP_SLUGS, SOP_STAGES, type SopStage } from "@/lib/sop";
+import { ALL_SOP_SLUGS, SOP_STAGES, type SopFileSource, type SopStage } from "@/lib/sop";
+
+const FILE_SOURCE_BADGE: Record<SopFileSource, string> = {
+  existing: "bg-slate-100 text-slate-600",
+  prepare: "bg-amber-100 text-amber-700",
+  generate: "bg-green-100 text-green-700",
+};
+
+const FILE_SOURCE_LABEL: Record<SopFileSource, string> = {
+  existing: "已有",
+  prepare: "需准备",
+  generate: "产出",
+};
 import { getCategoryProgress, resetAllProgress } from "@/lib/progress-store";
 import { ProgressBar, ProgressCheck } from "@/components/progress-bar";
 
@@ -55,6 +67,28 @@ function StageCard({ stage, stageProgress, onToggle }: { stage: SopStage; stageP
           {stageProgress.completed}/{stageProgress.total}
         </span>
       </header>
+
+      {/* 所需文件 */}
+      {stage.files && stage.files.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-xs font-semibold text-zinc-500 mb-1.5 flex items-center gap-1">
+            📁 所需文件
+          </h3>
+          <ul className="space-y-1">
+            {stage.files.map((f, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs">
+                <code className="shrink-0 bg-zinc-100 text-zinc-700 px-1.5 py-0.5 rounded font-mono max-w-[45%] truncate" title={f.name}>
+                  {f.name}
+                </code>
+                <span className="flex-1 text-zinc-500 leading-relaxed">{f.purpose}</span>
+                <span className={`shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${FILE_SOURCE_BADGE[f.source]}`}>
+                  {FILE_SOURCE_LABEL[f.source]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* CTA（阶段 2 → 配置构建器） */}
       {stage.cta && (
