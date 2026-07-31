@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/cheatsheet", label: "速查表", icon: "📋" },
   { href: "/papers", label: "论文", icon: "📄" },
   { href: "/config-builder", label: "配置", icon: "🔧" },
+  { href: "/dpgen-sop", label: "流程", icon: "🧭" },
   { href: "/qa", label: "问答", icon: "💬" },
   { href: "/progress", label: "学习进度", icon: "📊" },
 ];
@@ -35,7 +36,7 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`px-2 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-zinc-900 text-white"
                     : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"

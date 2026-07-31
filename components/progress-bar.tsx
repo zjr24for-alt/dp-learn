@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getProgress, toggleProgress as toggleProgressStore } from "@/lib/progress-store";
 
-export function ProgressCheck({ slug }: { slug: string }) {
+export function ProgressCheck({ slug, onToggle }: { slug: string; onToggle?: () => void }) {
   const [checked, setChecked] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -16,6 +16,7 @@ export function ProgressCheck({ slug }: { slug: string }) {
   const handleToggle = () => {
     const entry = toggleProgressStore(slug);
     setChecked(!!entry?.completed);
+    onToggle?.();
   };
 
   if (!mounted) {

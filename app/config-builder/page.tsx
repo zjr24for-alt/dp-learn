@@ -2,24 +2,47 @@
 
 import { useState, useCallback } from "react";
 import { CodeEditor } from "@/components/config-builder/code-editor";
-import { PARAM_SCHEMA } from "@/lib/dpgen-config/param-schema";
-import { MACHINE_SCHEMA, getMachineDefaults } from "@/lib/dpgen-config/machine-schema";
-import { INCAR_SCHEMA, getIncarDefaults, validateIncar } from "@/lib/dpgen-config/incar-schema";
-import type { ParamField } from "@/lib/dpgen-config";
+import { ValidationPanel, type ValidationGroup } from "@/components/config-builder/validation-panel";
+import { AiAssist, type AiAssistMode, type ExtractKind } from "@/components/config-builder/ai-assist";
+import {
+  PARAM_SCHEMA,
+  MACHINE_SCHEMA,
+  getMachineDefaults,
+  INCAR_SCHEMA,
+  getIncarDefaults,
+  validateParamJson,
+  validateMachineSegment,
+  validateIncarDeep,
+  validateLammps,
+  validateSubmitScript,
+  runCrossChecks,
+  buildParamPrompt,
+  buildMachinePrompt,
+  buildIncarPrompt,
+  buildLammpsPrompt,
+  buildSubmitPrompt,
+} from "@/lib/dpgen-config";
+import type { MachineSegment } from "@/lib/dpgen-config";
 
-type ConfigTab = "param" | "machine" | "incar";
-type MachineSegment = "train" | "model_devi" | "fp";
+type ConfigTab = "param" | "machine" | "incar" | "scripts";
+type ScriptTab = "lammps" | "submit";
 
 const TABS: { id: ConfigTab; label: string; desc: string }[] = [
   { id: "param", label: "param.json", desc: "DP-GEN 工作流参数" },
   { id: "machine", label: "machine.json", desc: "DPDispatcher 机器配置" },
   { id: "incar", label: "INCAR_fp", desc: "VASP 第一性原理标注参数" },
+  { id: "scripts", label: "其他脚本", desc: "LAMMPS / 提交脚本检查" },
 ];
 
 const MACHINE_SEGMENTS: { id: MachineSegment; label: string }[] = [
   { id: "train", label: "train" },
   { id: "model_devi", label: "model_devi" },
   { id: "fp", label: "fp" },
+];
+
+const SCRIPT_TABS: { id: ScriptTab; label: string; desc: string }[] = [
+  { id: "lammps", label: "in.lammps", desc: "LAMMPS 输入脚本" },
+  { id: "submit", label: "job.pbs", desc: "作业提交脚本" },
 ];
 
 // Default param.json from their actual project
@@ -113,45 +136,98 @@ const DEFAULT_PARAM = `{
 export default function ConfigBuilderPage() {
   const [activeTab, setActiveTab] = useState<ConfigTab>("param");
   const [machineSegment, setMachineSegment] = useState<MachineSegment>("train");
+  const [scriptTab, setScriptTab] = useState<ScriptTab>("lammps");
 
-  // Config content
+  // Config content（machine 三段分别保存，避免切段丢内容）
   const [paramJson, setParamJson] = useState(DEFAULT_PARAM);
-  const [machineJson, setMachineJson] = useState(getMachineDefaults("train"));
+  const [machineJsons, setMachineJsons] = useState<Record<MachineSegment, string>>({
+    train: getMachineDefaults("train"),
+    model_devi: getMachineDefaults("model_devi"),
+    fp: getMachineDefaults("fp"),
+  });
   const [incarText, setIncarText] = useState(getIncarDefaults());
+  const [lammpsText, setLammpsText] = useState("");
+  const [submitText, setSubmitText] = useState("");
 
-  // Validation results
-  const [validation, setValidation] = useState<{ valid: boolean; message: string } | null>(null);
+  // Validation report
+  const [report, setReport] = useState<ValidationGroup[] | null>(null);
 
-  // Switch machine segment
+  // AI assist modal
+  const [assistOpen, setAssistOpen] = useState(false);
+  const [assistMode, setAssistMode] = useState<AiAssistMode>("prompt");
+  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  // Switch machine segment（不重置内容）
   const switchMachineSegment = useCallback((seg: MachineSegment) => {
     setMachineSegment(seg);
-    setMachineJson(getMachineDefaults(seg));
-    setValidation(null);
+    setReport(null);
   }, []);
 
-  // Validate current tab
+  // 校验当前 Tab
   const handleValidate = useCallback(() => {
-    if (activeTab === "incar") {
-      const result = validateIncar(incarText);
-      setValidation({
-        valid: result.valid,
-        message: result.valid ? "✅ 所有必填参数齐全" : `❌ ${result.errors.join("；")}`,
-      });
+    let group: ValidationGroup;
+    if (activeTab === "param") {
+      group = { id: "param", file: "param.json", result: validateParamJson(paramJson) };
+    } else if (activeTab === "machine") {
+      group = {
+        id: "machine",
+        file: "machine.json",
+        label: machineSegment,
+        result: validateMachineSegment(machineJsons[machineSegment], machineSegment),
+      };
+    } else if (activeTab === "incar") {
+      group = { id: "incar", file: "INCAR_fp", result: validateIncarDeep(incarText) };
+    } else if (scriptTab === "lammps") {
+      group = { id: "lammps", file: "in.lammps", result: validateLammps(lammpsText) };
     } else {
-      const json = activeTab === "param" ? paramJson : machineJson;
-      try {
-        JSON.parse(json);
-        setValidation({ valid: true, message: "✅ JSON 格式正确" });
-      } catch (e: any) {
-        setValidation({ valid: false, message: `❌ JSON 解析错误: ${e.message}` });
-      }
+      group = { id: "submit", file: "job.pbs", result: validateSubmitScript(submitText) };
     }
-  }, [activeTab, paramJson, machineJson, incarText]);
+    setReport([group]);
+  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab]);
 
-  // Download config
+  // 一键检查全部配置
+  const handleValidateAll = useCallback(() => {
+    const groups: ValidationGroup[] = [
+      { id: "param", file: "param.json", result: validateParamJson(paramJson) },
+      { id: "train", file: "machine.json", label: "train", result: validateMachineSegment(machineJsons.train, "train") },
+      { id: "model_devi", file: "machine.json", label: "model_devi", result: validateMachineSegment(machineJsons.model_devi, "model_devi") },
+      { id: "fp", file: "machine.json", label: "fp", result: validateMachineSegment(machineJsons.fp, "fp") },
+      { id: "incar", file: "INCAR_fp", result: validateIncarDeep(incarText) },
+      lammpsText.trim() === ""
+        ? { id: "lammps", file: "in.lammps", skipped: true }
+        : { id: "lammps", file: "in.lammps", result: validateLammps(lammpsText) },
+      submitText.trim() === ""
+        ? { id: "submit", file: "作业提交脚本", skipped: true }
+        : { id: "submit", file: "作业提交脚本", result: validateSubmitScript(submitText) },
+      {
+        id: "cross",
+        file: "跨配置一致性",
+        result: runCrossChecks({ paramJson, machineJsonBySegment: machineJsons, incarText }),
+      },
+    ];
+    setReport(groups);
+  }, [paramJson, machineJsons, incarText, lammpsText, submitText]);
+
+  // 导出当前配置
   const handleDownload = useCallback(() => {
-    const content = activeTab === "param" ? paramJson : activeTab === "machine" ? machineJson : incarText;
-    const filename = activeTab === "param" ? "param.json" : activeTab === "machine" ? "machine.json" : "INCAR_fp";
+    let content: string;
+    let filename: string;
+    if (activeTab === "param") {
+      content = paramJson;
+      filename = "param.json";
+    } else if (activeTab === "machine") {
+      content = machineJsons[machineSegment];
+      filename = "machine.json";
+    } else if (activeTab === "incar") {
+      content = incarText;
+      filename = "INCAR_fp";
+    } else if (scriptTab === "lammps") {
+      content = lammpsText;
+      filename = "in.lammps";
+    } else {
+      content = submitText;
+      filename = "job.pbs";
+    }
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -159,15 +235,66 @@ export default function ConfigBuilderPage() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  }, [activeTab, paramJson, machineJson, incarText]);
+  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab]);
 
-  // Get schema for current tab
-  const getSchema = (): ParamField[] => {
-    if (activeTab === "param") return PARAM_SCHEMA;
-    if (activeTab === "machine") return MACHINE_SCHEMA[machineSegment] || [];
-    if (activeTab === "incar") return INCAR_SCHEMA;
-    return [];
+  const getExtractKind = (): ExtractKind => {
+    if (activeTab === "incar") return "incar";
+    if (activeTab === "scripts") return "text";
+    return "json";
   };
+
+  const getAssistTitle = () => {
+    const base =
+      activeTab === "param"
+        ? "param.json"
+        : activeTab === "machine"
+        ? `machine.json · ${machineSegment}`
+        : activeTab === "incar"
+        ? "INCAR_fp"
+        : scriptTab === "lammps"
+        ? "in.lammps"
+        : "job.pbs";
+    return `${base} — ${assistMode === "prompt" ? "AI 提示词" : "回贴答案解析"}`;
+  };
+
+  const buildPrompt = useCallback((): string => {
+    if (activeTab === "param") return buildParamPrompt(paramJson);
+    if (activeTab === "machine") return buildMachinePrompt(machineSegment, machineJsons[machineSegment]);
+    if (activeTab === "incar") return buildIncarPrompt(incarText);
+    return scriptTab === "lammps" ? buildLammpsPrompt(lammpsText) : buildSubmitPrompt(submitText);
+  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab]);
+
+  const openAssist = useCallback((mode: AiAssistMode) => {
+    setAssistMode(mode);
+    setAssistOpen(true);
+  }, []);
+
+  const handleAssistFill = useCallback(
+    (value: string, ok: boolean, message: string) => {
+      if (!ok) return; // 失败时留在模态里显示错误
+      if (activeTab === "param") setParamJson(value);
+      else if (activeTab === "machine") {
+        setMachineJsons((prev) => ({ ...prev, [machineSegment]: value }));
+      } else if (activeTab === "incar") setIncarText(value);
+      else if (scriptTab === "lammps") setLammpsText(value);
+      else setSubmitText(value);
+      setAssistOpen(false);
+      setToast({ ok: true, msg: message });
+      window.setTimeout(() => setToast(null), 3000);
+    },
+    [activeTab, machineSegment, scriptTab]
+  );
+
+  const downloadFilename =
+    activeTab === "param"
+      ? "param.json"
+      : activeTab === "machine"
+      ? "machine.json"
+      : activeTab === "incar"
+      ? "INCAR_fp"
+      : scriptTab === "lammps"
+      ? "in.lammps"
+      : "job.pbs";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -188,7 +315,7 @@ export default function ConfigBuilderPage() {
                 key={tab.id}
                 onClick={() => {
                   setActiveTab(tab.id);
-                  setValidation(null);
+                  setReport(null);
                 }}
                 className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
@@ -228,6 +355,33 @@ export default function ConfigBuilderPage() {
         </div>
       )}
 
+      {/* Scripts subtabs */}
+      {activeTab === "scripts" && (
+        <div className="bg-white border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-4 py-3">
+              <span className="text-xs text-slate-400 self-center">脚本类型:</span>
+              {SCRIPT_TABS.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    setScriptTab(s.id);
+                    setReport(null);
+                  }}
+                  className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
+                    scriptTab === s.id
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  }`}
+                >
+                  <code>{s.label}</code>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Editor */}
@@ -243,8 +397,8 @@ export default function ConfigBuilderPage() {
           )}
           {activeTab === "machine" && (
             <CodeEditor
-              value={machineJson}
-              onChange={setMachineJson}
+              value={machineJsons[machineSegment]}
+              onChange={(v) => setMachineJsons((prev) => ({ ...prev, [machineSegment]: v }))}
               schema={MACHINE_SCHEMA[machineSegment] || []}
               language="json"
               title={`machine.json — ${machineSegment} 段配置`}
@@ -259,52 +413,93 @@ export default function ConfigBuilderPage() {
               title="INCAR_fp — VASP 第一性原理标注"
             />
           )}
+          {activeTab === "scripts" && scriptTab === "lammps" && (
+            <CodeEditor
+              value={lammpsText}
+              onChange={setLammpsText}
+              schema={[]}
+              language="text"
+              title="in.lammps — LAMMPS 输入脚本"
+            />
+          )}
+          {activeTab === "scripts" && scriptTab === "submit" && (
+            <CodeEditor
+              value={submitText}
+              onChange={setSubmitText}
+              schema={[]}
+              language="text"
+              title="job.pbs — 作业提交脚本"
+            />
+          )}
         </div>
 
-        {/* Bottom bar: Validate + Download */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Bottom bar */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleValidate}
               className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors"
             >
               ✓ 校验
             </button>
-            {validation && (
-              <span
-                className={`text-sm ${validation.valid ? "text-green-600" : "text-red-500"}`}
-              >
-                {validation.message}
-              </span>
-            )}
+            <button
+              onClick={handleValidateAll}
+              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              ⚡ 一键检查全部
+            </button>
+            <button
+              onClick={() => openAssist("prompt")}
+              className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors"
+            >
+              🤖 AI 提示词
+            </button>
+            <button
+              onClick={() => openAssist("paste")}
+              className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors"
+            >
+              📥 回贴答案
+            </button>
+            {toast && <span className={`text-sm ${toast.ok ? "text-green-600" : "text-red-500"}`}>{toast.msg}</span>}
           </div>
           <button
             onClick={handleDownload}
             className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            ⬇ 导出{" "}
-            {activeTab === "param"
-              ? "param.json"
-              : activeTab === "machine"
-              ? "machine.json"
-              : "INCAR_fp"}
+            ⬇ 导出 {downloadFilename}
           </button>
         </div>
+
+        {/* Validation report */}
+        {report && <ValidationPanel groups={report} />}
 
         {/* Tips */}
         <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
           <h4 className="text-xs font-semibold text-blue-700 mb-1">💡 使用提示</h4>
           <ul className="text-xs text-blue-600 space-y-0.5">
             <li>• 选中左侧 JSON 中的参数名称 → 右侧自动显示其文档说明</li>
-            <li>• 右侧搜索框可直接搜索参数名或关键词</li>
-            <li>• 编辑后点击"校验"检查格式，确认无误后点"导出"下载</li>
-            <li>• 导出的配置文件直接覆盖到 <code className="bg-blue-100 px-1 rounded">~/TiC_aimd_64/dpgen/</code> 即可使用</li>
-            {activeTab === "machine" && (
-              <li>• machine.json 有三个段（train / model_devi / fp），需分别编辑</li>
-            )}
+            <li>• 「✓ 校验」深度检查当前配置的语义问题；「⚡ 一键检查全部」检查 param + machine 三段 + INCAR + 跨配置一致性</li>
+            <li>
+              • 「🤖 AI 提示词」生成提问提示词，复制到 matchat 问标准参数（文献/官方文档）；AI 返回后「📥 回贴答案」
+              粘贴回来自动解析填入
+            </li>
+            <li>• 确认无误后点「⬇ 导出」下载，直接覆盖到 <code className="bg-blue-100 px-1 rounded">~/TiC_aimd_64/dpgen/</code> 即可使用</li>
+            {activeTab === "machine" && <li>• machine.json 有三个段（train / model_devi / fp），需分别编辑，切段不会丢内容</li>}
+            {activeTab === "scripts" && <li>• 两个脚本框默认为空，「一键检查全部」会自动跳过未填写项</li>}
           </ul>
         </div>
       </div>
+
+      {/* AI Assist modal */}
+      <AiAssist
+        open={assistOpen}
+        onClose={() => setAssistOpen(false)}
+        mode={assistMode}
+        title={getAssistTitle()}
+        prompt={buildPrompt()}
+        extractKind={getExtractKind()}
+        onFill={handleAssistFill}
+      />
     </div>
   );
 }

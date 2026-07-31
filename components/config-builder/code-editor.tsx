@@ -7,7 +7,7 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   schema: ParamField[];
-  language: "json" | "incar";
+  language: "json" | "incar" | "text";
   title: string;
 }
 
@@ -18,7 +18,7 @@ interface SchemaDocPanelProps {
   onParamClick: (key: string) => void;
 }
 
-function SchemaDocPanel({ schema, flatSchema, searchTerm, onParamClick }: SchemaDocPanelProps) {
+function SchemaDocPanel({ flatSchema, searchTerm, onParamClick }: SchemaDocPanelProps) {
   const filtered = useMemo(() => {
     if (!searchTerm) return [];
     const lower = searchTerm.toLowerCase();
@@ -116,6 +116,7 @@ export function CodeEditor({ value, onChange, schema, language, title }: CodeEdi
   const [copied, setCopied] = useState(false);
 
   const flatSchema = useMemo(() => flattenSchema(schema), [schema]);
+  const docsEnabled = language !== "text";
 
   // Handle text selection to detect parameter names
   const handleSelect = useCallback(() => {
@@ -191,23 +192,25 @@ export function CodeEditor({ value, onChange, schema, language, title }: CodeEdi
         </div>
       </div>
 
-      {/* Right: Documentation panel - sticky */}
-      <div ref={docPanelRef} className="lg:w-72 xl:w-80 shrink-0">
-        <div className="sticky top-4">
-          <div className="mb-2">
-            <input
-              type="text"
-              value={docSearch}
-              onChange={(e) => setDocSearch(e.target.value)}
-              placeholder="搜索参数..."
-              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-blue-300"
-            />
-          </div>
-          <div className="overflow-y-auto max-h-[70vh] pr-1">
-            <SchemaDocPanel schema={schema} flatSchema={flatSchema} searchTerm={docSearch} onParamClick={setDocSearch} />
+      {/* Right: Documentation panel - sticky (text 模式不渲染) */}
+      {docsEnabled && (
+        <div ref={docPanelRef} className="lg:w-72 xl:w-80 shrink-0">
+          <div className="sticky top-4">
+            <div className="mb-2">
+              <input
+                type="text"
+                value={docSearch}
+                onChange={(e) => setDocSearch(e.target.value)}
+                placeholder="搜索参数..."
+                className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-blue-300"
+              />
+            </div>
+            <div className="overflow-y-auto max-h-[70vh] pr-1">
+              <SchemaDocPanel schema={schema} flatSchema={flatSchema} searchTerm={docSearch} onParamClick={setDocSearch} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -219,8 +222,8 @@ export function validateJson(json: string): { valid: boolean; errors: string[] }
     if (typeof parsed !== "object" || parsed === null) {
       errors.push("JSON 必须是一个对象或数组");
     }
-  } catch (e: any) {
-    errors.push(`JSON 语法错误: ${e.message}`);
+  } catch (e) {
+    errors.push(`JSON 语法错误: ${e instanceof Error ? e.message : String(e)}`);
   }
   return { valid: errors.length === 0, errors };
 }

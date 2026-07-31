@@ -1,5 +1,7 @@
 import type { ParamField } from "./param-schema";
 
+export type MachineSegment = "train" | "model_devi" | "fp";
+
 export const MACHINE_SCHEMA: Record<string, ParamField[]> = {
   train: [
     {
