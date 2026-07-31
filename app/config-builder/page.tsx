@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { CodeEditor } from "@/components/config-builder/code-editor";
 import { ValidationPanel, type ValidationGroup } from "@/components/config-builder/validation-panel";
 import { AiAssist, type AiAssistMode, type ExtractKind } from "@/components/config-builder/ai-assist";
+import { MaterialSwitch } from "@/components/config-builder/material-switch";
 import {
   PARAM_SCHEMA,
   MACHINE_SCHEMA,
@@ -44,6 +45,29 @@ const SCRIPT_TABS: { id: ScriptTab; label: string; desc: string }[] = [
   { id: "lammps", label: "in.lammps", desc: "LAMMPS 输入脚本" },
   { id: "submit", label: "job.pbs", desc: "作业提交脚本" },
 ];
+
+// 配置持久化存储键（进度账本之外的一套独立存档）
+const CONFIG_STORAGE_KEY = "dp-learn-config-builder";
+
+/** 合并 machine 三段为一个完整 DPDispatcher 数组；任一段 JSON 无效则返回错误 */
+function mergeMachineSegments(
+  jsons: Record<MachineSegment, string>
+): { ok: true; json: string } | { ok: false; error: string } {
+  const parts: unknown[] = [];
+  const segments: MachineSegment[] = ["train", "model_devi", "fp"];
+  for (const seg of segments) {
+    try {
+      const parsed = JSON.parse(jsons[seg]);
+      if (!Array.isArray(parsed)) {
+        return { ok: false, error: `machine.${seg} 段不是数组格式` };
+      }
+      parts.push(...parsed);
+    } catch {
+      return { ok: false, error: `machine.${seg} 段 JSON 语法错误` };
+    }
+  }
+  return { ok: true, json: JSON.stringify(parts, null, 2) };
+}
 
 // Default param.json from their actual project
 const DEFAULT_PARAM = `{
@@ -176,6 +200,92 @@ export default function ConfigBuilderPage() {
   const [assistMode, setAssistMode] = useState<AiAssistMode>("prompt");
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
   const [materialNote, setMaterialNote] = useState("");
+  const [materialOpen, setMaterialOpen] = useState(false);
+
+  // 配置持久化：挂载时从 localStorage 恢复（SSR 首渲用默认值避免 hydration 不一致）
+  const [hydrated, setHydrated] = useState(false);
+  const saveTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- 既有 hydration 安全模式：SSR 首渲用默认值，mount 后恢复 localStorage 存档 */
+    try {
+      const raw = localStorage.getItem(CONFIG_STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw) as Record<string, unknown>;
+        if (typeof saved.paramJson === "string") setParamJson(saved.paramJson);
+        if (saved.machineJsons && typeof saved.machineJsons === "object") {
+          const m = saved.machineJsons as Record<string, unknown>;
+          setMachineJsons((prev) => ({
+            ...prev,
+            ...(typeof m.train === "string" ? { train: m.train } : {}),
+            ...(typeof m.model_devi === "string" ? { model_devi: m.model_devi } : {}),
+            ...(typeof m.fp === "string" ? { fp: m.fp } : {}),
+          }));
+        }
+        if (typeof saved.incarText === "string") setIncarText(saved.incarText);
+        if (typeof saved.lammpsText === "string") setLammpsText(saved.lammpsText);
+        if (typeof saved.submitText === "string") setSubmitText(saved.submitText);
+      }
+    } catch {
+      // 存档损坏则忽略，用默认值
+    }
+    setHydrated(true);
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  // 防抖持久化（任何字段变化 400ms 后写入）
+  useEffect(() => {
+    if (!hydrated) return;
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      try {
+        localStorage.setItem(
+          CONFIG_STORAGE_KEY,
+          JSON.stringify({ paramJson, machineJsons, incarText, lammpsText, submitText })
+        );
+      } catch {
+        // localStorage 满/不可用时静默失败
+      }
+    }, 400);
+    return () => {
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    };
+  }, [paramJson, machineJsons, incarText, lammpsText, submitText, hydrated]);
+
+  // 短暂提示（3s 后自动消失）
+  const showToast = useCallback((ok: boolean, msg: string) => {
+    setToast({ ok, msg });
+    window.setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  // 恢复默认配置：清空本地存档 + 重置全部字段
+  const handleResetDefaults = useCallback(() => {
+    if (!window.confirm("确认恢复默认配置？当前所有编辑内容（param / machine / INCAR / 脚本）将被清除。")) return;
+    localStorage.removeItem(CONFIG_STORAGE_KEY);
+    setParamJson(DEFAULT_PARAM);
+    setMachineJsons({
+      train: getMachineDefaults("train"),
+      model_devi: getMachineDefaults("model_devi"),
+      fp: getMachineDefaults("fp"),
+    });
+    setIncarText(getIncarDefaults());
+    setLammpsText("");
+    setSubmitText("");
+    setReport(null);
+    showToast(true, "已恢复默认配置");
+  }, [showToast]);
+
+  // 切换材料：写入新 param.json，并同步材料备注（供 AI 提示词使用）
+  const handleMaterialApply = useCallback(
+    (newParam: string, compoundLabel: string) => {
+      setParamJson(newParam);
+      setMaterialNote(compoundLabel);
+      setReport(null);
+      setMaterialOpen(false);
+      showToast(true, `已切换到 ${compoundLabel}`);
+    },
+    [showToast]
+  );
 
   // Switch machine segment（不重置内容）
   const switchMachineSegment = useCallback((seg: MachineSegment) => {
@@ -236,7 +346,13 @@ export default function ConfigBuilderPage() {
       content = paramJson;
       filename = "param.json";
     } else if (activeTab === "machine") {
-      content = machineJsons[machineSegment];
+      // 导出完整 machine.json：三段合并为一个 DPDispatcher 数组，可直接 dpgen run 使用
+      const merged = mergeMachineSegments(machineJsons);
+      if (!merged.ok) {
+        showToast(false, merged.error + "，未导出");
+        return;
+      }
+      content = merged.json;
       filename = "machine.json";
     } else if (activeTab === "incar") {
       content = incarText;
@@ -255,7 +371,7 @@ export default function ConfigBuilderPage() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  }, [activeTab, paramJson, machineJsons, machineSegment, incarText, lammpsText, submitText, scriptTab]);
+  }, [activeTab, paramJson, machineJsons, incarText, lammpsText, submitText, scriptTab, showToast]);
 
   const getExtractKind = (): ExtractKind => {
     if (activeTab === "incar") return "incar";
@@ -305,10 +421,9 @@ export default function ConfigBuilderPage() {
       else if (scriptTab === "lammps") setLammpsText(value);
       else setSubmitText(value);
       setAssistOpen(false);
-      setToast({ ok: true, msg: message });
-      window.setTimeout(() => setToast(null), 3000);
+      showToast(true, message);
     },
-    [activeTab, machineSegment, scriptTab]
+    [activeTab, machineSegment, scriptTab, showToast]
   );
 
   const downloadFilename =
@@ -474,6 +589,14 @@ export default function ConfigBuilderPage() {
             >
               ⚡ 一键检查全部
             </button>
+            {activeTab === "param" && (
+              <button
+                onClick={() => setMaterialOpen(true)}
+                className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors"
+              >
+                🔄 切换材料
+              </button>
+            )}
             <button
               onClick={() => openAssist("prompt")}
               className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-colors"
@@ -488,12 +611,20 @@ export default function ConfigBuilderPage() {
             </button>
             {toast && <span className={`text-sm ${toast.ok ? "text-green-600" : "text-red-500"}`}>{toast.msg}</span>}
           </div>
-          <button
-            onClick={handleDownload}
-            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            ⬇ 导出 {downloadFilename}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleResetDefaults}
+              className="px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-500 transition-colors"
+            >
+              🗑 重置默认
+            </button>
+            <button
+              onClick={handleDownload}
+              className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              ⬇ 导出 {downloadFilename}
+            </button>
+          </div>
         </div>
 
         {/* Validation report */}
@@ -509,6 +640,8 @@ export default function ConfigBuilderPage() {
               • 「🤖 AI 提示词」生成提问提示词，复制到 matchat 问标准参数（文献/官方文档）；AI 返回后「📥 回贴答案」
               粘贴回来自动解析填入
             </li>
+            <li>• 配置自动保存在浏览器本地（防抖写入），刷新页面不丢失；「🗑 重置默认」可一键恢复出厂配置</li>
+            <li>• machine Tab 的「⬇ 导出」会合并 train / model_devi / fp 三段为一个完整 machine.json，可直接 <code className="bg-blue-100 px-1 rounded">dpgen run</code> 使用</li>
             <li>• 确认无误后点「⬇ 导出」下载，直接覆盖到 <code className="bg-blue-100 px-1 rounded">~/TiC_aimd_64/dpgen/</code> 即可使用</li>
             {activeTab === "machine" && <li>• machine.json 有三个段（train / model_devi / fp），需分别编辑，切段不会丢内容</li>}
             {activeTab === "scripts" && <li>• 两个脚本框默认为空，「一键检查全部」会自动跳过未填写项</li>}
@@ -528,6 +661,14 @@ export default function ConfigBuilderPage() {
         materialNote={materialNote}
         onMaterialNoteChange={setMaterialNote}
         showMaterialNote={assistMode === "prompt" && materialNoteRelevant}
+      />
+
+      {/* 切换材料 modal */}
+      <MaterialSwitch
+        open={materialOpen}
+        onClose={() => setMaterialOpen(false)}
+        currentParam={paramJson}
+        onApply={handleMaterialApply}
       />
     </div>
   );

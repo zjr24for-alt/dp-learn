@@ -1,7 +1,7 @@
 import { buildAllSearchIndex } from "@/content/index";
 import { NextResponse } from "next/server";
 
-/** 静���生成搜索索引 JSON（CDN 可缓存） */
+/** 静态生成搜索索引 JSON（CDN 可缓存） */
 export const dynamic = "force-static";
 
 export async function GET() {

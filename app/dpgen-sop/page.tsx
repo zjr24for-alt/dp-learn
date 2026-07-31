@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ALL_SOP_SLUGS, SOP_STAGES, type SopStage } from "@/lib/sop";
-import { getCategoryProgress } from "@/lib/progress-store";
+import { getCategoryProgress, resetAllProgress } from "@/lib/progress-store";
 import { ProgressBar, ProgressCheck } from "@/components/progress-bar";
 
 interface StageProgress {
@@ -145,17 +145,42 @@ export default function DpgenSopPage() {
     refresh();
   }, [refresh]);
 
+  // 新项目重新开始：清空全部勾选进度（与 /progress 共享账本）
+  const handleReset = useCallback(() => {
+    if (!window.confirm("确认清空本 SOP 全部进度？这也会同时清空「学习进度」页里这些文章的勾选状态。")) return;
+    resetAllProgress();
+    refresh();
+  }, [refresh]);
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-zinc-900">🧭 DP-GEN 标准流程（SOP）</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        拿到新材料 / 新势函数时的固定操作路线：建模 → DFT 参数准备 → init_bulk → 主动学习 → 质量验证。
-        按阶段勾选进度，与「学习进度」共享同一份本地账本。
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-900">🧭 DP-GEN 标准流程（SOP）</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            拿到新材料 / 新势函数时的固定操作路线：建模 → DFT 参数准备 → init_bulk → 主动学习 → 质量验证。
+            按阶段勾选进度，与「学习进度」共享同一份本地账本。
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="shrink-0 px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+        >
+          🔁 新项目重新开始
+        </button>
+      </div>
 
       {/* 总进度 */}
       <div className="mt-6 mb-8 bg-white border border-zinc-200 rounded-xl p-6">
-        <h2 className="text-sm font-semibold text-zinc-700 mb-2">总进度</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold text-zinc-700">总进度</h2>
+          {mounted && progress.total.total > 0 && (
+            <span className="text-xs text-zinc-400">
+              {progress.total.completed}/{progress.total.total}
+            </span>
+          )}
+        </div>
         <ProgressBar
           completed={mounted ? progress.total.completed : 0}
           total={progress.total.total}

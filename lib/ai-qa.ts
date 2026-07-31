@@ -5,9 +5,26 @@
 
 const DEEPSEEK_API = "/api/ai";
 
+/** localStorage 中 API Key 的存储键名（统一连字符版本） */
+const API_KEY_STORE = "dp-learn-deepseek-key";
+/** 旧版论文检索页使用的下划线 key，读取时一次性迁移 */
+const LEGACY_API_KEY_STORE = "dp_learn_deepseek_key";
+
 export function getApiKey(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("dp-learn-deepseek-key");
+  const key = localStorage.getItem(API_KEY_STORE);
+  if (key) return key;
+  // 兼容旧版：若旧 key 存在则清洗后迁移，避免用户重新配置
+  const legacy = localStorage.getItem(LEGACY_API_KEY_STORE);
+  if (legacy) {
+    const clean = legacy.trim().replace(/[^\x20-\x7E]/g, "");
+    if (clean) {
+      localStorage.setItem(API_KEY_STORE, clean);
+      localStorage.removeItem(LEGACY_API_KEY_STORE);
+      return clean;
+    }
+  }
+  return null;
 }
 
 export function setApiKey(key: string): boolean {
@@ -15,12 +32,12 @@ export function setApiKey(key: string): boolean {
   // 否则浏览器 fetch 会拒绝非 ISO-8859-1 的 header 值
   const clean = key.trim().replace(/[^\x20-\x7E]/g, "");
   if (!clean) return false; // 无效 key，拒绝存储
-  localStorage.setItem("dp-learn-deepseek-key", clean);
+  localStorage.setItem(API_KEY_STORE, clean);
   return true;
 }
 
 export function clearApiKey(): void {
-  localStorage.removeItem("dp-learn-deepseek-key");
+  localStorage.removeItem(API_KEY_STORE);
 }
 
 export function hasApiKey(): boolean {
@@ -129,16 +146,6 @@ export async function askAI(
 - ASE：Python 原子模拟环境，结构构建(bulk/surface/supercell)、计算器对接(VASP/GPAW)、弛豫(BFGS)
 - Phonopy：声子谱计算（冻结声子法），force constants → 热力学性质
 - pymatgen：材料分析库，能带结构、DOS、相图、缺陷分析
-
-### VASP 计算
-- INCAR 关键标签：ENCUT（截断能，≥1.3×ENMAX）、ISMEAR（半导体=0，金属=1）、EDIFF/EDIFFG
-- KPOINTS：KSPACING 或显式 KPOINTS 文件，DP-GEN 有 KPOINTS float bug（需源码补丁）
-- POTCAR：元素顺序必须与 POSCAR 一致
-
-### LAMMPS + DeePMD
-- 必须用 units metal（DeePMD 输出 eV/Å/fs）
-- pair_style deepmd frozen_model.pb
-- 常见错误：atom types mismatch、segfault（TF/PT 版本不一致）
 
 ## 回答规范
 ### 知识来源标记

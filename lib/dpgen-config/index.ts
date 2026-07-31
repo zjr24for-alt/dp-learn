@@ -24,3 +24,7 @@ export {
 
 export { extractJsonFromText, extractIncarFromText, extractPlainText } from "./extract";
 export type { ExtractJsonResult } from "./extract";
+
+export { ELEMENT_MASSES, elementMass, normalizeElementSymbol, parseElements } from "./periodic-table";
+export { applyMaterialToParam, extractPathsFromParam, extractTypeMap } from "./material";
+export type { MaterialPathInputs, ApplyMaterialResult, ExtractedPaths } from "./material";

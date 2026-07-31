@@ -12,11 +12,12 @@ import {
   type SearchProgress,
 } from "@/lib/arxiv";
 import { renderMarkdown } from "@/lib/render-markdown";
+import { getApiKey, setApiKey, clearApiKey, hasApiKey } from "@/lib/ai-qa";
 
 // ====== AI 调用工具 ======
 
 async function callAI(messages: { role: string; content: string }[]): Promise<string> {
-  const apiKey = localStorage.getItem("dp_learn_deepseek_key");
+  const apiKey = getApiKey();
   if (!apiKey) throw new Error("未配置 API Key");
 
   const res = await fetch("/api/ai", {
@@ -131,7 +132,7 @@ export function PaperChat() {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setKeyConfigured(!!localStorage.getItem("dp_learn_deepseek_key"));
+    setKeyConfigured(hasApiKey());
   }, []);
 
   useEffect(() => {
@@ -139,16 +140,18 @@ export function PaperChat() {
   }, [messages, progress]);
 
   const handleSaveKey = () => {
-    if (apiKeyInput.trim()) {
-      localStorage.setItem("dp_learn_deepseek_key", apiKeyInput.trim());
+    if (setApiKey(apiKeyInput)) {
       setKeyConfigured(true);
       setShowKeyInput(false);
       setApiKeyInput("");
+    } else {
+      setApiKeyInput("");
+      // 无效 key（如全角字符/空串）会被 setApiKey 拒绝，placeholder 会提示重新输入
     }
   };
 
   const handleClearKey = () => {
-    localStorage.removeItem("dp_learn_deepseek_key");
+    clearApiKey();
     setKeyConfigured(false);
   };
 
