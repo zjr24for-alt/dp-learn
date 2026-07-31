@@ -547,4 +547,212 @@ plt.tight_layout()
     tags: ["声子", "Phonopy", "热力学", "有限位移", "晶格动力学", "自由能"],
     sourceFiles: ["phonon-thermodynamics.md"],
   },
+  {
+    slug: "defect-formation-energy",
+    title: "DFT 缺陷形成能计算（vacancy / interstitial / 带电缺陷）",
+    category: "comp-materials",
+    summary: "点缺陷形成能完整计算流程：超胞构建、化学势取法、带电缺陷修正（Freysoldt），以及与机器学习势的对比要点",
+    content: `# DFT 缺陷形成能计算
+
+## 核心公式
+
+\`\`\`text
+ΔE_f = E_def − E_perfect + Σ n_i·μ_i + q(E_VBM + ε_F) + E_corr
+\`\`\`
+
+各项含义：
+- **E_def / E_perfect**：含缺陷超胞与完美超胞的总能
+- **n_i**：缺陷源的移除/添加原子数（n_i > 0 表示移除原子）
+- **μ_i**：缺陷源的化学势（取稳定相平衡下的值）
+- **q**：电荷态（0 表示中性缺陷）
+- **E_VBM**：完美晶体的价带顶
+- **ε_F**：费米能级（取 0 到带隙之间扫描）
+- **E_corr**：有限尺寸修正（带电缺陷时不可忽略）
+
+## 完整计算流程
+
+### 1. 构建足够大的超胞
+
+\`\`\`text
+要求：≥ 2×2×2，通常 64~128 原子
+原因：抑制周期性镜像作用，否则缺陷间相互作用污染形成能
+判断：继续扩胞看形成能是否收敛（变化 < 0.05 eV 即可）
+\`\`\`
+
+### 2. 同参数优化完美与含缺陷超胞
+
+- **完全一致的参数**：ENCUT、KPOINTS、POTCAR、ISMEAR 必须相同
+- 只优化原子位置，晶胞形状固定（保持体积接近完美晶体）
+- 带电缺陷：用 \`NELECT\` 加减电子数实现电荷态
+
+### 3. 化学势取法（最关键也最容易错）
+
+\`\`\`text
+二元体系 AB：
+  μ_A ≤ μ_A(bulk)          （元素不能比单质更富）
+  μ_A + μ_B = μ_AB(bulk)   （稳定化合物条件）
+
+富 A 端点：μ_A = μ_A(bulk)，μ_B = μ_AB(bulk) − μ_A(bulk)
+富 B 端点：μ_B = μ_B(bulk)，μ_A = μ_AB(bulk) − μ_B(bulk)
+\`\`\`
+
+**要点**：分别取富 A / 富 B 两个端点，绘制缺陷相图（形成能 vs 化学势），而不是只算一个点。
+
+### 4. 带电缺陷修正
+
+带电缺陷因周期性镜像引入长程库仑作用，需要修正：
+
+| 方法 | 工具 | 适用 |
+|------|------|------|
+| Freysoldt 修正（DFT） | sxdefectalign | 带电缺陷，推荐 |
+| 经验修正（Makov-Payne） | 手算 | 粗略估算 |
+| 增大超胞 | 重新计算 | 最稳妥但最贵 |
+
+### 5. 相图绘制
+
+\`\`\`text
+横轴：费米能级 ε_F（0 → E_g）
+纵轴：形成能 ΔE_f
+每条线：一个缺陷在某个电荷态下的形成能
+稳定区：形成能最低的电荷态/缺陷类型
+\`\`\`
+
+## 与机器学习势（deepmd）对比的要点
+
+1. **超胞尺寸与 k 点完全一致**，否则误差不可比
+2. deepmd 势的缺陷形成能应落在 DFT 参考值 0.1 eV 量级内
+3. 缺陷结构需要先充分弛豫——未弛豫的缺陷形成能偏高
+4. 对深能级缺陷，比较多个电荷态的形成能曲线，而非只看中性
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 形成能不收敛 | 超胞不够大，或弛豫不充分 |
+| 富 A/富 B 端点结果差异大 | 正常，画出相图看两端 |
+| 带电缺陷 E_corr 很大 | 必须做 Freysoldt 修正，经验修正常不够 |
+| 与实验不符 | 检查化学势是否对应稳定相（考虑相图区间） |
+`,
+    tags: ["缺陷", "形成能", "DFT", "VASP", "Freysoldt", "化学势"],
+    sourceFiles: ["defect-formation-energy.md"],
+  },
+  {
+    slug: "neb-migration-barrier",
+    title: "NEB / CI-NEB 迁移能垒计算",
+    category: "comp-materials",
+    summary: "用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认",
+    content: `# NEB / CI-NEB 迁移能垒计算
+
+## 什么场景用 NEB
+
+| 场景 | 说明 |
+|------|------|
+| 原子扩散 / 迁移 | 杂质、间隙原子、空位跳跃 |
+| 表面反应 | 吸附物迁移、脱附 |
+| 位错运动 / 相变 | 大尺度构型转变 |
+| **与 ML 势对比** | 验证 deepmd 势的迁移能垒精度 |
+
+NEB（Nudged Elastic Band）找**最小能量路径（MEP）**上的鞍点，给出迁移能垒 E_a。
+
+## 完整工作流
+
+### 1. 优化初态与末态
+
+\`\`\`text
+要求：
+- 初态：迁移前最稳定结构（含缺陷/杂质的超胞）
+- 末态：迁移后最稳定结构
+- 都用高精度参数优化到力收敛
+\`\`\`
+
+### 2. 线性插值生成初始路径
+
+\`\`\`python
+# ASE 线性插值：初态→末态之间生成 N-2 个 image
+from ase.neb import NEB
+from ase.io import read, write
+from ase.optimize import BFGS
+
+initial = read('initial.vasp')
+final   = read('final.vasp')
+
+images = [initial.copy() for _ in range(7)]  # 7 个 image（含端点）
+images[-1] = final
+neb = NEB(images, climb=True, k=0.5)  # climb=True = CI-NEB
+neb.interpolate()  # 线性插值初始路径
+
+for img in images:
+    write(f'img_{images.index(img)}.vasp', img)
+\`\`\`
+
+**image 数量**：通常 7~11 个（含端点 2 个 + 中间 5~9 个）。太少路径粗糙，太多每个都要算。
+
+### 3. 执行 NEB 计算
+
+**VTST 版 VASP（推荐，能垒精度高）：**
+
+\`\`\`incar
+# INCAR 关键项
+ICHAIN = 0        # NEB 方法
+LCLIMB = .TRUE.   # CI-NEB（找鞍点）
+IMAGES = 5        # 中间 image 数（需编译带 VTST 的 VASP）
+SPRING = -5.0     # 弹性常数
+LNEBCELL = .FALSE.
+EDIFFG = -0.02    # 力收敛判据
+IBRION = 1        # 需要 NEB 专用优化器
+ISYM = 0          # NEB 关闭对称性
+\`\`\`
+
+**LAMMPS neb 命令（deepmd 势可选）：**
+
+\`\`\`lammps
+# 用 LAMMPS 的 neb 命令（VASP 之外的另一条路）
+# 初始路径由多个 data 文件给出，配合 fix neb 使用
+\`\`\`
+
+### 4. 收敛判据
+
+\`\`\`text
+- 切向力 < 0.02 eV/Å
+- 能量收敛
+- 同时满足 → 提取能垒
+\`\`\`
+
+### 5. 提取鞍点能垒
+
+\`\`\`bash
+# VTST 工具：提取 MEP 数据
+nebmake.pl  # 或 nebresults.pl
+# 输出 MEP 能量曲线 → 最高点能量 − 初态能量 = 迁移能垒 E_a
+\`\`\`
+
+### 6. 鞍点确认（关键一步）
+
+\`\`\`text
+确认鞍点是真正的过渡态：
+- 对鞍点结构做频率计算
+- 必须且仅有一个虚频（虚频方向对应迁移方向）
+- 如果多个虚频或没有虚频 → 结构不是鞍点，需调整
+\`\`\`
+
+## 与 ML 势（deepmd）对比的要点
+
+1. 用同一初态/末态和同一 image 数跑 deepmd 势的 NEB
+2. 能垒误差应在 0.1 eV 量级内（与 DFT 端态/鞍点对比）
+3. deepmd 势可以做更长路径、更大超胞的 NEB——这是它的优势
+4. 注意 deepmd 势的鞍点位置可能与 DFT 略有偏移，需重新确认虚频
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 路径初始插值不合理（原子穿模） | 用 IDPP 插值（\`neb.interpolate(method='idpp')\`） |
+| 收敛慢 | 减小 image 间距离，或用 CI-NEB 加快 |
+| 找不到虚频 | 结构停在鞍点附近但不是鞍点，重新优化 |
+| 多个虚频 | 路径偏移了真实 MEP，用爬坡方法（\`climb\`）重找 |
+| 端点能量不一致 | 端点必须各自充分弛豫 |
+`,
+    tags: ["NEB", "CI-NEB", "迁移能垒", "过渡态", "VTST", "扩散"],
+    sourceFiles: ["neb-migration-barrier.md"],
+  },
 ];

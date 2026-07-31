@@ -113,4 +113,38 @@ cat POTCAR_Ti POTCAR_C > POTCAR
     url: "https://www.vasp.at/wiki/index.php/Available_pseudopotentials",
     tags: ["vasp", "POTCAR", "赝势", "PBE"],
   },
+  {
+    id: "vasp-spin-polarization",
+    source: "vasp",
+    title: "磁矩与自旋极化设置",
+    summary: "磁性材料（3d 过渡金属/合金）的 ISPIN、MAGMOM、初始磁矩设置",
+    content: `磁性材料计算必须开启自旋极化：
+
+【核心标签】
+- ISPIN = 2: 开启自旋极化（1 表示非磁）
+- MAGMOM = 初始磁矩（每个原子一个值，单位 μB）
+- 数量必须等于原子总数，顺序对应 POSCAR 原子顺序
+
+【MAGMOM 设置示例】
+\`\`\`incar
+ISPIN = 2
+MAGMOM = 5 5 5 0 0     # 前3个 Fe 原子各 5 μB，后2个原子 0
+\`\`\`
+
+【建议初始磁矩】
+- Fe: 5 μB, Co: 5, Ni: 3, Cr: 5, Mn: 5
+- 过渡金属氧化物：按 +4~+6 μB 试探
+- 非磁元素：0 即可
+
+【判断是否磁性】
+- 读 OUTCAR 的 mag 值，明显非零 → 材料是磁性
+- 用 NUPDOWN 固定总磁矩（如磁有序相）
+- 对比非磁与铁磁的总能，差值决定磁性稳定与否
+
+【与 DeePMD 结合注意】
+- 训练数据包含磁性体系时，标注计算务必开 ISPIN=2
+- 不同磁性构型（FM/AFM）都要有标注数据`,
+    url: "https://www.vasp.at/wiki/index.php/ISPIN",
+    tags: ["vasp", "磁性", "自旋", "ISPIN", "MAGMOM"],
+  },
 ];

@@ -123,4 +123,45 @@ fix 1 all npt temp 300 300 0.1 iso 1.0 1.0 1.0
     url: "https://docs.lammps.org/fix_nh.html",
     tags: ["lammps", "fix", "NVT", "NPT", "dpgen"],
   },
+  {
+    id: "lammps-data-format",
+    source: "lammps",
+    title: "LAMMPS data 文件与原子类型映射",
+    summary: "LAMMPS data 文件的 Atoms/Masses/Atoms# 段，原子类型与元素映射",
+    content: `LAMMPS data 文件（read_data 读入）定义原子结构与类型：
+
+【结构】
+\`\`\`text
+# data.lmp
+2 atoms
+2 atom types
+
+Masses
+1 47.867      # Ti
+2 12.011      # C
+
+Atoms # atomic
+1 1 1.0 0 0 0        # id type q x y z
+2 1 1.0 1.5 0 0
+3 2 1.0 0 1.5 0
+...
+\`\`\`
+
+【原子类型与元素映射】
+- type 1 = Ti, type 2 = C（由 Masses 段决定）
+- pair_coeff * * 配 deepmd 时，图模型内的元素顺序必须与 type 一致
+- 或显式映射：pair_coeff * * Ti C（按 LAMMPS type 顺序给元素名）
+
+【生成 data 文件】
+- ASE: write('data.lmp', atoms, format='lammps-data')
+- OVITO: 导出 LAMMPS data
+- dpdata: to_lammps_lmp()
+
+【常见坑】
+- atom types 数量与 Masses 段不符 → 报错
+- pair_coeff 元素顺序与 data 的 type 顺序不一致 → 势函数错位（结果全错）
+- 缺少完整盒子（atoms 有坐标但无 box 信息）→ 报错`,
+    url: "https://docs.lammps.org/read_data.html",
+    tags: ["lammps", "data文件", "原子类型", "read_data", "元素映射"],
+  },
 ];

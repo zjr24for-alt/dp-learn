@@ -55,6 +55,7 @@ export const SOP_STAGES: SopStage[] = [
       { slug: "ase-practical-workflow", label: "ASE 实战：结构操作与高通量计算" },
       { slug: "cmd-ase-build", label: "ASE 构建超胞/表面", href: "/cheatsheet" },
       { slug: "cmd-ase-relax", label: "ASE 结构弛豫", href: "/cheatsheet" },
+      { slug: "atat-sqs-high-entropy-alloy", label: "高熵合金：ATAT · SQS 特殊准随机结构" },
       { slug: "sop-stage1-poscar", label: "已产出干净 POSCAR（VASP 约定、单位 Å、无悬挂原子）" },
     ],
     inlineNotes: [
@@ -160,6 +161,8 @@ export const SOP_STAGES: SopStage[] = [
       { slug: "elastic-constants-dft", label: "DFT 计算弹性常数与力学性质" },
       { slug: "phonon-thermodynamics", label: "声子谱与热力学性质计算" },
       { slug: "phonopy-phono3py-workflow", label: "Phonopy + phono3py 实战" },
+      { slug: "defect-formation-energy", label: "DFT 缺陷形成能计算（vacancy / 带电缺陷）" },
+      { slug: "neb-migration-barrier", label: "NEB / CI-NEB 迁移能垒计算" },
       { slug: "ovito-dxa-defects", label: "缺陷与位错分析：DXA" },
       { slug: "ovito-cna-ptm", label: "晶体结构识别：CNA 与 PTM" },
     ],

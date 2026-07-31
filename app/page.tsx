@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
 import { CATEGORY_META, type Category, type Article } from "@/lib/types";
 import type { SearchIndexItem } from "@/lib/types";
@@ -42,7 +42,12 @@ export default function HomePage() {
 
   const categories = Object.entries(CATEGORY_META) as [Category, (typeof CATEGORY_META)[Category]][];
   const allMerged = [...allArticles, ...userArticles];
-  const recentArticles = allMerged.slice(0, 6);
+  // 最近更新：内置文章按时间戳倒序，用户文章按 updatedAt 参与排序
+  const recentArticles = useMemo(() => {
+    return [...allArticles, ...userArticles]
+      .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+      .slice(0, 6);
+  }, [userArticles]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -118,7 +123,7 @@ export default function HomePage() {
       {/* Recent articles */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-zinc-900">知识条目</h2>
+          <h2 className="text-xl font-bold text-zinc-900">最近更新</h2>
           <Link href="/learn" className="text-sm text-zinc-500 hover:text-zinc-900">
             查看全部 ({allMerged.length}) →
           </Link>

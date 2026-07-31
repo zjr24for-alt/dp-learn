@@ -40,6 +40,9 @@ export const ArticleCard = memo(function ArticleCard({ article }: Props) {
               </span>
             ))}
           </div>
+          {article.updatedAt && (
+            <p className="text-[11px] text-zinc-400 mt-2">更新于 {article.updatedAt}</p>
+          )}
         </div>
       </div>
     </div>

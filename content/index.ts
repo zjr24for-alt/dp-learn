@@ -1,5 +1,6 @@
 import type { Article, CheatsheetItem, DocEntry, SearchIndexItem } from "@/lib/types";
 import { dpgenWorkflowArticles } from "./dpgen-workflow";
+
 import { deepmdTrainingArticles } from "./deepmd-training";
 import { vaspHpcArticles } from "./vasp-hpc";
 import { envConfigArticles } from "./env-config";
@@ -17,24 +18,61 @@ import { machineConfigArticles } from "./machine-config";
 import { cheatsheetItems } from "./cheatsheet";
 import { officialDocs } from "./official-docs/index";
 
-/** 全部文章 */
+/**
+ * 内置文章时间戳：以各内容文件最后一次 git 提交日期为准（便于「最近更新」排序）。
+ * 新内容文件补进来时，在此追加对应日期即可。
+ */
+const FILE_UPDATED_AT: Record<string, string> = {
+  "dpgen-workflow": "2026-07-31",
+  "dpgen-handson": "2026-06-04",
+  "deepmd-training": "2026-06-04",
+  "deepmd-quickstart": "2026-06-04",
+  "deepmd-tuning": "2026-06-04",
+  "lammps-deepmd": "2026-06-04",
+  "dpdata-guide": "2026-06-04",
+  "machine-config": "2026-06-04",
+  "vasp-hpc": "2026-06-02",
+  "comp-materials": "2026-06-02",
+  "atomistic-sim": "2026-06-02",
+  "ovito-tips": "2026-06-02",
+  "env-config": "2026-06-02",
+  "linux-tips": "2026-06-02",
+  methodology: "2026-06-02",
+};
+
+/** 给一组文章注入 createdAt/updatedAt（按来源文件的最后修改日期） */
+function withTimestamps(articles: Article[], file: string): Article[] {
+  const date = FILE_UPDATED_AT[file] ?? "2026-06-02";
+  return articles.map((a) => ({
+    ...a,
+    createdAt: a.createdAt ?? date,
+    updatedAt: a.updatedAt ?? date,
+  }));
+}
+
+/** 全部文章（含时间戳） */
 export const allArticles: Article[] = [
-  ...dpgenWorkflowArticles,
-  ...dpgenHandsonArticles,
-  ...deepmdTrainingArticles,
-  ...deepmdQuickstartArticles,
-  ...vaspHpcArticles,
-  ...envConfigArticles,
-  ...linuxTipsArticles,
-  ...methodologyArticles,
-  ...compMaterialsArticles,
-  ...atomisticSimArticles,
-  ...ovitoTipsArticles,
-  ...lammpsDeepmdArticles,
-  ...dpdataGuideArticles,
-  ...deepmdTuningArticles,
-  ...machineConfigArticles,
+  ...withTimestamps(dpgenWorkflowArticles, "dpgen-workflow"),
+  ...withTimestamps(dpgenHandsonArticles, "dpgen-handson"),
+  ...withTimestamps(deepmdTrainingArticles, "deepmd-training"),
+  ...withTimestamps(deepmdQuickstartArticles, "deepmd-quickstart"),
+  ...withTimestamps(vaspHpcArticles, "vasp-hpc"),
+  ...withTimestamps(envConfigArticles, "env-config"),
+  ...withTimestamps(linuxTipsArticles, "linux-tips"),
+  ...withTimestamps(methodologyArticles, "methodology"),
+  ...withTimestamps(compMaterialsArticles, "comp-materials"),
+  ...withTimestamps(atomisticSimArticles, "atomistic-sim"),
+  ...withTimestamps(ovitoTipsArticles, "ovito-tips"),
+  ...withTimestamps(lammpsDeepmdArticles, "lammps-deepmd"),
+  ...withTimestamps(dpdataGuideArticles, "dpdata-guide"),
+  ...withTimestamps(deepmdTuningArticles, "deepmd-tuning"),
+  ...withTimestamps(machineConfigArticles, "machine-config"),
 ];
+
+/** 按最后更新倒序（首页「最近更新」、Learn 排序共用） */
+export function getRecentArticles(limit = 6): Article[] {
+  return [...allArticles].sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "")).slice(0, limit);
+}
 
 /** 按类别获取文章 */
 export function getArticlesByCategory(category: string): Article[] {

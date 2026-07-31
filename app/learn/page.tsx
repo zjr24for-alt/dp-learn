@@ -15,6 +15,7 @@ function LearnContent() {
 
   const [activeCategory, setActiveCategory] = useState<Category | "all">(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "title">("recent");
   const [userArticles, setUserArticles] = useState<Article[]>([]);
 
   useEffect(() => {
@@ -67,8 +68,15 @@ function LearnContent() {
       articles = articles.filter((a) => allSlugs.has(a.slug));
     }
 
-    return articles;
-  }, [activeCategory, searchQuery, mergedArticles, userArticles]);
+    // 排序：默认按最后更新倒序，可选按标题
+    const sorted = [...articles];
+    if (sortBy === "title") {
+      sorted.sort((a, b) => a.title.localeCompare(b.title, "zh"));
+    } else {
+      sorted.sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""));
+    }
+    return sorted;
+  }, [activeCategory, searchQuery, mergedArticles, userArticles, sortBy]);
 
   const handleSearch = (q: string) => {
     setSearchQuery(q);
@@ -83,8 +91,18 @@ function LearnContent() {
       </div>
 
       {/* Search */}
-      <div className="mb-6">
-        <SearchBar onSearch={handleSearch} />
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex-1">
+          <SearchBar onSearch={handleSearch} />
+        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as "recent" | "title")}
+          className="shrink-0 px-3 py-2 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+        >
+          <option value="recent">最近更新</option>
+          <option value="title">按标题</option>
+        </select>
       </div>
 
       {/* Category tabs */}
