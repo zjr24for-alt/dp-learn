@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 import { allArticles } from "@/content/index";
 
+// 静态导出（output: "export"）要求该路由构建期生成；
+// lastModified 用 new Date() 属于动态 API，需显式 force-static
+export const dynamic = "force-static";
+
 const BASE = "https://dp-learn.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {

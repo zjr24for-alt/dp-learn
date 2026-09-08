@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { CATEGORY_META, type Category, type Article } from "@/lib/types";
 import { saveUserArticle } from "@/lib/user-content-store";
-import { renderMarkdown } from "@/lib/render-markdown";
+import { Markdown } from "@/components/markdown";
 import { useRouter } from "next/navigation";
 
 interface Props {
@@ -22,8 +22,6 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
   const [content, setContent] = useState(initialArticle?.content || "");
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-
-  const previewHtml = useMemo(() => renderMarkdown(content), [content]);
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
@@ -64,7 +62,7 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="文章标题"
-          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-zinc-900"
+          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-900"
         />
       </div>
 
@@ -74,7 +72,7 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value as Category)}
-          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-zinc-900 bg-white"
+          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-900 bg-white"
         >
           {Object.entries(CATEGORY_META).map(([key, meta]) => (
             <option key={key} value={key}>
@@ -92,7 +90,7 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           placeholder="一句话描述（可选，留空则使用标题）"
-          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-zinc-900"
+          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-900"
         />
       </div>
 
@@ -106,7 +104,7 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
           value={tagsInput}
           onChange={(e) => setTagsInput(e.target.value)}
           placeholder="DeePMD, VASP, 超算"
-          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-zinc-900"
+          className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-900"
         />
       </div>
 
@@ -117,24 +115,23 @@ export function ArticleEditor({ initialArticle, onSaved }: Props) {
           <button
             type="button"
             onClick={() => setShowPreview(!showPreview)}
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs text-indigo-600 hover:underline"
           >
             {showPreview ? "📝 编辑" : "👁️ 预览"}
           </button>
         </div>
 
         {showPreview ? (
-          <div
-            className="prose prose-zinc max-w-none border border-zinc-200 rounded-lg p-4 min-h-[400px] bg-white"
-            dangerouslySetInnerHTML={{ __html: previewHtml }}
-          />
+          <div className="prose prose-zinc max-w-none border border-zinc-200 rounded-lg p-4 min-h-[400px] bg-white">
+            <Markdown content={content} />
+          </div>
         ) : (
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={`# 标题\n\n正文内容，支持 Markdown 语法。\n\n## 二级标题\n\n- 列表项\n- 列表项\n\n\`\`\`bash\n# 代码块\nls -la\n\`\`\``}
             rows={20}
-            className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-zinc-900 font-mono text-sm leading-relaxed resize-y"
+            className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-zinc-900 font-mono text-sm leading-relaxed resize-y"
           />
         )}
       </div>

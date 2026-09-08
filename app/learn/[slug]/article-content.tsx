@@ -1,68 +1,49 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { allArticles, buildAllSearchIndex } from "@/content/index";
-import { buildSearchIndex } from "@/lib/search";
+import { useEffect, useState } from "react";
 import { CATEGORY_META } from "@/lib/types";
 import type { Article } from "@/lib/types";
 import { ProgressCheck } from "@/components/progress-bar";
 import { readingTime as calcReadingTime } from "@/components/reading-time";
-import { renderMarkdown } from "@/lib/render-markdown";
+import { Markdown } from "@/components/markdown";
 import { getUserArticle, deleteUserArticle } from "@/lib/user-content-store";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export function ArticleContent({ slug: serverSlug }: { slug: string }) {
-  const params = useParams();
+interface ArticleLink {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  slug: string;
+  /** 内置文章由服务端直接传入：SSR 时正文即渲染进 HTML，无需客户端等待 */
+  builtinArticle: Article | null;
+  prevArticle: ArticleLink | null;
+  nextArticle: ArticleLink | null;
+}
+
+export function ArticleContent({ slug, builtinArticle, prevArticle, nextArticle }: Props) {
   const router = useRouter();
-  const slug = (params?.slug as string) || serverSlug;
-  const [mounted, setMounted] = useState(false);
   const [userArticle, setUserArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 内置文章立即可用；用户笔记需从 IndexedDB 异步加载
+  const [loading, setLoading] = useState(!builtinArticle);
 
+  // 内置文章未命中时，从 IndexedDB 加载用户笔记
   useEffect(() => {
-    setMounted(true);
-    buildSearchIndex(buildAllSearchIndex());
-    // 代码块复制按钮事件委托
-    const handler = (e: Event) => {
-      const btn = (e.target as HTMLElement).closest(".copy-btn") as HTMLElement | null;
-      if (!btn) return;
-      const code = btn.dataset.code || "";
-      navigator.clipboard?.writeText(code).catch(() => {});
-      btn.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
-      setTimeout(() => { btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>'; }, 1500);
-    };
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
-  }, []);
-
-  // 查找内置文章
-  const builtinArticle = useMemo(() => allArticles.find((a) => a.slug === slug), [slug]);
-
-  // 如果内置文章未命中，从 IndexedDB 加载用户文章
-  useEffect(() => {
-    if (builtinArticle) {
-      setLoading(false);
-      return;
-    }
+    if (builtinArticle) return;
+    let cancelled = false;
     getUserArticle(slug).then((a) => {
+      if (cancelled) return;
       setUserArticle(a);
       setLoading(false);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [slug, builtinArticle]);
 
   const article = builtinArticle || userArticle;
-
-  const navArticles = useMemo(() => {
-    if (!article) return { prev: null, next: null };
-    const sameCategory = allArticles.filter((a) => a.category === article.category);
-    const idx = sameCategory.findIndex((a) => a.slug === slug);
-    return {
-      prev: idx > 0 ? sameCategory[idx - 1] : null,
-      next: idx < sameCategory.length - 1 ? sameCategory[idx + 1] : null,
-    };
-  }, [article, slug]);
 
   const handleDelete = async () => {
     if (!confirm("确定要删除这篇笔记吗？此操作不可撤销。")) return;
@@ -84,7 +65,7 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
         <div className="text-4xl mb-4">📄</div>
         <h1 className="text-xl font-bold text-zinc-900 mb-2">文章未找到</h1>
         <p className="text-zinc-500 mb-4">slug: {slug}</p>
-        <Link href="/learn" className="text-blue-600 hover:underline">
+        <Link href="/learn" className="text-indigo-600 hover:underline">
           ← 返回知识库
         </Link>
       </div>
@@ -117,11 +98,11 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
               {meta.icon} {meta.label}
             </span>
           )}
-          {mounted && <ProgressCheck slug={article.slug} />}
+          <ProgressCheck slug={article.slug} />
           {isUser && (
             <Link
               href={`/contribute?edit=${article.slug}`}
-              className="text-xs text-blue-600 hover:underline ml-auto"
+              className="text-xs text-indigo-600 hover:underline ml-auto"
             >
               ✏️ 编辑
             </Link>
@@ -161,10 +142,9 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
         )}
       </div>
 
-      <article
-        className="prose prose-zinc max-w-none"
-        dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
-      />
+      <article className="prose prose-zinc max-w-none">
+        <Markdown content={article.content} />
+      </article>
 
       {!isUser && article.sourceFiles && article.sourceFiles.length > 0 && (
         <div className="mt-10 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
@@ -175,16 +155,16 @@ export function ArticleContent({ slug: serverSlug }: { slug: string }) {
       )}
 
       <div className="flex items-center justify-between mt-8 pt-6 border-t border-zinc-200">
-        {navArticles.prev ? (
-          <Link href={`/learn/${navArticles.prev.slug}`} className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1">
-            ← {navArticles.prev.title}
+        {prevArticle ? (
+          <Link href={`/learn/${prevArticle.slug}`} className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1">
+            ← {prevArticle.title}
           </Link>
         ) : (
           <div />
         )}
-        {navArticles.next ? (
-          <Link href={`/learn/${navArticles.next.slug}`} className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1 text-right">
-            {navArticles.next.title} →
+        {nextArticle ? (
+          <Link href={`/learn/${nextArticle.slug}`} className="text-sm text-zinc-600 hover:text-zinc-900 flex items-center gap-1 text-right">
+            {nextArticle.title} →
           </Link>
         ) : (
           <div />

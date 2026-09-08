@@ -1,5 +1,4 @@
-"use client";
-
+import { buildAllSearchIndex } from "@/content/index";
 import { QAChat } from "@/components/qa-chat";
 
 export default function QAPage() {
@@ -10,7 +9,7 @@ export default function QAPage() {
         基于你的学习笔记 + DP/VASP/LAMMPS 官方文档回答问题。配置 DeepSeek API Key 可获得 AI 整合回答。
       </p>
 
-      <QAChat />
+      <QAChat indexItems={buildAllSearchIndex()} />
     </div>
   );
 }

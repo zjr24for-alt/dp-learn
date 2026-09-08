@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
-import type { SearchIndexItem } from "./types";
+import type { Article, SearchIndexItem } from "./types";
+import { getAllUserArticles } from "./user-content-store";
 
 /** 共享 Fuse 配置，避免重复定义 */
 const FUSE_OPTIONS = {
@@ -58,4 +59,28 @@ export function searchByCategory(
 
 export function getAllItems(): SearchIndexItem[] {
   return allItems;
+}
+
+/** 用户文章 → 搜索索引项（与原有首页/知识库追加逻辑一致） */
+export function articleToSearchIndexItem(a: Article): SearchIndexItem {
+  return {
+    id: a.slug,
+    title: a.title,
+    content: a.summary + " " + a.content.slice(0, 500),
+    category: a.category,
+    url: `/learn/${a.slug}`,
+    type: "article",
+  };
+}
+
+/**
+ * 初始化全局搜索索引：内置条目 + 追加 IndexedDB 用户笔记。
+ * 幂等（数据量未变时跳过 Fuse 重建）；供各页面的搜索组件在挂载后调用。
+ */
+export async function initSearchIndex(items: SearchIndexItem[]): Promise<void> {
+  buildSearchIndex(items);
+  const userArticles = await getAllUserArticles();
+  if (userArticles.length > 0) {
+    appendToSearchIndex(userArticles.map(articleToSearchIndexItem));
+  }
 }

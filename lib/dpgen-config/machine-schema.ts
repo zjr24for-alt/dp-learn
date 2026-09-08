@@ -1,4 +1,5 @@
 import type { ParamField } from "./param-schema";
+import { sanitizeJsonString } from "./extract";
 
 export type MachineSegment = "train" | "model_devi" | "fp";
 
@@ -233,4 +234,66 @@ export function getMachineDefaults(segment: string): string {
     }], null, 2);
   }
   return "[]";
+}
+
+export type SplitMachineResult =
+  | { ok: true; segments: Record<MachineSegment, string> }
+  | { ok: false; error: string };
+
+/**
+ * 尝试把一个完整的 machine.json 拆成 train / model_devi / fp 三段。
+ *
+ * 支持两种粘贴格式：
+ * 1. DP-GEN 标准数组：[train_config, model_devi_config, fp_config]
+ * 2. 分段对象：{"train": [...], "model_devi": [...], "fp": [...]}
+ *    每段的值可以是单个 config 对象或 config 数组
+ *
+ * 每段在编辑器中存为单元素数组 `[config]`。
+ * 容忍粘贴时常见的多余字符（markdown 围栏、尾随逗号等）。
+ */
+export function trySplitMachineJson(raw: string): SplitMachineResult {
+  const cleaned = sanitizeJsonString(raw);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    return { ok: false, error: "无法解析为 JSON" };
+  }
+
+  // 格式 1：标准数组 [config1, config2, config3]
+  if (Array.isArray(parsed)) {
+    if (parsed.length === 3) {
+      return {
+        ok: true,
+        segments: {
+          train: JSON.stringify([parsed[0]], null, 2),
+          model_devi: JSON.stringify([parsed[1]], null, 2),
+          fp: JSON.stringify([parsed[2]], null, 2),
+        },
+      };
+    }
+    return { ok: false, error: `数组长度 ${parsed.length}，期望 3 段（train / model_devi / fp）` };
+  }
+
+  // 格式 2：分段对象 {"train": [...], "model_devi": [...], "fp": [...]}
+  if (typeof parsed === "object" && parsed !== null) {
+    const obj = parsed as Record<string, unknown>;
+    const segs: MachineSegment[] = ["train", "model_devi", "fp"];
+    if (segs.every((s) => s in obj)) {
+      const toSegmentJson = (val: unknown): string => {
+        if (Array.isArray(val)) return JSON.stringify(val, null, 2);
+        return JSON.stringify([val], null, 2);
+      };
+      return {
+        ok: true,
+        segments: {
+          train: toSegmentJson(obj.train),
+          model_devi: toSegmentJson(obj.model_devi),
+          fp: toSegmentJson(obj.fp),
+        },
+      };
+    }
+  }
+
+  return { ok: false, error: "格式不匹配：需要数组 [train, model_devi, fp] 或对象 {train, model_devi, fp}" };
 }

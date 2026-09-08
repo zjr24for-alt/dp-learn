@@ -86,3 +86,12 @@ export interface SearchIndexItem {
   url: string;
   type: "article" | "doc" | "cheatsheet";
 }
+
+/**
+ * 文章摘要投影：不含 content 正文，用于列表/卡片展示
+ * （服务端传给客户端组件，避免把整库正文打进客户端 bundle）
+ */
+export type ArticleSummary = Pick<
+  Article,
+  "slug" | "title" | "summary" | "category" | "tags" | "updatedAt" | "isUserArticle"
+>;

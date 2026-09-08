@@ -187,12 +187,14 @@ export interface IncarEntry {
   key: string;
   value: string;
   comment?: string;
+  /** 参数在源文本中的 1-based 行号 */
+  line: number;
 }
 
 export function parseIncar(text: string): IncarEntry[] {
   const lines = text.split("\n");
   const result: IncarEntry[] = [];
-  for (const line of lines) {
+  for (const [idx, line] of lines.entries()) {
     const trimmed = line.trim();
     if (trimmed.startsWith("#") || trimmed === "") continue;
     const eqIdx = trimmed.indexOf("=");
@@ -202,7 +204,7 @@ export function parseIncar(text: string): IncarEntry[] {
     const commentIdx = rest.indexOf("#");
     const value = commentIdx === -1 ? rest.trim() : rest.slice(0, commentIdx).trim();
     const comment = commentIdx === -1 ? undefined : rest.slice(commentIdx + 1).trim();
-    result.push({ key, value, comment });
+    result.push({ key, value, comment, line: idx + 1 });
   }
   return result;
 }

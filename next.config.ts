@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 const isStaticExport = process.env.STATIC_EXPORT === "true";
 
 const nextConfig: NextConfig = {
+  distDir: "build",
   // 仅明确要求静态导出时才启用（GitHub Pages 部署）
   ...(isStaticExport ? { output: "export" as const } : {}),
   basePath: isStaticExport ? "/dp-learn" : "",

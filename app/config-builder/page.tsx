@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { CodeEditor } from "@/components/config-builder/code-editor";
 import { ValidationPanel, type ValidationGroup } from "@/components/config-builder/validation-panel";
+import { ReadinessGate } from "@/components/config-builder/readiness-gate";
 import { AiAssist, type AiAssistMode, type ExtractKind } from "@/components/config-builder/ai-assist";
 import { MaterialSwitch } from "@/components/config-builder/material-switch";
 import {
@@ -22,8 +23,10 @@ import {
   buildIncarPrompt,
   buildLammpsPrompt,
   buildSubmitPrompt,
+  trySplitMachineJson,
+  sanitizeJsonString,
 } from "@/lib/dpgen-config";
-import type { MachineSegment } from "@/lib/dpgen-config";
+import type { MachineSegment, CheckIssue } from "@/lib/dpgen-config";
 
 type ConfigTab = "param" | "machine" | "incar" | "scripts";
 type ScriptTab = "lammps" | "submit";
@@ -48,6 +51,9 @@ const SCRIPT_TABS: { id: ScriptTab; label: string; desc: string }[] = [
 
 // 配置持久化存储键（进度账本之外的一套独立存档）
 const CONFIG_STORAGE_KEY = "dp-learn-config-builder";
+
+// 未校验/无问题的编辑器使用稳定的空数组，避免每帧新建引用
+const NO_ISSUES: CheckIssue[] = [];
 
 /** 合并 machine 三段为一个完整 DPDispatcher 数组；任一段 JSON 无效则返回错误 */
 function mergeMachineSegments(
@@ -195,12 +201,19 @@ export default function ConfigBuilderPage() {
   // Validation report
   const [report, setReport] = useState<ValidationGroup[] | null>(null);
 
+  // 行级跳转：记录目标校验组 + 行号 + nonce（nonce 递增保证重复跳转同一行也触发滚动）
+  const [jump, setJump] = useState<{ groupId: string; line: number; nonce: number } | null>(null);
+
   // AI assist modal
   const [assistOpen, setAssistOpen] = useState(false);
   const [assistMode, setAssistMode] = useState<AiAssistMode>("prompt");
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
   const [materialNote, setMaterialNote] = useState("");
   const [materialOpen, setMaterialOpen] = useState(false);
+
+  // 粘贴完整 machine.json 的展开/输入
+  const [pasteMachineOpen, setPasteMachineOpen] = useState(false);
+  const [pasteMachineText, setPasteMachineText] = useState("");
 
   // 配置持久化：挂载时从 localStorage 恢复（SSR 首渲用默认值避免 hydration 不一致）
   const [hydrated, setHydrated] = useState(false);
@@ -257,6 +270,66 @@ export default function ConfigBuilderPage() {
     setToast({ ok, msg });
     window.setTimeout(() => setToast(null), 3000);
   }, []);
+
+  // ── 粘贴拦截 ──
+
+  // machine 段粘贴：如果粘贴的是完整 machine.json（3 段数组）→ 自动分流到三段；
+  // 否则清理 JSON 后替换当前段
+  const handleMachinePaste = useCallback(
+    (text: string): boolean => {
+      const split = trySplitMachineJson(text);
+      if (split.ok) {
+        setMachineJsons(split.segments);
+        showToast(true, "检测到完整 machine.json，已自动分流到 train / model_devi / fp 三段");
+        return true;
+      }
+      // 尝试清理为单段 JSON
+      const sanitized = sanitizeJsonString(text);
+      try {
+        JSON.parse(sanitized);
+        setMachineJsons((prev) => ({ ...prev, [machineSegment]: sanitized }));
+        showToast(true, "已自动清理 JSON 格式（去除多余符号/围栏/尾随逗号）");
+        return true;
+      } catch {
+        return false; // 清理后仍非法，走默认粘贴
+      }
+    },
+    [machineSegment, showToast]
+  );
+
+  // param.json 粘贴：清理 JSON 后替换
+  const handleParamPaste = useCallback(
+    (text: string): boolean => {
+      const sanitized = sanitizeJsonString(text);
+      try {
+        JSON.parse(sanitized);
+        setParamJson(sanitized);
+        showToast(true, "已自动清理 JSON 格式");
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [showToast]
+  );
+
+  // 粘贴完整 machine.json 按钮：从展开的文本框读取内容并分流
+  const handlePasteMachineSplit = useCallback(() => {
+    const text = pasteMachineText.trim();
+    if (!text) {
+      showToast(false, "请先粘贴 machine.json 内容");
+      return;
+    }
+    const split = trySplitMachineJson(text);
+    if (split.ok) {
+      setMachineJsons(split.segments);
+      setPasteMachineOpen(false);
+      setPasteMachineText("");
+      showToast(true, "已自动分流到 train / model_devi / fp 三段");
+    } else {
+      showToast(false, split.error);
+    }
+  }, [pasteMachineText, showToast]);
 
   // 恢复默认配置：清空本地存档 + 重置全部字段
   const handleResetDefaults = useCallback(() => {
@@ -337,6 +410,43 @@ export default function ConfigBuilderPage() {
     ];
     setReport(groups);
   }, [paramJson, machineJsons, incarText, lammpsText, submitText]);
+
+  // 按校验组缓存问题列表，供各编辑器行号槽高亮
+  const issuesByGroup = useMemo(() => {
+    const map = new Map<string, CheckIssue[]>();
+    for (const g of report ?? []) {
+      map.set(g.id, g.result?.issues ?? []);
+    }
+    return map;
+  }, [report]);
+
+  // 编辑器高亮/跳转 props：只有目标组匹配时才传聚焦行
+  const focusProps = (groupId: string) => ({
+    issues: issuesByGroup.get(groupId) ?? NO_ISSUES,
+    focusLine: jump?.groupId === groupId ? jump.line : null,
+    focusNonce: jump?.groupId === groupId ? jump.nonce : 0,
+  });
+
+  // 点击「跳到第 N 行」：切到对应 Tab/段，再触发编辑器滚动
+  const handleJumpToLine = useCallback((groupId: string, line: number) => {
+    if (groupId === "param") {
+      setActiveTab("param");
+    } else if (groupId === "train" || groupId === "model_devi" || groupId === "fp") {
+      setActiveTab("machine");
+      setMachineSegment(groupId);
+    } else if (groupId === "incar") {
+      setActiveTab("incar");
+    } else if (groupId === "lammps") {
+      setActiveTab("scripts");
+      setScriptTab("lammps");
+    } else if (groupId === "submit") {
+      setActiveTab("scripts");
+      setScriptTab("submit");
+    } else {
+      return; // cross 等无编辑器可跳
+    }
+    setJump((prev) => ({ groupId, line, nonce: (prev?.nonce ?? 0) + 1 }));
+  }, []);
 
   // 导出当前配置
   const handleDownload = useCallback(() => {
@@ -476,8 +586,8 @@ export default function ConfigBuilderPage() {
       {activeTab === "machine" && (
         <div className="bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-4 py-3">
-              <span className="text-xs text-slate-400 self-center">选择段:</span>
+            <div className="flex items-center space-x-4 py-3">
+              <span className="text-xs text-slate-400">选择段:</span>
               {MACHINE_SEGMENTS.map((seg) => (
                 <button
                   key={seg.id}
@@ -491,7 +601,42 @@ export default function ConfigBuilderPage() {
                   <code>{seg.label}</code>
                 </button>
               ))}
+              <div className="flex-1" />
+              <button
+                onClick={() => setPasteMachineOpen((v) => !v)}
+                className="text-xs px-3 py-1.5 rounded-full font-medium bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors"
+              >
+                📥 粘贴完整 machine.json 自动分流
+              </button>
             </div>
+            {pasteMachineOpen && (
+              <div className="pb-4 space-y-2">
+                <textarea
+                  value={pasteMachineText}
+                  onChange={(e) => setPasteMachineText(e.target.value)}
+                  placeholder={"在此粘贴完整的 machine.json（3 段数组），自动拆分到 train / model_devi / fp\n\n也可直接在任意段编辑框内粘贴——系统会自动检测并分流"}
+                  className="w-full p-3 text-xs font-mono border border-slate-200 rounded-lg bg-slate-50 min-h-[120px] focus:outline-none focus:ring-1 focus:ring-green-300"
+                  spellCheck={false}
+                />
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePasteMachineSplit}
+                    className="px-4 py-1.5 text-xs font-medium bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    ⚡ 自动分流
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPasteMachineOpen(false);
+                      setPasteMachineText("");
+                    }}
+                    className="px-4 py-1.5 text-xs font-medium bg-white border border-slate-200 text-slate-500 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -534,6 +679,8 @@ export default function ConfigBuilderPage() {
               schema={PARAM_SCHEMA}
               language="json"
               title="param.json — DP-GEN 工作流参数"
+              onPaste={handleParamPaste}
+              {...focusProps("param")}
             />
           )}
           {activeTab === "machine" && (
@@ -543,6 +690,8 @@ export default function ConfigBuilderPage() {
               schema={MACHINE_SCHEMA[machineSegment] || []}
               language="json"
               title={`machine.json — ${machineSegment} 段配置`}
+              onPaste={handleMachinePaste}
+              {...focusProps(machineSegment)}
             />
           )}
           {activeTab === "incar" && (
@@ -552,6 +701,7 @@ export default function ConfigBuilderPage() {
               schema={INCAR_SCHEMA}
               language="incar"
               title="INCAR_fp — VASP 第一性原理标注"
+              {...focusProps("incar")}
             />
           )}
           {activeTab === "scripts" && scriptTab === "lammps" && (
@@ -561,6 +711,7 @@ export default function ConfigBuilderPage() {
               schema={[]}
               language="text"
               title="in.lammps — LAMMPS 输入脚本"
+              {...focusProps("lammps")}
             />
           )}
           {activeTab === "scripts" && scriptTab === "submit" && (
@@ -570,6 +721,7 @@ export default function ConfigBuilderPage() {
               schema={[]}
               language="text"
               title="job.pbs — 作业提交脚本"
+              {...focusProps("submit")}
             />
           )}
         </div>
@@ -628,7 +780,8 @@ export default function ConfigBuilderPage() {
         </div>
 
         {/* Validation report */}
-        {report && <ValidationPanel groups={report} />}
+        {report && <ValidationPanel groups={report} onJumpToLine={handleJumpToLine} />}
+        {report && report.length > 1 && <ReadinessGate groups={report} />}
 
         {/* Tips */}
         <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
@@ -644,6 +797,7 @@ export default function ConfigBuilderPage() {
             <li>• machine Tab 的「⬇ 导出」会合并 train / model_devi / fp 三段为一个完整 machine.json，可直接 <code className="bg-blue-100 px-1 rounded">dpgen run</code> 使用</li>
             <li>• 确认无误后点「⬇ 导出」下载，直接覆盖到 <code className="bg-blue-100 px-1 rounded">~/TiC_aimd_64/dpgen/</code> 即可使用</li>
             {activeTab === "machine" && <li>• machine.json 有三个段（train / model_devi / fp），需分别编辑，切段不会丢内容</li>}
+            {activeTab === "machine" && <li>• 粘贴完整 machine.json（3 段数组）到任意段编辑框会<strong className="text-blue-700">自动分流</strong>到三段；多余的 <code className="bg-blue-100 px-1 rounded">```json</code> 围栏、尾随逗号等会自动清理</li>}
             {activeTab === "scripts" && <li>• 两个脚本框默认为空，「一键检查全部」会自动跳过未填写项</li>}
           </ul>
         </div>

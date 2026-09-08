@@ -11,7 +11,7 @@ import {
   type ArxivPaper,
   type SearchProgress,
 } from "@/lib/arxiv";
-import { renderMarkdown } from "@/lib/render-markdown";
+import { Markdown } from "@/components/markdown";
 import { getApiKey, setApiKey, clearApiKey, hasApiKey } from "@/lib/ai-qa";
 
 // ====== AI 调用工具 ======
@@ -75,13 +75,13 @@ function PaperCard({ paper, index }: PaperCardProps) {
             )}
             {paper.pdfUrl && paper.pdfUrl !== "#" && (
               <a href={paper.pdfUrl} target="_blank" rel="noopener"
-                 className="text-xs px-2 py-0.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 font-medium">
+                 className="text-xs px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 font-medium">
                 PDF
               </a>
             )}
             {paper.doi && (
               <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener"
-                 className="text-xs text-slate-400 hover:text-blue-500 underline">
+                 className="text-xs text-slate-400 hover:text-indigo-500 underline">
                 DOI
               </a>
             )}
@@ -412,12 +412,12 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
               onChange={(e) => setApiKeyInput(e.target.value)}
               placeholder="输入 DeepSeek API Key (sk-...)"
               autoComplete="off"
-              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900 bg-white"
+              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
               style={{ backgroundColor: "#fff", color: "#18181b" }}
             />
             <button
               onClick={handleSaveKey}
-              className="px-3 py-1.5 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800"
+              className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
             >
               保存
             </button>
@@ -453,14 +453,13 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                     <div
                       className={`max-w-[88%] rounded-xl px-4 py-3 text-sm ${
                         msg.role === "user"
-                          ? "bg-blue-100 text-blue-900"
+                          ? "bg-indigo-100 text-indigo-900"
                           : "bg-zinc-100 text-zinc-800"
                       }`}
                     >
-                      <div
-                        className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-blue-600 prose-code:text-xs"
-                        dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
-                      />
+                      <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-indigo-600 prose-code:text-xs">
+                        <Markdown content={msg.content} />
+                      </div>
                     </div>
                   </div>
 
@@ -483,9 +482,9 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                 <div className="space-y-3 bg-zinc-50 border border-zinc-200 rounded-xl p-4">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-                      <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                     </div>
                     <span className="text-sm font-medium text-zinc-700">正在搜索论文...</span>
                   </div>
@@ -494,8 +493,8 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                       const p = progress.find((x) => x.source === name);
                       if (!p || p.status === "searching") {
                         return (
-                          <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                            <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                          <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                            <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
                             {name} 搜索中...
                           </span>
                         );
@@ -537,13 +536,13 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                   placeholder="输入论文检索问题，如：DP-GEN 主动学习在高熵合金中的应用"
                   autoComplete="off"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+                  className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                   style={{ backgroundColor: "#fff", color: "#18181b" }}
                 />
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
-                  className="px-5 py-2.5 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+                  className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors"
                 >
                   {loading ? "搜索中..." : "🔍 检索"}
                 </button>
@@ -568,13 +567,13 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                 onChange={(e) => setClassicQuery(e.target.value)}
                 placeholder="搜索 arXiv 论文..."
                 autoComplete="on"
-                className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+                className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                 style={{ backgroundColor: "#fff", color: "#18181b" }}
               />
               <button
                 type="submit"
                 disabled={classicLoading || !classicQuery.trim()}
-                className="px-5 py-2.5 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 transition-colors shrink-0"
+                className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors shrink-0"
               >
                 {classicLoading ? "搜索中..." : "🔍 搜索"}
               </button>
@@ -582,7 +581,7 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
             <select
               value={classicCategory}
               onChange={(e) => setClassicCategory(e.target.value)}
-              className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+              className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               {DP_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -597,8 +596,8 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                 const p = progress.find((x) => x.source === name);
                 if (!p || p.status === "searching") {
                   return (
-                    <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                    <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                      <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
                       {name} 搜索中...
                     </span>
                   );
@@ -642,7 +641,7 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                             <h3 className="font-semibold text-zinc-900 text-sm leading-relaxed">{paper.title}</h3>
                             <div className="flex items-center gap-1 shrink-0">
                               <a href={paper.pdfUrl} target="_blank" rel="noopener" className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 font-medium">PDF</a>
-                              <a href={paper.abstractUrl} target="_blank" rel="noopener" className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100 font-medium">arXiv</a>
+                              <a href={paper.abstractUrl} target="_blank" rel="noopener" className="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 font-medium">arXiv</a>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 mt-1.5 text-xs text-zinc-400 flex-wrap">
@@ -661,7 +660,7 @@ DOI: ${p.doi ? `https://doi.org/${p.doi}` : "N/A"}`;
                           <h4 className="text-xs font-medium text-zinc-500 mb-2">摘要</h4>
                           <p className="text-sm text-zinc-600 leading-relaxed">{paper.summary}</p>
                           {paper.doi && (
-                            <p className="mt-2 text-xs text-zinc-400">DOI: <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener" className="text-blue-500 hover:underline">{paper.doi}</a></p>
+                            <p className="mt-2 text-xs text-zinc-400">DOI: <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener" className="text-indigo-500 hover:underline">{paper.doi}</a></p>
                           )}
                           <div className="mt-3 text-xs text-zinc-400">完整作者: {paper.authors.join(", ")}</div>
                         </div>

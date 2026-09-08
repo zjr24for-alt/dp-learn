@@ -48,6 +48,56 @@ pre code {
   padding: 0;
 }
 
+/* 深色代码块（.not-prose 容器内）：
+   「深色背景 + 浅色文字」必须成对出现，用 !important 锁死，
+   避免浏览器缓存了不同版本 CSS（新 HTML + 旧 CSS）时底色与文字色错配导致看不见 */
+.not-prose pre {
+  background-color: #18181b !important; /* zinc-900 */
+  color: #f4f4f5 !important; /* zinc-100 */
+}
+
+.not-prose pre code {
+  color: inherit !important;
+  background: transparent !important;
+  padding: 0;
+}
+
+/* 代码块头部标签栏（同样锁定，防止与旧缓存 CSS 错配） */
+.dark-code-header {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+/* 行内代码（prose 内、非代码块）—— 匹配旧版 bg-zinc-200 外观 */
+.prose :not(pre) > code {
+  background: #e4e4e7;
+  padding: 0.125em 0.375em;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+/* 表格（react-markdown 渲染）：保留旧版 zinc 边框 + 表头底色 */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.prose table th {
+  border: 1px solid #d4d4d8;
+  background: #e4e4e7;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #18181b;
+}
+
+.prose table td {
+  border: 1px solid #e4e4e7;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #18181b;
+}
+
 /* 覆盖浏览器 autofill 的默认深色背景 —— 全局生效 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

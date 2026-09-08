@@ -125,3 +125,42 @@ export function extractPlainText(text: string): string {
     .replace(/```/g, "")
     .trim();
 }
+
+/**
+ * 清理 JSON 字符串中的常见复制痕迹：
+ * - BOM 字符
+ * - Markdown 代码围栏 (```json ... ```)
+ * - 尾随逗号 ({"a": 1,} → {"a": 1})
+ * - 前后多余空白/散文
+ *
+ * 成功时返回美化后的 JSON；失败时返回清理后的原文（让用户自己修）。
+ */
+export function sanitizeJsonString(raw: string): string {
+  let text = raw;
+
+  // BOM
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+
+  // Markdown 围栏
+  text = text.replace(/```(?:json|javascript|js)?/gi, "").replace(/```/g, "").trim();
+
+  // 尾随逗号：,} → }  ,] → ]（容忍空白）
+  text = text.replace(/,\s*([}\]])/g, "$1");
+
+  // 直接解析
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    // fall through
+  }
+
+  // 括号平衡扫描，提取首个合法 JSON 片段
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === "{" || text[i] === "[") {
+      const span = tryParseSpan(text, i);
+      if (span.ok) return JSON.stringify(span.value, null, 2);
+    }
+  }
+
+  return text;
+}

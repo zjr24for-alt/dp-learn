@@ -1,58 +1,44 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState, useCallback, useMemo } from "react";
 import { allArticles, buildAllSearchIndex } from "@/content/index";
-import { CATEGORY_META, type Category, type Article } from "@/lib/types";
-import type { SearchIndexItem } from "@/lib/types";
-import { buildSearchIndex, search as doSearch, appendToSearchIndex } from "@/lib/search";
-import { SearchBar } from "@/components/search-bar";
-import { ArticleCard } from "@/components/article-card";
-import { getCategoryProgress } from "@/lib/progress-store";
-import { getAllUserArticles } from "@/lib/user-content-store";
+import { CATEGORY_META, type Category, type Article, type ArticleSummary } from "@/lib/types";
+import { HomeSearch } from "@/components/home-search";
+import { CategoryGrid } from "@/components/category-grid";
+import { RecentArticles } from "@/components/recent-articles";
+
+/** 文章 → 摘要投影（不含正文，避免正文进入客户端 bundle / RSC payload） */
+function toSummary(a: Article): ArticleSummary {
+  return {
+    slug: a.slug,
+    title: a.title,
+    summary: a.summary,
+    category: a.category,
+    tags: a.tags,
+    updatedAt: a.updatedAt,
+    isUserArticle: a.isUserArticle,
+  };
+}
 
 export default function HomePage() {
-  const [mounted, setMounted] = useState(false);
-  const [userArticles, setUserArticles] = useState<Article[]>([]);
-
-  useEffect(() => {
-    setMounted(true);
-    const idx = buildAllSearchIndex();
-    buildSearchIndex(idx);
-    getAllUserArticles().then((articles) => {
-      setUserArticles(articles);
-      if (articles.length > 0) {
-        appendToSearchIndex(
-          articles.map((a) => ({
-            id: a.slug,
-            title: a.title,
-            content: a.summary + " " + a.content.slice(0, 500),
-            category: a.category,
-            url: `/learn/${a.slug}`,
-            type: "article" as const,
-          }))
-        );
-      }
-    });
-  }, []);
-
-  const handleSearch = useCallback((query: string): SearchIndexItem[] => {
-    return doSearch(query);
-  }, []);
-
+  const index = buildAllSearchIndex();
   const categories = Object.entries(CATEGORY_META) as [Category, (typeof CATEGORY_META)[Category]][];
-  const allMerged = [...allArticles, ...userArticles];
-  // 最近更新：内置文章按时间戳倒序，用户文章按 updatedAt 参与排序
-  const recentArticles = useMemo(() => {
-    return [...allArticles, ...userArticles]
-      .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
-      .slice(0, 6);
-  }, [userArticles]);
+
+  const categorySlugs = {} as Record<Category, string[]>;
+  for (const [key] of categories) {
+    categorySlugs[key] = allArticles.filter((a) => a.category === key).map((a) => a.slug);
+  }
+  const recent = [...allArticles]
+    .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
+    .slice(0, 6)
+    .map(toSummary);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Hero */}
-      <section className="text-center mb-12">
+      <section className="text-center mb-12 relative">
+        {/* 品牌色背景光晕 */}
+        <div className="absolute inset-x-0 -top-16 h-80 -z-10 overflow-hidden" aria-hidden="true">
+          <div className="absolute left-1/2 -translate-x-1/2 w-[38rem] h-[26rem] rounded-full bg-indigo-200/40 blur-3xl" />
+        </div>
         <h1 className="text-4xl font-bold text-zinc-900 mb-3">
           ⚛️ DP Learn
         </h1>
@@ -60,12 +46,12 @@ export default function HomePage() {
           Deep Potential 学习笔记 — 整合 DP-GEN / DeePMD / VASP / LAMMPS 实战经验与官方文档
         </p>
         <div className="flex justify-center">
-          <SearchBar onSearch={handleSearch} />
+          <HomeSearch items={index} />
         </div>
         <div className="flex justify-center gap-3 mt-6 flex-wrap">
           <Link
             href="/learn"
-            className="px-4 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-colors"
+            className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
           >
             📚 浏览知识库
           </Link>
@@ -93,47 +79,11 @@ export default function HomePage() {
       {/* Category grid */}
       <section className="mb-12">
         <h2 className="text-xl font-bold text-zinc-900 mb-4">知识分类</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {categories.map(([key, meta]) => {
-            const slugs = allArticles.filter((a) => a.category === key).map((a) => a.slug);
-            const progress = mounted ? getCategoryProgress(slugs) : { percent: 0, completed: 0, total: slugs.length };
-            return (
-              <Link
-                key={key}
-                href={`/learn?category=${key}`}
-                className="border border-zinc-200 rounded-xl p-4 bg-white hover:shadow-md hover:border-zinc-300 transition-all duration-200 text-center"
-              >
-                <div className="text-2xl mb-2">{meta.icon}</div>
-                <div className="text-sm font-medium text-zinc-800 mb-1">{meta.label}</div>
-                <div className="text-xs text-zinc-400">{progress.total} 篇</div>
-                {mounted && progress.total > 0 && (
-                  <div className="mt-2 h-1 bg-zinc-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-green-400 rounded-full transition-all"
-                      style={{ width: `${progress.percent}%` }}
-                    />
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+        <CategoryGrid categories={categories} categorySlugs={categorySlugs} />
       </section>
 
       {/* Recent articles */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-zinc-900">最近更新</h2>
-          <Link href="/learn" className="text-sm text-zinc-500 hover:text-zinc-900">
-            查看全部 ({allMerged.length}) →
-          </Link>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recentArticles.map((article) => (
-            <ArticleCard key={article.slug} article={article} />
-          ))}
-        </div>
-      </section>
+      <RecentArticles builtin={recent} totalBuiltin={allArticles.length} />
 
       {/* Features */}
       <section className="grid md:grid-cols-3 gap-6 mb-8">
@@ -141,7 +91,7 @@ export default function HomePage() {
           <div className="text-3xl mb-3">📚</div>
           <h3 className="font-semibold text-zinc-900 mb-2">结构化知识</h3>
           <p className="text-sm text-zinc-500">
-            {allMerged.length} 篇实战笔记，涵盖 DP-GEN 工作流到 VASP 调错，按类别组织
+            {allArticles.length} 篇实战笔记，涵盖 DP-GEN 工作流到 VASP 调错，按类别组织
           </p>
         </div>
         <div className="border border-zinc-200 rounded-xl p-6 bg-white text-center">

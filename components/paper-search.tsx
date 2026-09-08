@@ -87,13 +87,13 @@ export function PaperSearch() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索 arXiv 论文（如 deep potential molecular dynamics）..."
             autoComplete="on"
-            className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+            className="flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
             style={{ backgroundColor: "#fff", color: "#18181b" }}
           />
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="px-5 py-2.5 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 transition-colors shrink-0"
+            className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors shrink-0"
           >
             {loading ? "搜索中..." : "🔍 搜索"}
           </button>
@@ -107,7 +107,7 @@ export function PaperSearch() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             autoComplete="on"
-            className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
+            className="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             {DP_CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -186,7 +186,7 @@ export function PaperSearch() {
                     href={`https://arxiv.org/abs/${item.id}`}
                     target="_blank"
                     rel="noopener"
-                    className={`flex-1 truncate hover:text-blue-600 ${item.read ? "text-zinc-400 line-through" : "text-zinc-700"}`}
+                    className={`flex-1 truncate hover:text-indigo-600 ${item.read ? "text-zinc-400 line-through" : "text-zinc-700"}`}
                   >
                     {item.title}
                   </a>
@@ -258,7 +258,7 @@ export function PaperSearch() {
                               href={paper.abstractUrl}
                               target="_blank"
                               rel="noopener"
-                              className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100 font-medium"
+                              className="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 font-medium"
                             >
                               arXiv
                             </a>
@@ -320,7 +320,7 @@ export function PaperSearch() {
                         <p className="text-sm text-zinc-600 leading-relaxed">{paper.summary}</p>
                         {paper.doi && (
                           <p className="mt-2 text-xs text-zinc-400">
-                            DOI: <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener" className="text-blue-500 hover:underline">{paper.doi}</a>
+                            DOI: <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener" className="text-indigo-500 hover:underline">{paper.doi}</a>
                           </p>
                         )}
                         <div className="mt-3 text-xs text-zinc-400">
@@ -350,16 +350,16 @@ export function PaperSearch() {
         <div className="p-5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-3">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+              <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
             </div>
             <span className="text-sm font-medium text-zinc-700">正在搜索论文...</span>
           </div>
           {/* 进度条 */}
           <div className="flex gap-1 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
             <div
-              className="bg-blue-500 rounded-full transition-all duration-500"
+              className="bg-indigo-500 rounded-full transition-all duration-500"
               style={{ width: `${Math.max(10, progress.filter(p => p.status === "done").length * 33)}%` }}
             />
           </div>
@@ -369,8 +369,8 @@ export function PaperSearch() {
               const p = progress.find((x) => x.source === name);
               if (!p || p.status === "searching") {
                 return (
-                  <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
-                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                  <span key={name} className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                    <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
                     {name} 搜索中...
                   </span>
                 );

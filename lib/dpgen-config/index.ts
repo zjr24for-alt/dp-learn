@@ -1,7 +1,7 @@
 export { PARAM_SCHEMA } from "./param-schema";
 export type { ParamField } from "./param-schema";
-export { MACHINE_SCHEMA, getMachineDefaults } from "./machine-schema";
-export type { MachineSegment } from "./machine-schema";
+export { MACHINE_SCHEMA, getMachineDefaults, trySplitMachineJson } from "./machine-schema";
+export type { MachineSegment, SplitMachineResult } from "./machine-schema";
 export { INCAR_SCHEMA, getIncarDefaults, parseIncar, validateIncar } from "./incar-schema";
 
 export {
@@ -11,8 +11,12 @@ export {
   validateLammps,
   validateSubmitScript,
   runCrossChecks,
+  CHECK_CODES,
 } from "./validate";
 export type { CheckSeverity, CheckIssue, ValidationResult, CrossCheckParams } from "./validate";
+
+export { createJsonLineIndex } from "./json-lines";
+export type { JsonLineResolver } from "./json-lines";
 
 export {
   buildParamPrompt,
@@ -22,7 +26,7 @@ export {
   buildSubmitPrompt,
 } from "./prompts";
 
-export { extractJsonFromText, extractIncarFromText, extractPlainText } from "./extract";
+export { extractJsonFromText, extractIncarFromText, extractPlainText, sanitizeJsonString } from "./extract";
 export type { ExtractJsonResult } from "./extract";
 
 export { ELEMENT_MASSES, elementMass, normalizeElementSymbol, parseElements } from "./periodic-table";

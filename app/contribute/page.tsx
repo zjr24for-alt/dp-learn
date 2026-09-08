@@ -75,14 +75,14 @@ function ContributeContent() {
                   key={article.slug}
                   className={`flex items-center gap-4 p-4 border rounded-lg transition-colors ${
                     isActive
-                      ? "border-blue-300 bg-blue-50"
+                      ? "border-indigo-300 bg-indigo-50"
                       : "border-zinc-200 bg-white hover:border-zinc-300"
                   }`}
                 >
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/learn/${article.slug}`}
-                      className="font-medium text-zinc-900 hover:text-blue-600 transition-colors"
+                      className="font-medium text-zinc-900 hover:text-indigo-600 transition-colors"
                     >
                       {article.title}
                     </Link>
@@ -100,7 +100,7 @@ function ContributeContent() {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => setEditingArticle(article)}
-                      className="text-xs text-blue-600 hover:underline px-2 py-1"
+                      className="text-xs text-indigo-600 hover:underline px-2 py-1"
                     >
                       编辑
                     </button>

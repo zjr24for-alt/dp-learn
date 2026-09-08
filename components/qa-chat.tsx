@@ -5,10 +5,10 @@ import type { QASnippet } from "@/lib/search-qa";
 import { retrieveRelevant, buildContext } from "@/lib/search-qa";
 import { askAI, hasApiKey, setApiKey, clearApiKey, getApiKey } from "@/lib/ai-qa";
 import type { HistoryMessage } from "@/lib/ai-qa";
-import { allArticles, cheatsheetItems, officialDocs } from "@/content/index";
 import { getAllUserArticles } from "@/lib/user-content-store";
-import { renderMarkdown } from "@/lib/render-markdown";
-import type { Article } from "@/lib/types";
+import { Markdown } from "@/components/markdown";
+import { articleToSearchIndexItem } from "@/lib/search";
+import type { Article, SearchIndexItem } from "@/lib/types";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -17,7 +17,7 @@ interface Message {
   mode?: "search-only" | "ai-enhanced";
 }
 
-export function QAChat() {
+export function QAChat({ indexItems }: { indexItems: SearchIndexItem[] }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
@@ -94,9 +94,9 @@ export function QAChat() {
     const userMsg: Message = { role: "user", content: question };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Retrieve relevant snippets（合并内置文章和用户文章）
-    const mergedArticles = [...allArticles, ...userArticles];
-    const snippets = retrieveRelevant(question, mergedArticles, officialDocs, cheatsheetItems, 5);
+    // Retrieve relevant snippets（内置索引 + 用户文章）
+    const mergedItems = [...indexItems, ...userArticles.map(articleToSearchIndexItem)];
+    const snippets = retrieveRelevant(question, mergedItems, 5);
 
     if (snippets.length === 0 && !hasApiKey()) {
       // 无知识库结果 + 无 AI → 提示用户
@@ -217,12 +217,12 @@ export function QAChat() {
               onChange={(e) => setApiKeyInput(e.target.value)}
               placeholder="输入 DeepSeek API Key (sk-...)"
               autoComplete="off"
-              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-zinc-900 bg-white"
+              className="flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white"
               style={{ backgroundColor: "#fff", color: "#18181b" }}
             />
             <button
               onClick={handleSaveKey}
-              className="px-3 py-1.5 text-sm bg-zinc-900 text-white rounded-md hover:bg-zinc-800"
+              className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
             >
               保存
             </button>
@@ -238,15 +238,15 @@ export function QAChat() {
             <div
               className={`max-w-[85%] rounded-xl px-4 py-3 text-sm ${
                 msg.role === "user"
-                  ? "bg-blue-100 text-blue-900"
+                  ? "bg-indigo-100 text-indigo-900"
                   : msg.role === "system"
-                  ? "bg-blue-50 text-blue-800 border border-blue-100"
+                  ? "bg-indigo-50 text-indigo-800 border border-indigo-100"
                   : "bg-zinc-100 text-zinc-800"
               }`}
             >
-              <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-blue-600"
-                   dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
-              />
+              <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-indigo-600">
+                <Markdown content={msg.content} />
+              </div>
               {msg.mode === "ai-enhanced" && (
                 <span className="inline-block mt-2 text-xs text-zinc-400">✨ AI 生成</span>
               )}
@@ -278,14 +278,14 @@ export function QAChat() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="提问... 支持追问，AI 会记住上下文"
             autoComplete="on"
-            className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent bg-white"
+            className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
             style={{ backgroundColor: "#fff", color: "#18181b" }}
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             发送
           </button>

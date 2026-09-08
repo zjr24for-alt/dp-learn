@@ -1,7 +1,10 @@
 import type { IncarEntry } from "./incar-schema";
 import { parseIncar } from "./incar-schema";
 import { INCAR_SCHEMA } from "./incar-schema";
+import { PARAM_SCHEMA } from "./param-schema";
+import type { ParamField } from "./param-schema";
 import type { MachineSegment } from "./machine-schema";
+import { createJsonLineIndex } from "./json-lines";
 
 export type CheckSeverity = "error" | "warning" | "info";
 
@@ -10,6 +13,10 @@ export interface CheckIssue {
   message: string;
   path?: string;
   hint?: string;
+  /** 问题在源文本中的 1-based 行号（可定位跳转；缺失则退化为无跳转） */
+  line?: number;
+  /** 稳定的机器码，供就绪度门禁的冒烟清单匹配 */
+  code?: string;
 }
 
 export interface ValidationResult {
@@ -51,12 +58,122 @@ function isArr(v: unknown): v is unknown[] {
   return Array.isArray(v);
 }
 
-function createCtx() {
+/* ---------------------------------- 未知键检测 ---------------------------------- */
+
+type SchemaKeyMap = Map<string, Set<string>>;
+
+/** 由 ParamField[] 的 dotted keys 构建「父模板路径 → 允许的子键名」映射（`[]` 表示数组元素占位） */
+function buildKeyMap(fields: ParamField[]): SchemaKeyMap {
+  const map: SchemaKeyMap = new Map();
+  const push = (parent: string, child: string) => {
+    let s = map.get(parent);
+    if (!s) {
+      s = new Set();
+      map.set(parent, s);
+    }
+    s.add(child);
+  };
+  for (const f of fields) {
+    const segs = f.key.split(".");
+    const child = segs[segs.length - 1];
+    const parent = segs.slice(0, -1).join(".");
+    push(parent, child);
+  }
+  return map;
+}
+
+const PARAM_KEY_MAP = buildKeyMap(PARAM_SCHEMA);
+
+/** dpgen strict 模式不检查 `default_training_param` 内部：整体透传给 dp train，各版本 schema 不同 */
+const PARAM_OPAQUE = new Set(["default_training_param"]);
+
+function hasChildren(map: SchemaKeyMap, template: string): boolean {
+  const s = map.get(template);
+  return !!s && s.size > 0;
+}
+
+/**
+ * 递归检查对象节点中的未知键（dpgen ≥0.10.7 strict 模式会硬报错）。
+ * template：节点在 schema 中的模板路径（如 "" / "init_bulk" / "model_devi_jobs[]"）；
+ * display：节点在 JSON 中的实际显示路径（如 "" / "model_devi_jobs[0]"）。
+ */
+function checkUnknownParamKeys(
+  ctx: ReturnType<typeof createCtx>,
+  node: Record<string, unknown>,
+  template: string,
+  display: string
+) {
+  const allowed = PARAM_KEY_MAP.get(template);
+  for (const key of Object.keys(node)) {
+    const childTemplate = template ? `${template}.${key}` : key;
+    const childDisplay = display ? `${display}.${key}` : key;
+    if (allowed && allowed.has(key)) {
+      if (PARAM_OPAQUE.has(childTemplate)) continue;
+      const value = node[key];
+      if (isObj(value) && hasChildren(PARAM_KEY_MAP, childTemplate)) {
+        checkUnknownParamKeys(ctx, value, childTemplate, childDisplay);
+      } else if (isArr(value)) {
+        const elemTemplate = `${childTemplate}[]`;
+        if (hasChildren(PARAM_KEY_MAP, elemTemplate)) {
+          value.forEach((el, i) => {
+            if (isObj(el)) checkUnknownParamKeys(ctx, el, elemTemplate, `${childDisplay}[${i}]`);
+          });
+        }
+      }
+    } else {
+      ctx.add(
+        "error",
+        `未知字段 "${key}" 不在 dpgen strict 模式允许列表中（提交时会报错）`,
+        childDisplay,
+        "若确为 dpgen 合法字段，请补充 schema"
+      );
+    }
+  }
+}
+
+// machine.json 各块的合法键集合（条目层容忍平铺旧格式，即含 machine 块键）
+const MACHINE_ENTRY_KEYS = new Set([
+  "machine", "resources", "command", "api_version", "deepmd_version",
+  "user_forward_files", "user_backward_files",
+  "batch_type", "context_type", "local_root", "remote_root", "remote_profile",
+]);
+const MACHINE_BLOCK_KEYS = new Set(["batch_type", "context_type", "local_root", "remote_root", "remote_profile"]);
+const MACHINE_RESOURCES_KEYS = new Set([
+  "number_node", "cpu_per_node", "gpu_per_node", "queue_name", "group_size",
+  "custom_flags", "source_list", "module_list", "envs", "prepend_script", "append_script",
+]);
+const MACHINE_REMOTE_PROFILE_KEYS = new Set(["hostname", "port", "username", "key_filename", "execute_command"]);
+
+function checkUnknownKeysIn(
+  ctx: ReturnType<typeof createCtx>,
+  obj: Record<string, unknown>,
+  allowed: Set<string>,
+  base: string
+) {
+  for (const key of Object.keys(obj)) {
+    if (!allowed.has(key)) {
+      ctx.add("warning", `未知字段 "${key}"（不在 machine schema 中，请检查拼写）`, base ? `${base}.${key}` : key);
+    }
+  }
+}
+
+/** 由 path 解析 1-based 行号；解析不到返回 undefined（问题退化为无跳转） */
+type LineResolver = (path: string) => number | undefined;
+
+function createCtx(resolveLine?: LineResolver) {
   const issues: CheckIssue[] = [];
   let errorCount = 0;
   let warningCount = 0;
-  const add = (severity: CheckSeverity, message: string, path?: string, hint?: string) => {
-    issues.push({ severity, message, path, hint });
+  const add = (
+    severity: CheckSeverity,
+    message: string,
+    path?: string,
+    hint?: string,
+    line?: number,
+    code?: string
+  ) => {
+    const resolvedLine = line ?? (path ? resolveLine?.(path) : undefined);
+    issues.push({ severity, message, path, hint, line: resolvedLine, code });
     if (severity === "error") errorCount++;
     else if (severity === "warning") warningCount++;
   };
@@ -64,10 +181,29 @@ function createCtx() {
   return { add, result };
 }
 
+/** 就绪度门禁冒烟清单使用的稳定问题码（单一来源，避免字符串漂移） */
+export const CHECK_CODES = {
+  submitCrlf: "submit.crlf",
+  submitNoModule: "submit.no_module",
+  submitNoMpirun: "submit.no_mpirun",
+  submitNoPbsSbatch: "submit.no_pbs_sbatch",
+  submitNoLdLibrary: "submit.no_ld_library",
+  lammpsUnits: "lammps.units",
+} as const;
+
+/** 返回首个匹配文本行的 1-based 行号 */
+function firstMatchLine(text: string, re: RegExp): number | undefined {
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (re.test(lines[i])) return i + 1;
+  }
+  return undefined;
+}
+
 /* ---------------------------------- param.json ---------------------------------- */
 
 export function validateParamJson(jsonText: string): ValidationResult {
-  const ctx = createCtx();
+  const ctx = createCtx(createJsonLineIndex(jsonText));
 
   let root: unknown;
   try {
@@ -238,6 +374,12 @@ export function validateParamJson(jsonText: string): ValidationResult {
     ctx.add("warning", `init_fp_style 非法: "${p.init_fp_style}"（合法值: vasp/abacus）`, "init_fp_style");
   }
 
+  // use_ele_temp 必须为 0/1/2（dpgen 硬失败）
+  const useEleTemp = toNum(p.use_ele_temp);
+  if (useEleTemp !== null && ![0, 1, 2].includes(useEleTemp)) {
+    ctx.add("error", `use_ele_temp 必须为 0/1/2（当前: ${JSON.stringify(p.use_ele_temp)}）`, "use_ele_temp");
+  }
+
   // model_devi_f_trust_lo / hi
   const trustLo = p.model_devi_f_trust_lo;
   const trustHi = p.model_devi_f_trust_hi;
@@ -284,6 +426,23 @@ export function validateParamJson(jsonText: string): ValidationResult {
       const temps = isArr(j.temps) ? j.temps : [];
       const press = isArr(j.press) ? j.press : [];
       const ensemble = typeof j.ensemble === "string" ? j.ensemble : "";
+      // sys_idx 单个 job 内去重（dpgen 硬失败）
+      const sysIdxNums = (isArr(j.sys_idx) ? j.sys_idx : [])
+        .map((s) => toNum(s))
+        .filter((s): s is number => s !== null);
+      if (sysIdxNums.length !== new Set(sysIdxNums).size) {
+        ctx.add("error", `model_devi_jobs[${jobIdx}].sys_idx 含重复系统索引，dpgen 报 "system index should be uniq"`, `model_devi_jobs[${jobIdx}].sys_idx`);
+      }
+      // sys_idx 必须在 sys_configs 索引范围内
+      const sysConfigsLen = isArr(p.sys_configs) ? p.sys_configs.length : 0;
+      if (sysConfigsLen > 0) {
+        for (const s of sysIdxNums) {
+          if (s < 0 || s >= sysConfigsLen) {
+            ctx.add("error", `model_devi_jobs[${jobIdx}].sys_idx 含 ${s}，超出 sys_configs 索引范围 [0, ${sysConfigsLen - 1}]`, `model_devi_jobs[${jobIdx}].sys_idx`);
+            break;
+          }
+        }
+      }
       if (ensemble === "npt" && press.length === 0) {
         ctx.add("error", `model_devi_jobs[${jobIdx}] ensemble=npt 时必须提供 press（控压）`, `model_devi_jobs[${jobIdx}].press`);
       }
@@ -346,6 +505,43 @@ export function validateParamJson(jsonText: string): ValidationResult {
     ctx.add("warning", "model_devi_engine=lammps 但 model_devi_command 未包含 lmp", "model_devi_command");
   }
 
+  // training_init_* 三选一互斥（dpgen 硬失败）
+  const initModelKeys: string[] = [];
+  for (const k of ["training_init_model", "training_init_frozen_model", "training_finetune_model"]) {
+    if (p[k] !== undefined && p[k] !== null) initModelKeys.push(k);
+  }
+  if (initModelKeys.length > 1) {
+    ctx.add("error", `${initModelKeys.join("、")} 至多设置一个（当前设置 ${initModelKeys.length} 个，dpgen 互斥）`, initModelKeys[0]);
+  }
+
+  const numbM = toNum(p.numb_models);
+  // training_init_model 长度 = numb_models（dpgen 断言）
+  const tim = p.training_init_model;
+  if (isArr(tim) && numbM !== null && tim.length !== numbM) {
+    ctx.add("error", `training_init_model 长度 (${tim.length}) 必须等于 numb_models (${numbM})`, "training_init_model");
+  }
+  // model_devi_activation_func 长度 = numb_models（dpgen 断言）
+  const mdaf = p.model_devi_activation_func;
+  if (isArr(mdaf) && numbM !== null && mdaf.length !== numbM) {
+    ctx.add("error", `model_devi_activation_func 长度 (${mdaf.length}) 必须等于 numb_models (${numbM})`, "model_devi_activation_func");
+  }
+  // model_devi_numb_models 应等于 numb_models（dpgen 用它分组）
+  const mdNumb = toNum(p.model_devi_numb_models);
+  if (numbM !== null && mdNumb !== null && mdNumb !== numbM) {
+    ctx.add("warning", `model_devi_numb_models (${mdNumb}) 通常应等于 numb_models (${numbM})（用于 model_devi 分组）`, "model_devi_numb_models");
+  }
+  // init_batch_size 长度覆盖 init_data_sys（dpgen 不足项按 auto）
+  if (isArr(p.init_batch_size) && isArr(p.init_data_sys) && p.init_batch_size.length < p.init_data_sys.length) {
+    ctx.add(
+      "warning",
+      `init_batch_size 长度 (${p.init_batch_size.length}) 少于 init_data_sys (${p.init_data_sys.length})，缺失项按 "auto" 处理（dpgen 会警告）`,
+      "init_batch_size"
+    );
+  }
+
+  // dpgen strict 模式未知键检测（顶层 + init_bulk + model_devi_jobs[]）
+  checkUnknownParamKeys(ctx, p, "", "");
+
   return ctx.result();
 }
 
@@ -361,7 +557,20 @@ function normalizeContext(v: unknown): string {
 }
 
 export function validateMachineSegment(jsonText: string, segment: MachineSegment): ValidationResult {
-  const ctx = createCtx();
+  // 行解析：先查字面路径，再兼容 machine 块嵌套（`[0].local_root` → `[0].machine.local_root`）
+  const lineIndex = createJsonLineIndex(jsonText);
+  const resolveMachineLine: LineResolver = (path) => {
+    if (!path) return undefined;
+    const direct = lineIndex(path);
+    if (direct !== undefined) return direct;
+    const m = /^(\[[\d]+\])(.*)$/.exec(path);
+    if (m) {
+      const rest = m[2].replace(/^\./, "");
+      return lineIndex(m[1] + ".machine" + (rest ? "." + rest : ""));
+    }
+    return undefined;
+  };
+  const ctx = createCtx(resolveMachineLine);
 
   let parsed: unknown;
   try {
@@ -420,6 +629,34 @@ export function validateMachineSegment(jsonText: string, segment: MachineSegment
 
     const isSsh = contextType.toLowerCase() === "sshcontext";
 
+    // local_root 必须为 "./"（dpgen 提交时硬失败）
+    const localRoot = machine?.local_root ?? e.local_root;
+    if (localRoot === undefined || localRoot === null) {
+      ctx.add("error", "缺少 local_root（dpgen 提交时要求为 \"./\"）", `${path}.local_root`);
+    } else if (String(localRoot).trim() !== "./") {
+      ctx.add("error", `local_root 必须为 "./"（当前: ${JSON.stringify(localRoot)}），否则 dpgen 提交时直接报错`, `${path}.local_root`);
+    }
+
+    // api_version 若存在必须 ≥ 1.0（dpgen check_api_version 硬失败）
+    const apiVersion = e.api_version;
+    if (apiVersion !== undefined && apiVersion !== null) {
+      const av = toNum(apiVersion);
+      if (av !== null && av < 1.0) {
+        ctx.add("error", `api_version (${JSON.stringify(apiVersion)}) 必须 ≥ 1.0，dpgen 会校验`, `${path}.api_version`);
+      }
+    } else {
+      ctx.add("info", "建议显式声明 api_version: 1.0（dpgen 会校验）", `${path}.api_version`);
+    }
+
+    // deepmd_version 若存在必须在 1~3（dpgen 仅支持 DeePMD-kit 1.x~3.x）
+    const deepmdVersion = e.deepmd_version;
+    if (deepmdVersion !== undefined && deepmdVersion !== null) {
+      const dv = toNum(deepmdVersion);
+      if (dv !== null && (dv < 1 || dv > 3)) {
+        ctx.add("error", `deepmd_version (${JSON.stringify(deepmdVersion)}) 超出支持范围（1~3），dpgen 无法运行`, `${path}.deepmd_version`);
+      }
+    }
+
     // SSH: remote_root + remote_profile
     const remoteRoot = machine?.remote_root ?? e.remote_root;
     if (isSsh && (typeof remoteRoot !== "string" || remoteRoot.trim() === "")) {
@@ -453,6 +690,12 @@ export function validateMachineSegment(jsonText: string, segment: MachineSegment
     }
     const res = resources;
     const rPath = `${path}.resources`;
+
+    // 未知键检查（DPDispatcher 容忍多余键，防拼写错误 → warning）
+    checkUnknownKeysIn(ctx, e, MACHINE_ENTRY_KEYS, path);
+    if (machine) checkUnknownKeysIn(ctx, machine, MACHINE_BLOCK_KEYS, `${path}.machine`);
+    checkUnknownKeysIn(ctx, res, MACHINE_RESOURCES_KEYS, rPath);
+    if (isObj(remoteProfile)) checkUnknownKeysIn(ctx, remoteProfile, MACHINE_REMOTE_PROFILE_KEYS, `${path}.remote_profile`);
 
     for (const f of ["number_node", "cpu_per_node", "gpu_per_node", "group_size"] as const) {
       const v = res[f];
@@ -557,13 +800,14 @@ export function validateMachineSegment(jsonText: string, segment: MachineSegment
 /* ---------------------------------- INCAR_fp ---------------------------------- */
 
 export function validateIncarDeep(text: string): ValidationResult {
-  const ctx = createCtx();
-
   if (text.trim() === "") {
+    const ctx = createCtx();
     ctx.add("error", "INCAR 内容为空");
     return ctx.result();
   }
   const entries = parseIncar(text);
+  // 行解析：以参数键为 path，映射到该键所在行
+  const ctx = createCtx((key) => entries.find((e) => e.key === key)?.line);
   const byKey = new Map<string, IncarEntry[]>();
   for (const en of entries) {
     const arr = byKey.get(en.key) || [];
@@ -657,15 +901,16 @@ export function validateIncarDeep(text: string): ValidationResult {
 /* ---------------------------------- LAMMPS 输入脚本 ---------------------------------- */
 
 export function validateLammps(text: string): ValidationResult {
-  const ctx = createCtx();
-
-  const cmds: { cmd: string; args: string }[] = [];
-  for (const line of text.split("\n")) {
+  const cmds: { cmd: string; args: string; line: number }[] = [];
+  const lines = text.split("\n");
+  for (const [idx, line] of lines.entries()) {
     const noComment = line.split("#")[0].trim();
     if (noComment === "") continue;
     const parts = noComment.split(/\s+/);
-    cmds.push({ cmd: parts[0], args: parts.slice(1).join(" ") });
+    cmds.push({ cmd: parts[0], args: parts.slice(1).join(" "), line: idx + 1 });
   }
+  // 行解析：以命令名为 path，映射到该命令所在行
+  const ctx = createCtx((cmd) => cmds.find((c) => c.cmd === cmd)?.line);
   if (cmds.length === 0) {
     ctx.add("error", "LAMMPS 输入为空或无法解析");
     return ctx.result();
@@ -676,9 +921,9 @@ export function validateLammps(text: string): ValidationResult {
 
   const units = cmds.find((x) => x.cmd === "units");
   if (!units) {
-    ctx.add("error", "缺少 units 命令", "units", "DeePMD 必须使用 units metal");
+    ctx.add("error", "缺少 units 命令", "units", "DeePMD 必须使用 units metal", undefined, CHECK_CODES.lammpsUnits);
   } else if (!units.args.includes("metal")) {
-    ctx.add("error", `units 应为 metal（当前: ${units.args}）`, "units");
+    ctx.add("error", `units 应为 metal（当前: ${units.args}）`, "units", undefined, undefined, CHECK_CODES.lammpsUnits);
   }
 
   if (!pairStyleDeepmd) {
@@ -703,10 +948,10 @@ export function validateLammps(text: string): ValidationResult {
   if (!hasCmd("thermo")) ctx.add("warning", "缺少 thermo 命令", "thermo");
   if (!hasCmd("run")) ctx.add("warning", "缺少 run 命令（未定义 MD 步数）", "run");
 
-  const hasFixNvtNpt = cmds.some((x) => x.cmd === "fix" && /nvt|npt/.test(x.args));
+  const fixCmd = cmds.find((x) => x.cmd === "fix" && /nvt|npt/.test(x.args));
   const hasVelocitySeed = cmds.some((x) => x.cmd === "velocity" && x.args.includes("seed"));
-  if (hasFixNvtNpt && !hasVelocitySeed) {
-    ctx.add("warning", "存在 fix nvt/npt 但未设置 velocity ... seed（缺少随机种子）", "velocity");
+  if (fixCmd && !hasVelocitySeed) {
+    ctx.add("warning", "存在 fix nvt/npt 但未设置 velocity ... seed（缺少随机种子）", "velocity", undefined, fixCmd.line);
   }
 
   if (!hasCmd("dump")) ctx.add("info", "缺少 dump 命令（若轨迹由 DP-GEN 外部处理可忽略）", "dump");
@@ -728,15 +973,15 @@ export function validateSubmitScript(text: string): ValidationResult {
   const hasPbs = /^#PBS/m.test(text);
   const hasSbatch = /^#SBATCH/m.test(text);
   if (!hasPbs && !hasSbatch) {
-    ctx.add("warning", "未检测到 #PBS 或 #SBATCH 调度头（本地直接运行可忽略）", "");
+    ctx.add("warning", "未检测到 #PBS 或 #SBATCH 调度头（本地直接运行可忽略）", "", undefined, undefined, CHECK_CODES.submitNoPbsSbatch);
   }
 
   if (!/(mpirun|mpiexec|srun)/.test(text)) {
-    ctx.add("warning", "未检测到 mpirun/mpiexec/srun（并行计算作业通常需要）", "");
+    ctx.add("warning", "未检测到 mpirun/mpiexec/srun（并行计算作业通常需要）", "", undefined, undefined, CHECK_CODES.submitNoMpirun);
   }
 
   if (text.includes("vasp") && !text.includes("unset LD_LIBRARY_PATH")) {
-    ctx.add("warning", "调用 vasp 前建议 unset LD_LIBRARY_PATH，避免动态库污染导致 SIGSEGV", "", "在 mpirun 前加 unset LD_LIBRARY_PATH");
+    ctx.add("warning", "调用 vasp 前建议 unset LD_LIBRARY_PATH，避免动态库污染导致 SIGSEGV", "", "在 mpirun 前加 unset LD_LIBRARY_PATH", undefined, CHECK_CODES.submitNoLdLibrary);
   }
 
   if (hasPbs) {
@@ -747,7 +992,7 @@ export function validateSubmitScript(text: string): ValidationResult {
     if (!wallMatch) {
       ctx.add("warning", "#PBS 头缺少 walltime（如 #PBS -l walltime=85:00:00）", "");
     } else if (!/^\d+:\d{2}:\d{2}$/.test(wallMatch[1])) {
-      ctx.add("warning", `walltime 格式应为 HH:MM:SS（当前: ${wallMatch[1]}）`, "");
+      ctx.add("warning", `walltime 格式应为 HH:MM:SS（当前: ${wallMatch[1]}）`, "", undefined, firstMatchLine(text, /#PBS\s+-l\s+[^\n]*walltime=/));
     }
   }
 
@@ -757,15 +1002,15 @@ export function validateSubmitScript(text: string): ValidationResult {
     }
     const timeMatch = text.match(/--time=(\S+)/);
     if (timeMatch && !/^\d+:\d{2}:\d{2}$/.test(timeMatch[1])) {
-      ctx.add("warning", `--time 格式应为 HH:MM:SS（当前: ${timeMatch[1]}）`, "");
+      ctx.add("warning", `--time 格式应为 HH:MM:SS（当前: ${timeMatch[1]}）`, "", undefined, firstMatchLine(text, /--time=/));
     }
   }
 
   if (!/(module\s+load|source\s+)/.test(text)) {
-    ctx.add("info", "未检测到 module load / source 环境加载命令", "");
+    ctx.add("info", "未检测到 module load / source 环境加载命令", "", undefined, undefined, CHECK_CODES.submitNoModule);
   }
   if (text.includes("\r")) {
-    ctx.add("info", "文本含 CRLF（\\r），提交前建议 dos2unix 转为 LF", "");
+    ctx.add("info", "文本含 CRLF（\\r），提交前建议 dos2unix 转为 LF", "", undefined, firstMatchLine(text, /\r/), CHECK_CODES.submitCrlf);
   }
 
   return ctx.result();
@@ -780,6 +1025,11 @@ export interface CrossCheckParams {
 }
 
 export function runCrossChecks(params: CrossCheckParams): ValidationResult {
+  const paramLines = createJsonLineIndex(params.paramJson);
+  const machineLines: Partial<Record<MachineSegment, ReturnType<typeof createJsonLineIndex>>> = {};
+  for (const seg of ["train", "model_devi", "fp"] as const) {
+    machineLines[seg] = createJsonLineIndex(params.machineJsonBySegment[seg] ?? "");
+  }
   const ctx = createCtx();
 
   let p: Record<string, unknown>;
@@ -809,7 +1059,13 @@ export function runCrossChecks(params: CrossCheckParams): ValidationResult {
     const groupSize = toNum(trainEntry.resources.group_size);
     const numb = toNum(p.numb_models);
     if (groupSize !== null && numb !== null && groupSize !== numb) {
-      ctx.add("warning", `train 段 group_size (${groupSize}) 通常应等于 param.numb_models (${numb})`, "machine.train.resources.group_size");
+      ctx.add(
+        "warning",
+        `train 段 group_size (${groupSize}) 通常应等于 param.numb_models (${numb})`,
+        "machine.train.resources.group_size",
+        undefined,
+        machineLines.train?.("[0].resources.group_size")
+      );
     }
   }
 
@@ -818,7 +1074,7 @@ export function runCrossChecks(params: CrossCheckParams): ValidationResult {
   if (p.model_devi_engine === "lammps" && mdEntry) {
     const cmd = typeof mdEntry.command === "string" ? mdEntry.command : "";
     if (!cmd.includes("lmp")) {
-      ctx.add("warning", "param.model_devi_engine=lammps 但 machine model_devi 段 command 未调用 lmp", "machine.model_devi.command");
+      ctx.add("warning", "param.model_devi_engine=lammps 但 machine model_devi 段 command 未调用 lmp", "machine.model_devi.command", undefined, machineLines.model_devi?.("[0].command"));
     }
   }
 
@@ -827,7 +1083,7 @@ export function runCrossChecks(params: CrossCheckParams): ValidationResult {
   if (p.fp_style === "vasp" && fpEntry) {
     const cmd = typeof fpEntry.command === "string" ? fpEntry.command : "";
     if (!cmd.includes("vasp")) {
-      ctx.add("error", "param.fp_style=vasp 但 machine fp 段 command 未调用 vasp", "machine.fp.command");
+      ctx.add("error", "param.fp_style=vasp 但 machine fp 段 command 未调用 vasp", "machine.fp.command", undefined, machineLines.fp?.("[0].command"));
     }
   }
 
@@ -838,7 +1094,7 @@ export function runCrossChecks(params: CrossCheckParams): ValidationResult {
     const incarBool = toBool(incarKg.value);
     const paramBool = toBool(p.fp_kgamma);
     if (incarBool !== null && paramBool !== null && incarBool !== paramBool) {
-      ctx.add("warning", `INCAR KGAMMA (${incarKg.value}) 与 param.fp_kgamma (${JSON.stringify(p.fp_kgamma)}) 不一致`, "fp_kgamma");
+      ctx.add("warning", `INCAR KGAMMA (${incarKg.value}) 与 param.fp_kgamma (${JSON.stringify(p.fp_kgamma)}) 不一致`, "fp_kgamma", undefined, incarKg.line);
     }
   }
 
@@ -848,13 +1104,13 @@ export function runCrossChecks(params: CrossCheckParams): ValidationResult {
     const incarNum = toNum(incarKs.value);
     const paramNum = toNum(p.fp_kspacing);
     if (incarNum !== null && paramNum !== null && Math.abs(incarNum - paramNum) > 1e-9) {
-      ctx.add("info", `INCAR KSPACING (${incarKs.value}) 与 param.fp_kspacing (${JSON.stringify(p.fp_kspacing)}) 数值不一致（两者语义不同，请确认）`, "fp_kspacing");
+      ctx.add("info", `INCAR KSPACING (${incarKs.value}) 与 param.fp_kspacing (${JSON.stringify(p.fp_kspacing)}) 数值不一致（两者语义不同，请确认）`, "fp_kspacing", undefined, incarKs.line);
     }
   }
 
   // fp_incar 命名
   if (typeof p.fp_incar === "string" && p.fp_incar.trim() !== "" && !p.fp_incar.endsWith("INCAR_fp")) {
-    ctx.add("info", `param.fp_incar (${p.fp_incar}) 不是以 INCAR_fp 结尾，请确认与 INCAR 模板路径一致`, "fp_incar");
+    ctx.add("info", `param.fp_incar (${p.fp_incar}) 不是以 INCAR_fp 结尾，请确认与 INCAR 模板路径一致`, "fp_incar", undefined, paramLines("fp_incar"));
   }
 
   return ctx.result();

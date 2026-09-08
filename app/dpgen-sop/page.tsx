@@ -36,7 +36,7 @@ function ChecklistRow({ item, onToggle }: { item: { slug: string; label: string;
     <li className="flex items-center gap-3 py-1">
       <ProgressCheck slug={item.slug} onToggle={onToggle} />
       {item.href ? (
-        <Link href={item.href} className="text-sm text-zinc-700 hover:text-blue-600 hover:underline">
+        <Link href={item.href} className="text-sm text-zinc-700 hover:text-indigo-600 hover:underline">
           {item.label}
         </Link>
       ) : (
@@ -95,7 +95,7 @@ function StageCard({ stage, stageProgress, onToggle }: { stage: SopStage; stageP
         <div className="mb-4">
           <Link
             href={stage.cta.href}
-            className="inline-block px-4 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-800 transition-colors"
+            className="inline-block px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 transition-colors"
           >
             {stage.cta.label}
           </Link>

@@ -11,6 +11,28 @@ export interface ValidationGroup {
   skipped?: boolean;
 }
 
+export interface ValidationTotals {
+  errors: number;
+  warnings: number;
+  skipped: number;
+}
+
+/** 聚合所有校验组的总数（面板与就绪度门禁共用，避免重复逻辑） */
+export function countValidationTotals(groups: ValidationGroup[]): ValidationTotals {
+  let errors = 0;
+  let warnings = 0;
+  let skipped = 0;
+  for (const g of groups) {
+    if (g.skipped || !g.result) {
+      skipped++;
+      continue;
+    }
+    errors += g.result.errorCount;
+    warnings += g.result.warningCount;
+  }
+  return { errors, warnings, skipped };
+}
+
 const SEVERITY_BADGE: Record<CheckSeverity, string> = {
   error: "bg-red-100 text-red-700",
   warning: "bg-amber-100 text-amber-700",
@@ -23,22 +45,39 @@ const SEVERITY_LABEL: Record<CheckSeverity, string> = {
   info: "提示",
 };
 
-function IssueItem({ issue }: { issue: CheckIssue }) {
+function IssueItem({
+  issue,
+  groupId,
+  onJump,
+}: {
+  issue: CheckIssue;
+  groupId: string;
+  onJump?: (groupId: string, line: number) => void;
+}) {
   return (
     <li className="flex items-start gap-2 text-xs">
       <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium mt-0.5 ${SEVERITY_BADGE[issue.severity]}`}>
         {SEVERITY_LABEL[issue.severity]}
       </span>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <span className="text-slate-700">{issue.message}</span>
         {issue.path && <span className="ml-1.5 font-mono text-slate-400">{issue.path}</span>}
         {issue.hint && <div className="text-slate-400 mt-0.5">💡 {issue.hint}</div>}
       </div>
+      {typeof issue.line === "number" && onJump && (
+        <button
+          type="button"
+          onClick={() => onJump(groupId, issue.line as number)}
+          className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors mt-0.5"
+        >
+          <span className="font-mono">L{issue.line}</span>跳转
+        </button>
+      )}
     </li>
   );
 }
 
-function GroupRow({ group }: { group: ValidationGroup }) {
+function GroupRow({ group, onJump }: { group: ValidationGroup; onJump?: (groupId: string, line: number) => void }) {
   const [open, setOpen] = useState(false);
   const result = group.result;
 
@@ -86,7 +125,7 @@ function GroupRow({ group }: { group: ValidationGroup }) {
       {open && hasIssues && (
         <ul className="px-4 py-2.5 border-t border-slate-100 space-y-1.5">
           {result.issues.map((issue, i) => (
-            <IssueItem key={i} issue={issue} />
+            <IssueItem key={i} issue={issue} groupId={group.id} onJump={onJump} />
           ))}
         </ul>
       )}
@@ -94,17 +133,14 @@ function GroupRow({ group }: { group: ValidationGroup }) {
   );
 }
 
-export function ValidationPanel({ groups }: { groups: ValidationGroup[] }) {
-  const totals = useMemo(() => {
-    let errors = 0;
-    let warnings = 0;
-    for (const g of groups) {
-      if (!g.result) continue;
-      errors += g.result.errorCount;
-      warnings += g.result.warningCount;
-    }
-    return { errors, warnings };
-  }, [groups]);
+export function ValidationPanel({
+  groups,
+  onJumpToLine,
+}: {
+  groups: ValidationGroup[];
+  onJumpToLine?: (groupId: string, line: number) => void;
+}) {
+  const totals = useMemo(() => countValidationTotals(groups), [groups]);
 
   const summaryDot = totals.errors > 0 ? "bg-red-500" : totals.warnings > 0 ? "bg-amber-400" : "bg-green-500";
   const summaryText =
@@ -112,6 +148,8 @@ export function ValidationPanel({ groups }: { groups: ValidationGroup[] }) {
       ? `共 ${totals.errors} 个错误需要处理`
       : totals.warnings > 0
       ? `共 ${totals.warnings} 个警告，建议查看`
+      : totals.skipped > 0
+      ? `未填写 ${totals.skipped} 项，其余全部通过 ✓`
       : "全部通过 ✓";
 
   return (
@@ -126,7 +164,7 @@ export function ValidationPanel({ groups }: { groups: ValidationGroup[] }) {
       </div>
       <div className="space-y-1.5">
         {groups.map((g) => (
-          <GroupRow key={g.id} group={g} />
+          <GroupRow key={g.id} group={g} onJump={onJumpToLine} />
         ))}
       </div>
     </div>

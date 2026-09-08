@@ -1,8 +1,8 @@
 import Fuse from "fuse.js";
-import type { DocEntry, Article, CheatsheetItem } from "./types";
+import type { SearchIndexItem } from "./types";
 
 /**
- * 合并所有知识源（文章 + 官方文档 + 速查表），
+ * QA 检索：基于搜索索引项（服务端构建、RSC props 传入，含全文内容），
  * 用 Fuse.js 模糊检索 Top-N 最相关内容片段。
  */
 export interface QASnippet {
@@ -14,36 +14,27 @@ export interface QASnippet {
 }
 
 interface QADocument {
-  type: "article" | "doc" | "cheatsheet";
   title: string;
   snippet: string;
   url?: string;
   isOfficial: boolean;
   source: string;
-  tags: string;
-  // 用于 Fuse 检索的拼接字段
   searchText: string;
 }
 
-// 缓存 Fuse 实例避免每次提问重建（文档总数不变时复用）
+// 缓存 Fuse 实例避免每次提问重建（索引条目数不变时复用）
 let _qaFuse: Fuse<QADocument> | null = null;
 let _qaDocCount = 0;
 
 export function retrieveRelevant(
   question: string,
-  articles: Article[],
-  docs: DocEntry[],
-  cheatsheets: CheatsheetItem[],
+  items: SearchIndexItem[],
   topK = 5
 ): QASnippet[] {
-  if (!question.trim()) return [];
+  if (!question.trim() || items.length === 0) return [];
 
-  // 构建 Fuse 可搜索的文档列表（仅在文档数变化时重建）
-  const totalDocs = articles.length + docs.length + cheatsheets.length;
-  let documents: QADocument[];
-
-  if (_qaFuse && _qaDocCount === totalDocs) {
-    // 复用缓存的 Fuse 实例，直接搜索
+  // 复用缓存的 Fuse 实例，直接搜索
+  if (_qaFuse && _qaDocCount === items.length) {
     const results = _qaFuse.search(question.trim());
     return results.slice(0, topK).map((r) => ({
       title: r.item.title,
@@ -54,52 +45,29 @@ export function retrieveRelevant(
     }));
   }
 
-  // 重建索引
-  documents = [];
-
-  for (const article of articles) {
-    documents.push({
-      type: "article",
-      title: article.title,
-      snippet: article.summary || article.content.slice(0, 200),
-      url: `/learn/${article.slug}`,
-      isOfficial: false,
-      source: article.category,
-      tags: (article.tags || []).join(" "),
-      searchText: `${article.title} ${article.summary} ${article.content}`,
-    });
-  }
-
-  for (const doc of docs) {
-    documents.push({
-      type: "doc",
-      title: `[${doc.source.toUpperCase()}] ${doc.title}`,
-      snippet: doc.summary,
-      url: doc.url,
-      isOfficial: true,
-      source: doc.source,
-      tags: (doc.tags || []).join(" "),
-      searchText: `${doc.title} ${doc.summary} ${doc.content}`,
-    });
-  }
-
-  for (const cs of cheatsheets) {
-    documents.push({
-      type: "cheatsheet",
-      title: `📋 ${cs.label}`,
-      snippet: `${cs.description}\n\`\`\`\n${cs.code}\n\`\`\``,
-      url: "/cheatsheet",
-      isOfficial: false,
-      source: "cheatsheet",
-      tags: (cs.tags || []).join(" "),
-      searchText: `${cs.label} ${cs.description} ${cs.code}`,
-    });
-  }
+  // 重建索引（索引条目变化时）
+  const documents: QADocument[] = items.map((it) => {
+    const isOfficial = it.type === "doc";
+    let title = it.title;
+    if (isOfficial) {
+      const source = it.category.replace("official-", "").toUpperCase();
+      title = `[${source}] ${it.title}`;
+    } else if (it.type === "cheatsheet") {
+      title = `📋 ${it.title}`;
+    }
+    return {
+      title,
+      snippet: it.content.slice(0, 200),
+      url: it.url,
+      isOfficial,
+      source: it.category,
+      searchText: it.content,
+    };
+  });
 
   _qaFuse = new Fuse(documents, {
     keys: [
       { name: "title", weight: 3 },
-      { name: "tags", weight: 2 },
       { name: "searchText", weight: 1 },
     ],
     threshold: 0.45,
@@ -108,7 +76,7 @@ export function retrieveRelevant(
     minMatchCharLength: 1,
     ignoreLocation: true,
   });
-  _qaDocCount = totalDocs;
+  _qaDocCount = items.length;
 
   const results = _qaFuse.search(question.trim());
 

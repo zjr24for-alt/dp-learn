@@ -1,4 +1,4 @@
-import type { Article, CheatsheetItem, DocEntry, SearchIndexItem } from "@/lib/types";
+import type { Article, SearchIndexItem } from "@/lib/types";
 import { dpgenWorkflowArticles } from "./dpgen-workflow";
 
 import { deepmdTrainingArticles } from "./deepmd-training";
@@ -98,7 +98,7 @@ export function buildAllSearchIndex(): SearchIndexItem[] {
     items.push({
       id: article.slug,
       title: article.title,
-      content: article.summary + " " + (article.tags || []).join(" ") + " " + article.content.slice(0, 2000),
+      content: article.summary + " " + (article.tags || []).join(" ") + " " + article.content,
       category: article.category,
       url: `/learn/${article.slug}`,
       type: "article",

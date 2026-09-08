@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-export function CopyButton({ text }: { text: string }) {
+/** 复制按钮；className 可覆盖默认浅色样式（深色代码块传深色变体） */
+export function CopyButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -26,7 +27,9 @@ export function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors shrink-0"
+      className={`p-1.5 rounded-md transition-colors shrink-0 ${
+        className ?? "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
+      }`}
       title="复制"
     >
       {copied ? (

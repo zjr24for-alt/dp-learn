@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState, useMemo, useRef } from "react";
-import type { ParamField } from "@/lib/dpgen-config";
+import { useCallback, useState, useMemo, useRef, useEffect } from "react";
+import type { ParamField, CheckIssue, CheckSeverity } from "@/lib/dpgen-config";
 
 interface CodeEditorProps {
   value: string;
@@ -9,6 +9,14 @@ interface CodeEditorProps {
   schema: ParamField[];
   language: "json" | "incar" | "text";
   title: string;
+  /** 校验问题（带行号的用于行号槽高亮） */
+  issues?: CheckIssue[];
+  /** 聚焦到某 1-based 行（滚动到可视区） */
+  focusLine?: number | null;
+  /** 每次跳转递增，驱动滚动 effect 重新触发 */
+  focusNonce?: number;
+  /** 粘贴拦截：返回 true 阻止默认粘贴（父组件自行处理） */
+  onPaste?: (text: string) => boolean;
 }
 
 interface SchemaDocPanelProps {
@@ -109,7 +117,17 @@ function findParam(flatSchema: ParamField[], key: string): ParamField | null {
   return null;
 }
 
-export function CodeEditor({ value, onChange, schema, language, title }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  onChange,
+  schema,
+  language,
+  title,
+  issues = [],
+  focusLine = null,
+  focusNonce = 0,
+  onPaste,
+}: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const docPanelRef = useRef<HTMLDivElement>(null);
   const [docSearch, setDocSearch] = useState("");
@@ -117,6 +135,16 @@ export function CodeEditor({ value, onChange, schema, language, title }: CodeEdi
 
   const flatSchema = useMemo(() => flattenSchema(schema), [schema]);
   const docsEnabled = language !== "text";
+
+  // 粘贴拦截：父组件返回 true 时阻止默认插入
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!onPaste) return;
+      const text = e.clipboardData.getData("text");
+      if (onPaste(text)) e.preventDefault();
+    },
+    [onPaste]
+  );
 
   // Handle text selection to detect parameter names
   const handleSelect = useCallback(() => {
@@ -156,6 +184,29 @@ export function CodeEditor({ value, onChange, schema, language, title }: CodeEdi
 
   const lineCount = value.split("\n").length;
 
+  // 行号槽高亮：按行聚合最严重的问题（error > warning > info）
+  const lineMarks = useMemo(() => {
+    const map = new Map<number, CheckSeverity>();
+    const rank: Record<CheckSeverity, number> = { error: 3, warning: 2, info: 1 };
+    for (const issue of issues) {
+      if (typeof issue.line !== "number") continue;
+      const cur = map.get(issue.line);
+      if (!cur || rank[issue.severity] > rank[cur]) map.set(issue.line, issue.severity);
+    }
+    return map;
+  }, [issues]);
+
+  // 跳转到聚焦行：滚动 textarea 使该行位于可视区中部（行高 = leading-5 的 20px）
+  const appliedNonce = useRef(0);
+  useEffect(() => {
+    if (!focusLine || typeof focusLine !== "number") return;
+    if (focusNonce === appliedNonce.current) return;
+    appliedNonce.current = focusNonce;
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.scrollTop = Math.max(0, (focusLine - 1) * 20 - ta.clientHeight / 2 + 20);
+  }, [focusLine, focusNonce]);
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 h-full">
       {/* Left: Editor */}
@@ -172,15 +223,28 @@ export function CodeEditor({ value, onChange, schema, language, title }: CodeEdi
         <div className="relative border border-slate-200 rounded-lg overflow-hidden bg-white">
           {/* Line numbers + Editor side by side */}
           <div className="flex">
-            <div className="select-none text-right px-3 py-4 text-xs text-slate-300 font-mono leading-5 bg-slate-50 border-r border-slate-200 min-w-[3rem]">
-              {Array.from({ length: Math.max(lineCount, 1) }, (_, i) => (
-                <div key={i}>{i + 1}</div>
-              ))}
+            <div className="select-none text-right px-3 py-4 text-xs font-mono leading-5 bg-slate-50 border-r border-slate-200 min-w-[3rem]">
+              {Array.from({ length: Math.max(lineCount, 1) }, (_, i) => {
+                const line = i + 1;
+                const sev = lineMarks.get(line);
+                const isFocus = focusLine === line;
+                let cls = "text-slate-300";
+                if (isFocus) cls = "bg-blue-100 text-blue-700 font-bold";
+                else if (sev === "error") cls = "bg-red-100 text-red-700";
+                else if (sev === "warning") cls = "bg-amber-100 text-amber-700";
+                else if (sev === "info") cls = "bg-sky-100 text-sky-700";
+                return (
+                  <div key={line} className={cls}>
+                    {line}
+                  </div>
+                );
+              })}
             </div>
             <textarea
               ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
+              onPaste={handlePaste}
               onMouseUp={handleSelect}
               onKeyUp={handleSelect}
               onClick={handleSelect}

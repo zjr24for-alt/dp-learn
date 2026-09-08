@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { BackToTop } from "@/components/back-to-top";
 
-const geistSans = Geist({
+// 自托管 Geist 可变字体（latin 子集）：
+// 原 next/font/google 构建时需要访问 fonts.googleapis.com，在无外网/被墙环境构建会失败；
+// 改为 next/font/local 后构建完全离线、结果确定。字体文件与之前 Google 拉取的完全一致。
+const geistSans = localFont({
+  src: "./fonts/GeistVariable.woff2",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  display: "swap",
+  weight: "100 900",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVariable.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
+  weight: "100 900",
 });
 
 const SITE = {
