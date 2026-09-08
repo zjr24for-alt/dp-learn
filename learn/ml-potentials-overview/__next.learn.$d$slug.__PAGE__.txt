@@ -1,6 +1,91 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:Td97,# 机器学习势函数全景概述
+
+## 为什么要 ML 势
+
+| 方法 | 精度 | 速度 (atom·step) | 可跑体系 |
+|------|------|-----------------|---------|
+| DFT (VASP/QE) | 最高 | ~1 sec | ~100 atoms |
+| 经典力场 (EAM/ReaxFF) | 中 | ~1 μs | ~10⁶ atoms |
+| **ML 势** | **接近 DFT** | **~1-10 ms** | **~10⁵ atoms** |
+
+**ML 势 = DFT 精度 + 经典力场速度**（前提：在训练域内）。
+
+## 五大路线对比
+
+| | DeePMD | ACE | MTP | GAP | NNP (NequIP/MACE) |
+|---|---|---|---|---|---|
+| **架构** | 前馈 NN | 原子簇展开（线性） | 线性基函数展开 | 高斯过程回归 | 等变消息传递 NN |
+| **精度** | ★★★★ | ★★★★ | ★★★★ | ★★★★★ | ★★★★★ |
+| **速度** | ★★★★ | ★★★★★ | ★★★★ | ★★ | ★★★ |
+| **数据效率** | ★★★ | ★★★★ | ★★★★ | ★★★★★ | ★★★ |
+| **外推能力** | ★★★ | ★★★ | ★★★ | ★★★★★ | ★★ |
+| **多体描述** | 隐式 | 显式体序展开 | 显式 | 显式核函数 | 隐式+等变性 |
+| **典型软件** | DeepMD-kit | PACE, Julia-ACE | MLIP | QUIP/GAP | NequIP, MACE, Allegro |
+
+## 选型决策树
+
+```text
+数据量 > 10⁵ 帧，体系 > 1000 atoms → DeePMD（速度+可扩展性）
+数据量 < 10³ 帧，追求极致精度 → GAP（数据效率）
+中等数据，需要快速迭代 → ACE 或 MTP（训练快）
+需要跑大应变/极端条件 → GAP（外推最好）或 ACE（显式多体）
+周期性晶体，做声子/弹性 → 任意（都行），优先 DeePMD（社区大）
+```
+
+## 描述符（Descriptor）对比
+
+描述符将 3N 维原子坐标映射为旋转平移不变的向量：
+
+| 描述符 | 优点 | 缺点 | 使用者 |
+|--------|------|------|--------|
+| **se_e2_a** (DeepMD) | 生产验证最充分 | 对数据量要求较高 | DP-GEN / 大部分 DP 论文 |
+| **SOAP** (GAP) | 理论上最完备 | 计算贵 | GAP |
+| **ACSF/Behler** | 经典，可控 | 需要人工调节参数 | NNP, RuNNer |
+| **ACE 基函数** | 线性回归可求解 | 基组截断 | ACE |
+| **等变消息传递** | 自动学特征 | 训练贵，黑箱 | NequIP / MACE / Allegro |
+
+## 实际速度参考
+
+（单 GPU 推理，1000 atoms）
+
+| ML 势 | 速度 (step/s) | 相对 DFT 加速 |
+|--------|-------------|-------------|
+| DeePMD (se_e2_a) | ~10⁴ | ~10⁴× |
+| ACE (PACE) | ~10⁵ | ~10⁵× |
+| MTP | ~10⁴ | ~10⁴× |
+| GAP (SOAP) | ~10² | ~10²× |
+| NequIP (Allegro) | ~10³ | ~10³× |
+
+## 通用 MLIP 框架
+
+2024-2025 出现了多个"万能 MLIP"，类似 LLM 的 foundation model：
+
+| 模型 | 覆盖元素 | 架构 |
+|------|---------|------|
+| **MACE-MP-0** | 89 元素（全周期表） | MACE (等变 MPNN) |
+| **CHGNet** | 89 元素 | GNN + 磁矩 |
+| **SevenNet** | 89 元素 | Equiformer |
+| **MatterSim** | 全周期表 | GNN + 自监督 |
+| **ORB** | 全周期表 | Equiformer v2 |
+
+## 与 DP-GEN 的衔接
+
+DP-GEN 天然产出 DeePMD 势。如果要切换：
+
+```bash
+# DP-GEN 产出的数据 (set.xxx/) 可以直接用于：
+# - 训练 DeePMD（已有链路）
+# - 训练 ACE / MTP（需要格式转换）
+# - 精调 MACE / CHGNet（用 DP-GEN 标注数据做 fine-tune）
+
+# 格式转换工具
+dpdata set.000/xyz  → ASE Atoms → ACE/MTP 训练格式
+```
+
+> 目前最稳妥的路径还是 DP-GEN + DeePMD。通用 MLIP（MACE/CHGNet）适合快速筛选或初始猜测，正式发表论文前可以用 DP-GEN 精细标注。
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"机器学习势函数全景概述\",\"description\":\"DeePMD、ACE、MTP、GAP、NNP 五大 ML 势函数架构对比、选型指南、精度-速度-数据效率三角权衡\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"ML势函数, DeePMD, ACE, MTP, GAP, NNP, MACE, CHGNet\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"ml-potentials-overview","builtinArticle":{"slug":"ml-potentials-overview","title":"机器学习势函数全景概述","category":"atomistic-sim","summary":"DeePMD、ACE、MTP、GAP、NNP 五大 ML 势函数架构对比、选型指南、精度-速度-数据效率三角权衡","content":"$3","tags":["ML势函数","DeePMD","ACE","MTP","GAP","NNP","MACE","CHGNet"],"sourceFiles":["ml-potentials-overview.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"mc-materials-science","title":"蒙特卡洛方法在材料科学中的应用"},"nextArticle":{"slug":"ase-practical-workflow","title":"ASE 实战：结构操作与高通量计算"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

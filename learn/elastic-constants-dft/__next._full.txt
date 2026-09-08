@@ -1,20 +1,168 @@
-1:"$Sreact.fragment"
-2:I[63780,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"Navbar"]
-3:I[39756,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-4:I[37457,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-5:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-6:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
-a:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"ViewportBoundary"]
-c:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"MetadataBoundary"]
-e:I[68027,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default",1]
-:HL["/dp-learn/_next/static/chunks/09p0yn84u5atm.css","style"]
-:HL["/dp-learn/_next/static/media/797e433ab948586e-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/dp-learn/_next/static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"P":null,"c":["","learn","elastic-constants-dft"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","elastic-constants-dft","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/06jauabyjhbca.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L2",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":"DP Learn — 基于 DP-GEN + DeePMD + VASP + LAMMPS 的学习笔记 · 部署于 GitHub Pages"}]}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[["$","$L5",null,{"slug":"$undefined"}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true,"nonce":"$undefined"}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],{},null,false,null]},null,false,"$@9"]},null,false,"$@9"]},null,false,null],["$","$1","h",{"children":[null,["$","$La",null,{"children":"$Lb"}],["$","div",null,{"hidden":true,"children":["$","$Lc",null,{"children":["$","$7",null,{"name":"Next.Metadata","children":"$Ld"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$e",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"AoJz3IC3AuQsnD4hRAx1t"}
-f:[]
-9:"$Wf"
-b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-10:I[27201,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"IconMark"]
-8:null
-d:[["$","title","0",{"children":"DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"DP-GEN / DeePMD / VASP / LAMMPS 学习辅助网站，整合个人实战笔记与官方文档，支持智能问答与学习进度追踪"}],["$","link","2",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L10","3",{}]]
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","elastic-constants-dft"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","elastic-constants-dft","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:Tf25,# DFT 计算弹性常数与力学性质
+
+## 弹性常数矩阵
+
+对于一般晶体，弹性常数是 6×6 矩阵 Cij（Voigt 记号）：
+
+```text
+应力 σ_i = Σ_j C_{ij} × 应变 ε_j    (i,j = 1..6)
+```
+
+其中 1=xx, 2=yy, 3=zz, 4=yz, 5=xz, 6=xy。
+
+### 不同晶系的独立 Cij
+
+| 晶系 | 独立 Cij 数 | 关键分量 |
+|------|------------|---------|
+| 立方 | 3 | C11, C12, C44 |
+| 六方 | 5 | C11, C12, C13, C33, C44 |
+| 四方 | 6 | C11, C12, C13, C33, C44, C66 |
+| 正交 | 9 | 全部非对角线对 |
+| 三斜 | 21 | 全部可能 |
+
+## 应力-应变法流程
+
+```text
+1. 完全弛豫结构 → 得到平衡晶格
+2. 对每种应变模式施加 ±1%, ±2% 应变
+3. 对每个变形结构做静态计算 → 提取应力张量
+4. 用 σ = C·ε 线性拟合求 Cij
+```
+
+## VASP 实现
+
+### Step 1: 弛豫
+```bash
+# INCAR 弛豫设置
+IBRION = 2
+ISIF = 3       # 同时优化原子位置+晶格+体积
+NSW = 100
+EDIFFG = -0.001 # 力收敛标准 eV/Å
+ENCUT = 1.3 × ENMAX   # 略高于通常值（弹性对截断能敏感）
+PREC = Accurate
+```
+
+### Step 2: VASP 应变计算
+```bash
+# INCAR 弹性常数直接计算（IBRION=6 应力-应变法）
+IBRION = 6
+ISIF = 3
+NFREE = 2      # 每个方向 ±2 个位移
+POTIM = 0.015  # 位移幅度 Å
+```
+
+VASP 会自动施加对称应变，从 OUTCAR 提取：
+
+```bash
+grep "TOTAL ELASTIC MODULI" OUTCAR -A 20
+```
+
+### Step 3: 手动提取（如需更高精度）
+
+对每个晶格向量施加小幅应变：
+
+```python
+import numpy as np
+
+# 对 POSCAR 的晶格矩阵施加单轴/剪切应变
+def apply_strain(lattice, strain_type, delta):
+    """
+    strain_type: 'xx', 'yy', 'zz', 'yz', 'xz', 'xy'
+    delta: 应变大小 (如 0.01 = 1%)
+    """
+    eps = np.zeros((3, 3))
+    if strain_type == 'xx': eps[0, 0] = delta
+    elif strain_type == 'yy': eps[1, 1] = delta
+    elif strain_type == 'zz': eps[2, 2] = delta
+    elif strain_type == 'yz': eps[1, 2] = eps[2, 1] = delta / 2
+    elif strain_type == 'xz': eps[0, 2] = eps[2, 0] = delta / 2
+    elif strain_type == 'xy': eps[0, 1] = eps[1, 0] = delta / 2
+    return lattice @ (np.eye(3) + eps)
+
+# 对 delta = -0.02, -0.01, 0.01, 0.02 各跑一次静态
+# 提取应力张量 → 线性拟合 → Cij
+```
+
+## 从 Cij 到工程弹性模量
+
+### Voigt-Reuss-Hill (VRH) 近似
+
+```python
+import numpy as np
+
+def calc_moduli_vrh(C):
+    """立方晶系 VRH 平均"""
+    C11, C12, C44 = C[0,0], C[0,1], C[3,3]
+
+    # Voigt 上界 (等应变假设)
+    B_V = (C11 + 2*C12) / 3
+    G_V = (C11 - C12 + 3*C44) / 5
+
+    # Reuss 下界 (等应力假设)
+    S = np.linalg.inv(C)  # 柔度矩阵
+    S11, S12, S44 = S[0,0], S[0,1], S[3,3]
+    B_R = 1 / (3*S11 + 6*S12)
+    G_R = 5 / (4*S11 - 4*S12 + 3*S44)
+
+    # Hill 平均
+    B_H = (B_V + B_R) / 2
+    G_H = (G_V + G_R) / 2
+
+    # 杨氏模量和泊松比
+    E = 9*B_H*G_H / (3*B_H + G_H)
+    nu = (3*B_H - 2*G_H) / (2*(3*B_H + G_H))
+
+    return {
+        'B_V': B_V, 'B_R': B_R, 'B_H': B_H,  # GPa
+        'G_V': G_V, 'G_R': G_R, 'G_H': G_H,  # GPa
+        'E': E,                                 # GPa
+        'nu': nu,
+        'B_G_ratio': B_H / G_H                 # Pugh 判据
+    }
+```
+
+### Pugh 判据与机械稳定性
+
+| 判据 | 条件 | 含义 |
+|------|------|------|
+| Pugh 比 B/G | > 1.75 → 延性 | 体模量 vs 剪切模量 |
+| | < 1.75 → 脆性 | |
+| Cauchy 压力 C12 - C44 | > 0 → 金属键/延性 | 角向键强度 |
+| | < 0 → 共价键/脆性 | |
+
+**Born 稳定性判据（立方晶系）：**
+```text
+C11 - C12 > 0
+C11 + 2C12 > 0  （即 B > 0）
+C44 > 0
+```
+
+## 实战注意
+
+1. **截断能要足够高**：弹性常数对 ENCUT 敏感，推荐 ENCUT = 1.5 × max(ENMAX)
+2. **k 点要加密**：推荐密度 ≥ 40 Å
+3. **应变幅度要收敛**：试 0.5%, 1%, 2%，选 Cij 不随幅度变化的最小值
+4. **结构的 Ising 效应**：弛豫要收敛到每原子受力 < 0.001 eV/Å
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DFT 计算弹性常数与力学性质\",\"description\":\"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"弹性常数, Cij, VRH, 体模量, 剪切模量, 杨氏模量, Pugh判据\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"elastic-constants-dft","builtinArticle":{"slug":"elastic-constants-dft","title":"DFT 计算弹性常数与力学性质","category":"comp-materials","summary":"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比","content":"$13","tags":["弹性常数","Cij","VRH","体模量","剪切模量","杨氏模量","Pugh判据"],"sourceFiles":["elastic-constants-dft.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"band-structure-dos","title":"能带结构与态密度分析实战"},"nextArticle":{"slug":"phonon-thermodynamics","title":"声子谱与热力学性质计算"}}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"DFT 计算弹性常数与力学性质 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/elastic-constants-dft"}],["$","meta","6",{"property":"og:title","content":"DFT 计算弹性常数与力学性质"}],["$","meta","7",{"property":"og:description","content":"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/elastic-constants-dft"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-02"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-02"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"DFT 计算弹性常数与力学性质"}],["$","meta","14",{"name":"twitter:description","content":"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

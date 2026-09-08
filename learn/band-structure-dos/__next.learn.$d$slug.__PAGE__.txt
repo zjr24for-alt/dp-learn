@@ -1,6 +1,134 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:Td89,# 能带结构与态密度分析实战
+
+## 概念速览
+
+| 概念 | 核心信息 | 类比 |
+|------|---------|------|
+| 能带结构 | E(k) 色散关系，告诉电子在晶体中能做什么 | 高速公路速度限制图 |
+| 态密度 (DOS) | 在能量 E 附近有多少可用电子态 | 停车场每层有多少车位 |
+| 费米能级 E_F | T=0 K 电子占据的最高能量 | 水位线 |
+| 带隙 | 价带顶和导带底之间的能量差 | 绝缘区 |
+
+## VASP 计算流程
+
+```text
+Step 1: 结构优化（弛豫）
+  INCAR: IBRION=2, ISIF=3, NSW=100
+  → 得到平衡晶格常数
+
+Step 2: 静态计算（自洽 SCF）
+  INCAR: IBRION=-1, NSW=0, LCHARG=.TRUE.
+  → 得到 CHGCAR（电荷密度）
+
+Step 3: NSCF 能带计算
+  INCAR: ICHARG=11, LCHARG=.FALSE.
+  KPOINTS: 高对称路径（用 vaspkit 生成）
+  → 得到 EIGENVAL
+
+Step 4: DOS 计算
+  INCAR: ICHARG=11, LORBIT=11, NEDOS=2000
+  KPOINTS: 加密的 MP 网格
+  → 得到 DOSCAR
+```
+
+## KPOINTS 设置要点
+
+### 能带计算（高对称路径）
+```bash
+vaspkit -task 302   # 自动生成能带路径 KPOINTS
+```
+
+### DOS 计算（加密网格）
+```bash
+vaspkit -task 102   # 生成 KPOINTS，输入密度 0.03（比静态计算密 2-3 倍）
+```
+
+## 用 Python 画能带 + DOS
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from pymatgen.io.vasp import Vasprun, BSVasprun
+
+# --- 读取能带 ---
+bs = BSVasprun("band/vasprun.xml").get_band_structure()
+# bs.bands[spin][band_idx] 形状: (n_kpoints,)
+
+# --- 读取 DOS ---
+dosrun = Vasprun("dos/vasprun.xml")
+dos = dosrun.complete_dos
+# dos.energies, dos.densities[spin] 形状: (n_energies,)
+
+# --- 画图 ---
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), gridspec_kw={'width_ratios': [3, 1]})
+
+# 能带图
+for band in bs.bands[0]:
+    ax1.plot(range(len(band)), band - bs.efermi, 'b-', lw=0.8)
+ax1.axhline(y=0, color='r', ls='--', lw=1, label='E_F')
+ax1.set_ylabel('E - E_F (eV)')
+ax1.set_xticks(bs.get_kpoint_indices())
+ax1.set_xticklabels([l.replace('GAMMA', 'Γ') for l in bs.kpoints_labels])
+ax1.set_ylim(-5, 5)
+
+# DOS 图
+ax2.plot(dos.densities[0], dos.energies - dos.efermi, 'b-')
+ax2.axhline(y=0, color='r', ls='--', lw=1)
+ax2.set_xlabel('DOS')
+ax2.set_ylim(-5, 5)
+
+plt.tight_layout()
+plt.savefig('band_dos.png', dpi=300)
+```
+
+## 能带/DOS 解读
+
+### 带隙类型
+| 类型 | k 空间特征 | 材料举例 |
+|------|----------|---------|
+| 直接带隙 | VBM 和 CBM 在同一 k 点 | GaAs, MAPbI₃ |
+| 间接带隙 | VBM 和 CBM 在不同 k 点 | Si, Ge, TiO₂ |
+
+### 有效质量
+```text
+m* = ℏ² / (d²E/dk²)
+```
+
+从能带曲率判断：
+- **平带** → 大有效质量 → 电子"重"（d/f 电子）
+- **陡带** → 小有效质量 → 电子"轻"（s/p 电子）
+
+### DOS 中看什么
+```text
+1. 费米能级附近是否为零 → 判断金属/绝缘体
+2. 带隙大小（VBM-CBM 距离）
+3. 轨道投影 → s, p, d 轨道贡献占比
+4. 峰高低 → 态密度集中程度（van Hove 奇点）
+```
+
+## 轨道投影 DOS（pDOS）
+
+INCAR 设置：
+```bash
+LORBIT = 11    # 输出 lm 分解的 DOS（PROCAR）
+```
+
+用 pymatgen 提取 pDOS 画堆叠图：
+```python
+from pymatgen.io.vasp import Vasprun
+
+dosrun = Vasprun("vasprun.xml")
+pdos = dosrun.complete_dos.get_element_dos()
+# pdos['Ti'].densities, pdos['Ti'].energies → 按元素/轨道绘制
+```
+
+> 实战技巧：做能带前一定先做精细弛豫！能带对晶格常数非常敏感，结构差 0.5% 能带能差出 0.1-0.2 eV。
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"能带结构与态密度分析实战\",\"description\":\"从 VASP 输出提取能带和态密度数据，用 Python 画图并解读电子结构特征（带隙/有效质量/轨道投影）\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"能带结构, 态密度, DOS, 电子结构, VASP, pymatgen, 带隙\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"band-structure-dos","builtinArticle":{"slug":"band-structure-dos","title":"能带结构与态密度分析实战","category":"comp-materials","summary":"从 VASP 输出提取能带和态密度数据，用 Python 画图并解读电子结构特征（带隙/有效质量/轨道投影）","content":"$3","tags":["能带结构","态密度","DOS","电子结构","VASP","pymatgen","带隙"],"sourceFiles":["band-structure-dos.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"dft-materials-intro","title":"DFT 与材料计算基础"},"nextArticle":{"slug":"elastic-constants-dft","title":"DFT 计算弹性常数与力学性质"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

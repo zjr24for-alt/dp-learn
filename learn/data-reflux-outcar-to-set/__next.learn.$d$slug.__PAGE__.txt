@@ -1,6 +1,86 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:Taf0,# 数据回流：OUTCAR → set.xxx
+
+## 流程
+
+1. 收集 `02.fp` 下所有 task 目录的 OUTCAR
+2. 用 dpdata 提取能量、力、应力
+3. 转换为 DeePMD 训练格式
+
+## 核心代码
+
+```python
+import dpdata
+import numpy as np
+from pathlib import Path
+
+# ── 收集所有 OUTCAR ──────────────────────────────────────────────
+# DP-GEN 每轮 FP 标注后，task 目录下会有 OUTCAR 文件
+systems = []
+failed_tasks = []  # 记录失败的 task
+
+for task_dir in sorted(Path("iter.000000/02.fp").glob("task.*")):
+    outcar = task_dir / "OUTCAR"
+    if not outcar.exists():
+        failed_tasks.append(task_dir.name)
+        continue
+
+    try:
+        # fmt="vasp/outcar" 告诉 dpdata 按 VASP OUTCAR 格式解析
+        # 解析内容：能量(eV)、力(eV/Å)、应力(kB)
+        s = dpdata.LabeledSystem(str(outcar), fmt="vasp/outcar")
+        if len(s) > 0:  # 确保有有效帧
+            systems.append(s)
+        else:
+            failed_tasks.append(task_dir.name)
+    except Exception as e:
+        # OUTCAR 不完整（VASP 崩溃/超时）时会解析失败
+        print(f"跳过 {task_dir.name}: {e}")
+        failed_tasks.append(task_dir.name)
+
+print(f"成功: {len(systems)} 个 task, 失败: {len(failed_tasks)} 个")
+
+# ── 合并并保存 ───────────────────────────────────────────────────
+# dpdata 用 append() 做帧级拼接（不是数组级拼接）
+merged = systems[0]
+for s in systems[1:]:
+    merged.append(s)
+
+# to_deepmd_npy() 生成 DeePMD 训练所需的 numpy 文件
+# 输出目录结构：
+#   set.001/
+#   ├── box.npy      # 晶胞向量 (n_frames, 9)
+#   ├── coord.npy    # 原子坐标 (n_frames, n_atoms*3)
+#   ├── energy.npy   # 总能量 (n_frames,)
+#   ├── force.npy    # 原子力 (n_frames, n_atoms*3)
+#   └── virial.npy   # 应力张量 (n_frames, 9)
+merged.to_deepmd_npy("set.001")
+```
+
+## 输出格式
+
+```text
+set.001/
+├── box.npy      # 晶胞向量 (n_frames, 9)
+├── coord.npy    # 原子坐标 (n_frames, n_atoms*3)
+├── energy.npy   # 总能量 (n_frames,)
+├── force.npy    # 原子力 (n_frames, n_atoms*3)
+├── virial.npy   # 应力张量 (n_frames, 9)
+└── type.raw     # 原子类型映射
+```
+
+## 数据合并
+
+第二轮训练时，训练集 = set.000（初始数据）+ set.001（新标注数据），
+模型在更大的数据集上重训，偏差范围收窄。
+
+## 注意事项
+
+- 确保 type_map 一致（Ti→0, C→1）
+- 检查 virial 是否提取成功（某些旧版 VASP OUTCAR 不含 virial）
+- 如果标注失败（OUTCAR 不完整），该 task 应跳过
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"数据回流：OUTCAR → set.xxx\",\"description\":\"如何将 VASP 标注产出的 OUTCAR 转换成下一轮训练可用的 set.xxx 格式\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"deepmd, 数据回流, OUTCAR, dpdata, 训练集\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"data-reflux-outcar-to-set","builtinArticle":{"slug":"data-reflux-outcar-to-set","title":"数据回流：OUTCAR → set.xxx","category":"deepmd-training","summary":"如何将 VASP 标注产出的 OUTCAR 转换成下一轮训练可用的 set.xxx 格式","content":"$3","tags":["deepmd","数据回流","OUTCAR","dpdata","训练集"],"sourceFiles":["工作流程以及模版文件夹.md"],"createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"committee-model","title":"Committee Model 策略"},"nextArticle":{"slug":"deepmd-quick-start","title":"DeePMD 快速上手：从数据到势函数"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

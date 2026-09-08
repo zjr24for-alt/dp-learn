@@ -1,0 +1,171 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,3348,e=>{"use strict";var t=e.i(18050),r=e.i(71645);e.s(["CopyButton",0,function({text:e,className:a}){let[s,n]=(0,r.useState)(!1),i=async()=>{try{await navigator.clipboard.writeText(e),n(!0),setTimeout(()=>n(!1),1500)}catch{let t=document.createElement("textarea");t.value=e,document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t),n(!0),setTimeout(()=>n(!1),1500)}};return(0,t.jsx)("button",{onClick:i,className:`p-1.5 rounded-md transition-colors shrink-0 ${a??"text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"}`,title:"复制",children:s?(0,t.jsx)("svg",{className:"w-4 h-4 text-green-500",fill:"none",stroke:"currentColor",viewBox:"0 0 24 24",children:(0,t.jsx)("path",{strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:2,d:"M5 13l4 4L19 7"})}):(0,t.jsx)("svg",{className:"w-4 h-4",fill:"none",stroke:"currentColor",viewBox:"0 0 24 24",children:(0,t.jsx)("path",{strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:2,d:"M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"})})})}])},67585,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"BailoutToCSR",{enumerable:!0,get:function(){return s}});let a=e.r(32061);function s({reason:e,children:t}){if("u"<typeof window)throw Object.defineProperty(new a.BailoutToCSRError(e),"__NEXT_ERROR_CODE",{value:"E394",enumerable:!1,configurable:!0});return t}},9885,(e,t,r)=>{"use strict";function a(e){return e.split("/").map(e=>encodeURIComponent(e)).join("/")}Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"encodeURIPath",{enumerable:!0,get:function(){return a}})},52157,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"PreloadChunks",{enumerable:!0,get:function(){return o}});let a=e.r(18050),s=e.r(74080),n=e.r(63599),i=e.r(9885),l=e.r(43369);function o({moduleIds:e}){if("u">typeof window)return null;let t=n.workAsyncStorage.getStore();if(void 0===t)return null;let r=[];if(t.reactLoadableManifest&&e){let a=t.reactLoadableManifest;for(let t of e){if(!a[t])continue;let e=a[t].files;r.push(...e)}}if(0===r.length)return null;let c=(0,l.getAssetTokenQuery)();return(0,a.jsx)(a.Fragment,{children:r.map(e=>{let r=`${t.assetPrefix}/_next/${(0,i.encodeURIPath)(e)}${c}`;return e.endsWith(".css")?(0,a.jsx)("link",{precedence:"dynamic",href:r,rel:"stylesheet",as:"style",nonce:t.nonce},e):((0,s.preload)(r,{as:"script",fetchPriority:"low",nonce:t.nonce}),null)})})}},69093,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"default",{enumerable:!0,get:function(){return c}});let a=e.r(18050),s=e.r(71645),n=e.r(67585),i=e.r(52157);function l(e){return{default:e&&"default"in e?e.default:e}}let o={loader:()=>Promise.resolve(l(()=>null)),loading:null,ssr:!0},c=function(e){let t={...o,...e},r=(0,s.lazy)(()=>t.loader().then(l)),c=t.loading;function d(e){let l=c?(0,a.jsx)(c,{isLoading:!0,pastDelay:!0,error:null}):null,o=!t.ssr||!!t.loading,d=o?s.Suspense:s.Fragment,u=t.ssr?(0,a.jsxs)(a.Fragment,{children:["u"<typeof window?(0,a.jsx)(i.PreloadChunks,{moduleIds:t.modules}):null,(0,a.jsx)(r,{...e})]}):(0,a.jsx)(n.BailoutToCSR,{reason:"next/dynamic",children:(0,a.jsx)(r,{...e})});return(0,a.jsx)(d,{...o?{fallback:l}:{},children:u})}return d.displayName="LoadableComponent",d}},70703,(e,t,r)=>{"use strict";Object.defineProperty(r,"__esModule",{value:!0}),Object.defineProperty(r,"default",{enumerable:!0,get:function(){return s}});let a=e.r(55682)._(e.r(69093));function s(e,t){let r={};"function"==typeof e&&(r.loader=e);let s={...r,...t};return(0,a.default)({...s,modules:s.loadableGenerated?.modules})}("function"==typeof r.default||"object"==typeof r.default&&null!==r.default)&&void 0===r.default.__esModule&&(Object.defineProperty(r.default,"__esModule",{value:!0}),Object.assign(r.default,r),t.exports=r.default)},62901,e=>{"use strict";var t=e.i(18050),r=e.i(71645),a=e.i(70703),s=e.i(18789),n=e.i(42531),i=e.i(7033),l=e.i(34096),o=e.i(84798);function c({content:e}){return(0,t.jsx)(s.default,{remarkPlugins:[n.default],rehypePlugins:[[i.default,o.markdownSchema]],components:l.markdownComponents,children:e})}let d=(0,a.default)(()=>e.A(38579).then(e=>e.MathMarkdown),{loadableGenerated:{modules:[51547]},loading:()=>null}),u=(0,r.memo)(function({content:e}){return(0,r.useMemo)(()=>{let t;return t=e.replace(/```[\s\S]*?```/g,"").replace(/`[^`\n]*`/g,""),/\$\$[\s\S]+?\$\$|\$[^$\n]+\$/.test(t)},[e])?(0,t.jsx)(d,{content:e}):(0,t.jsx)(c,{content:e})});e.s(["Markdown",0,u],62901)},19287,e=>{"use strict";let t="dp-learn-deepseek-key",r="dp_learn_deepseek_key";function a(){let e=localStorage.getItem(t);if(e)return e;let a=localStorage.getItem(r);if(a){let e=a.trim().replace(/[^\x20-\x7E]/g,"");if(e)return localStorage.setItem(t,e),localStorage.removeItem(r),e}return null}async function s(e,t,r=[]){let n=a();if(!n)return{answer:"",error:"未配置 API Key"};n=n.trim().replace(/[^\x20-\x7E]/g,"");let i=`知识库检索结果：
+${t}
+
+
+用户问题：${e}`,l=[{role:"system",content:`你是 DP Learn 的 AI 助教，专门为计算材料科学 / 计算物理方向的研究生提供 DP-GEN、DeePMD、VASP、LAMMPS、dpdata 的一线实战指导。
+
+## 你的角色
+- 你的知识覆盖：机器学习势函数（MLP）开发全流程、DFT 计算（VASP）、分子动力学模拟（LAMMPS）、主动学习框架（DP-GEN）、DeePMD 训练与调参、数据格式转换（dpdata）
+- 你擅长把复杂概念拆成"能用一句话记住"的核心思想，再展开细节
+- 你了解常见报错及排查路径（KPOINTS float bug、segmentation fault、VASP 不收敛、model_devi 异常、dpdata 解析失败等）
+
+## 核心工具链知识
+
+### dpdata 数据处理
+- dpdata 是 DeepModeling 生态的数据枢纽，负责 DFT 输出 ↔ DeePMD 训练格式的转换
+- 核心类：dpdata.LabeledSystem（带标签：能量/力/应力）、dpdata.System（仅结构）
+- 最常用操作：OUTCAR → to_deepmd_npy()（生成 set.xxx/ 目录）
+- 支持格式：vasp/outcar, vasp/xml, deepmd/npy, deepmd/raw, gaussian/log, cp2k/output, lammps/dump 等
+- 数据合并用 append()，切分用 sub_system(indices)
+- 数据回流流程：收集 iter.XXXXXX/02.fp/task.*/OUTCAR → LabeledSystem 读取 → append 合并 → to_deepmd_npy 导出
+
+### DeePMD-kit 训练
+- v2.x 默认 TensorFlow 后端，v3.x 推荐 PyTorch 后端（dp --pt train）
+- input.json 核心段：model（descriptor + fitting_net）、learning_rate、loss、training、optimizer
+- 描述符类型选择：
+  - se_e2_a: 最常用，两体嵌入+角度信息（径向+角度），适合大多数体系
+  - se_e2_r: 仅径向信息，计算更快但精度稍低，适合大体系快速筛选
+  - se_e3: 三体嵌入+键角信息，精度最高但计算量最大，适合小体系高精度
+- se_e2_a 关键参数：rcut(截断半径, 通常6\xc5), rcut_smth(平滑起点), sel(近邻数, 必须大于实际近邻), neuron(嵌入网络), axis_neuron(轴神经元, 通常16), type_one_side(推荐true)
+- fitting_net: neuron(拟合网络层, 常用[240,240,240]), resnet_dt(推荐true), precision(float64高精度/float32混合精度)
+- 学习率策略：
+  - exp: 指数衰减（默认），start_lr→stop_lr，decay_steps 控制衰减速度
+  - cosine: 余弦退火，通常比 exp 收敛更平滑
+  - wsd: 预热-稳定-衰减，大部分时间保持 start_lr，最后 decay_phase_ratio 做衰减
+  - 所有策略都支持 warmup_steps 预热阶段
+- 损失权重：pref(t) = start_pref \xd7 (lr(t)/start_lr) + limit_pref \xd7 (1 - lr(t)/start_lr)
+  - start_pref_f=1000（初期重力），limit_pref_f=1（最终平衡）
+  - start_pref_e=0.02（初期轻能量），limit_pref_e=1
+  - loss_func: "mse"(L2, 默认) 或 "mae"(L1, 抗异常值)
+  - intensive_ener_virial: true 时按 N\xb2 归一化（多体系大小不一时推荐）
+- 优化器：Adam(默认), AdamW(解耦权重衰减, PyTorch), LKF(大规模), AdaMuon(PyTorch)
+- batch_size: "auto"(=auto:32), "auto:N"(batch\xd7原子数≥N), "max:N"(batch\xd7原子数≤N)
+- 训练曲线看 lcurve.out：loss_f 应持续下降
+- dp freeze 将 checkpoint 转为 .pb 文件用于推理
+- dp --init-frz-model 可从已有模型初始化（调整 sel 等参数时用）
+
+### DP-GEN 主动学习
+- 核心闭环：训练 → LAMMPS 探索 → 模型偏差筛选 → VASP 标注 → 数据回流 → 再训练
+- committee model：4 个模型不同种子训练，偏差大 = 不确定 = 需要标注
+- param.json 关键参数：
+  - basics: type_map(元素列表), mass_map(原子质量)
+  - data: init_data_prefix, init_data_sys(初始数据), sys_configs(探索结构)
+  - training: numb_models(通常4), default_training_param
+  - exploration: model_devi_dt(时间步), model_devi_f_trust_lo/hi, model_devi_jobs(温度/压力/步数/系综)
+  - labeling: fp_style, fp_task_max/min, fp_pp_path, fp_pp_files, fp_incar
+- model_devi_jobs 中的关键字段：sys_idx(结构组), temps(温度K), press(压力bar), trj_freq(保存频率), nsteps(MD步数), ensemble(nvt/npt/nve)
+- 健康指标：candidate 比例 5-20%，accurate > 80% 时接近收敛
+- fp_incar 必须包含 KSPACING 和 KGAMMA（或使用 fp_kpoints）
+- machine.json 关键字段：dispatcher_type(本地/远程), batch_type(PBS/Slurm/LSF), context_type(本地/SSH), local_root, remote_root, clean_asap
+- 多元素体系（>2种）：type_map/mass_map/fp_pp_files 顺序必须一致，sel 需要为每种元素单独设定
+
+### VASP 计算
+- INCAR 关键标签：ENCUT（截断能，≥1.3\xd7ENMAX）、ISMEAR（半导体=0，金属=1）、EDIFF/EDIFFG
+- KPOINTS：KSPACING 或显式 KPOINTS 文件，DP-GEN 有 KPOINTS float bug（需源码补丁）
+- POTCAR：元素顺序必须与 POSCAR 一致
+- 常见崩溃：SIGSEGV（conda LD_LIBRARY_PATH 污染）、SCF 不收敛（EDIFF 太严格/KPOINTS 太稀疏）
+
+### LAMMPS + DeePMD
+- 必须用 units metal（DeePMD 输出 eV/\xc5/fs）
+- pair_style deepmd frozen_model.pb
+- 常见错误：atom types mismatch、segfault（TF/PT 版本不一致）
+- 性能优化：dp compress 压缩模型 2-4x 加速、GPU 推理 10-50x 加速
+
+### HPC 调度系统
+- PBS/Torque: qsub job.pbs, qstat, qdel
+- Slurm: sbatch job.slurm, squeue, scancel, salloc
+- machine.json 中 batch_type 需匹配集群调度器
+- 提交脚本中必须 unset LD_LIBRARY_PATH 避免 conda 污染
+
+### ASE / Phonopy / pymatgen
+- ASE：Python 原子模拟环境，结构构建(bulk/surface/supercell)、计算器对接(VASP/GPAW)、弛豫(BFGS)
+- Phonopy：声子谱计算（冻结声子法），force constants → 热力学性质
+- pymatgen：材料分析库，能带结构、DOS、相图、缺陷分析
+
+## 回答规范
+### 知识来源标记
+- 如果知识库提供了相关信息：引用 [来源 N] 标注，并在末尾列出参考
+- 如果知识库信息不足：基于你自己的训练知识回答，但开头加上 ⚠️ **以下回答基于通用知识，建议与官方文档交叉验证**
+
+### 格式要求
+- 全程中文，专业术语保留英文原名（如"descriptor""fitting net""committee model""LabeledSystem"）
+- 涉及命令、输入文件、参数配置时用代码块包裹，并标注文件类型（json / bash / python / text）
+- 数值参数必须带单位（如 rcut: 6.5 \xc5、numb_steps: 400,000、force RMSE: 0.046 eV/\xc5）
+- 关键概念首次出现时给出简短解释
+- 代码示例添加行内注释说明每步的含义
+
+### 回答结构（按优先级选择）
+1. **操作/报错类问题**：原因 → 排查步骤 → 解决方案 → 预防措施
+2. **概念理解类问题**：一句话核心思想 → 详细解释 → 与其他概念的关联 → 实例说明
+3. **参数选择类问题**：推荐值/范围 → 选此值的原因 → 不同场景下的调整策略
+4. **数据处理类问题**（dpdata 相关）：输入格式 → 转换代码 → 输出说明 → 常见陷阱
+
+### 多轮对话
+- 你会收到之前的对话历史，用户可能会追问"能再详细说说吗"、"PyTorch 版本怎么写"等
+- 回答追问时，直接引用之前对话中的上下文，不要重复用户已知的信息
+- 如果用户说"上面那个"、"刚才那个参数"等指代词，根据上下文推断所指
+
+### 特别注意
+- 区分 TensorFlow 版和 PyTorch 版 DeePMD（dp train vs dp --pt train）
+- VASP INCAR 标签区分 5.x 和 6.x 版本差异
+- LAMMPS units metal vs real 的数值换算（energy: eV vs kcal/mol, time: ps vs fs）
+- 涉及超算集群的建议，区分 Slurm / PBS / LSF 调度系统
+- 温度、压强、能量等物理量务必带单位
+- dpdata 读取 OUTCAR 时建议用 try-except 包裹（VASP 崩溃时 OUTCAR 不完整）
+- 合并多源数据时注意 type_map 一致性（元素顺序必须相同）`},...r.map(e=>({role:e.role,content:e.content})),{role:"user",content:i}];try{let e=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${n}`},body:JSON.stringify({model:"deepseek-chat",messages:l,temperature:.4,max_tokens:2048})});if(!e.ok){let t=await e.text();return{answer:"",error:`API 调用失败 (${e.status}): ${t.slice(0,300)}`}}let t=await e.json();return{answer:t.choices?.[0]?.message?.content||""}}catch(e){return{answer:"",error:`网络错误: ${e.message}`}}}e.s(["askAI",0,s,"clearApiKey",0,function(){localStorage.removeItem(t)},"getApiKey",0,a,"hasApiKey",0,function(){return!!a()},"setApiKey",0,function(e){let r=e.trim().replace(/[^\x20-\x7E]/g,"");return!!r&&(localStorage.setItem(t,r),!0)}])},80495,e=>{"use strict";var t=e.i(18050),r=e.i(71645);let a=[{value:"",label:"全部"},{value:"cond-mat.mtrl-sci",label:"材料科学"},{value:"physics.comp-ph",label:"计算物理"},{value:"cs.LG",label:"机器学习"},{value:"physics.chem-ph",label:"化学物理"},{value:"cond-mat.mes-hall",label:"介观物理"},{value:"cond-mat.str-el",label:"强关联"},{value:"physics.atm-clus",label:"原子/团簇"},{value:"cond-mat.soft",label:"软物质"}],s=[{label:"Deep Potential",query:"deep potential molecular dynamics"},{label:"ML Potential",query:"machine learning interatomic potential"},{label:"DP-GEN",query:"dp-gen active learning framework"},{label:"DeePMD",query:"deepmd-kit neural network potential"},{label:"VASP + ML",query:"VASP machine learning first principles"},{label:"DFT 高通量",query:"high-throughput density functional theory screening"},{label:"能带结构",query:"band structure topological insulator"},{label:"表面催化",query:"surface catalysis DFT reaction mechanism"},{label:"相变",query:"phase transition molecular dynamics simulation"},{label:"扩散/输运",query:"diffusion transport coefficient molecular dynamics"},{label:"热导率",query:"thermal conductivity phonon lattice dynamics"},{label:"弹性/力学",query:"elastic constants mechanical properties simulation"},{label:"锂电池",query:"lithium ion battery electrode diffusion"},{label:"钙钛矿",query:"perovskite solar cell stability"},{label:"高熵合金",query:"high entropy alloy mechanical properties"},{label:"二维材料",query:"two dimensional materials graphene MXene"},{label:"图神经网络",query:"graph neural network atomistic representation"},{label:"等变网络",query:"equivariant neural network molecular"},{label:"主动学习",query:"active learning materials discovery"}];async function n(e){let t=Math.min(e.maxResults||20,100),r=e.start||0,a=e.sortBy||"relevance",s=e.sortOrder||"descending",n=e.query.trim();e.category&&(n=`(${n}) AND cat:${e.category}`);let i=new URL("https://export.arxiv.org/api/query");i.searchParams.set("search_query",n),i.searchParams.set("start",String(r)),i.searchParams.set("max_results",String(t)),i.searchParams.set("sortBy",a),i.searchParams.set("sortOrder",s);let l=`/api/arxiv?${i.searchParams.toString()}`,o=await fetch(l);if(!o.ok){let e=`代理请求失败 (${o.status})`;try{let t=await o.json();t.error&&(e=t.error)}catch{}throw Error(e)}let c=await o.text();if(!c.trim().startsWith("<?xml"))throw Error("代理返回了非 XML 内容，可能被限流");let d=new DOMParser().parseFromString(c,"text/xml"),u=d.querySelector("totalResults")||d.querySelector("opensearch|totalResults"),p=u?parseInt(u.textContent||"0"):0,m=d.querySelectorAll("entry"),x=[];for(let e of m){let t=e.querySelector("id")?.textContent?.replace(/^.*\/abs\//,"")||"";if(!t)continue;let r=e.querySelector("title")?.textContent?.replace(/\s+/g," ").trim()||"Untitled",a=e.querySelector("summary")?.textContent?.replace(/\s+/g," ").trim()||"",s=Array.from(e.querySelectorAll("author name")).map(e=>e.textContent?.trim()||"").filter(Boolean),n=e.querySelector("published")?.textContent?.slice(0,10)||"",i=e.querySelectorAll("category"),l=[],o="";for(let e of i){let t=e.getAttribute("term")||"";t&&l.push(t),o||(o=t)}x.push({id:`arxiv:${t}`,title:r,summary:a,authors:s,published:n,categories:l,primaryCategory:o,pdfUrl:`https://arxiv.org/pdf/${t}`,abstractUrl:`https://arxiv.org/abs/${t}`,arxivId:t})}return{papers:x,totalResults:p}}async function i(e){let t=Math.min(e.maxResults||20,100),r=e.start||0,a=new URL("https://api.semanticscholar.org/graph/v1/paper/search");return a.searchParams.set("query",e.query.trim()),a.searchParams.set("limit",String(t)),a.searchParams.set("offset",String(r)),a.searchParams.set("fields","paperId,externalIds,title,abstract,authors,year,publicationVenue,citationCount,url,openAccessPdf,fieldsOfStudy,publicationDate"),await l(a.toString())}async function l(e){var t;let r,a=`/api/semantic-scholar?${new URL(e).searchParams.toString()}`;try{r=await fetch(e,{signal:AbortSignal.timeout(15e3)})}catch{try{r=await fetch(a,{signal:AbortSignal.timeout(15e3)})}catch{throw Error("Semantic Scholar 无法访问，请检查网络")}}if(429===r.status)throw Error("Semantic Scholar 请求太频繁，请稍后再试");if(!r.ok)throw Error(`Semantic Scholar 请求失败 (${r.status})`);return{papers:((t=await r.json()).data||[]).map(e=>{let t=e.externalIds?.ArXiv||void 0,r=e.externalIds?.DOI||void 0,a=e.fieldsOfStudy||[];return{id:e.paperId||`s2:${Math.random()}`,title:e.title||"Untitled",summary:e.abstract||"暂无摘要",authors:(e.authors||[]).map(e=>{let t=(e.name||"").split(",").map(e=>e.trim());return 2===t.length?`${t[1]} ${t[0]}`:e.name||""}),published:e.year?.toString()||"",categories:a,primaryCategory:a[0]||"N/A",pdfUrl:e.openAccessPdf?.url||(t?`https://arxiv.org/pdf/${t}`:"#"),abstractUrl:t?`https://arxiv.org/abs/${t}`:`https://www.semanticscholar.org/paper/${e.paperId}`,arxivId:t,doi:r,citationCount:e.citationCount,venue:e.publicationVenue?.name||void 0}}),totalResults:t.total||0}}async function o(e){let t=Math.min(e.maxResults||20,50),r=Math.floor((e.start||0)/t)+1,a=new URL("https://api.openalex.org/works");if(a.searchParams.set("search",e.query.trim()),a.searchParams.set("per_page",String(t)),a.searchParams.set("page",String(r)),e.category){let t={"cond-mat.mtrl-sci":"C154945302","physics.comp-ph":"C191209702","cs.LG":"C119857082","physics.chem-ph":"C138885662"}[e.category];t&&a.searchParams.set("filter",`concepts.id:${t}`)}let s=await fetch(a.toString(),{headers:{Accept:"application/json"},signal:AbortSignal.timeout(15e3)});if(429===s.status)throw Error("OpenAlex 请求太频繁");if(!s.ok)throw Error(`OpenAlex 请求失败 (${s.status})`);let n=await s.json(),i=n.results||[],l=n.meta?.count||0;return{papers:i.map(e=>{let t=e.ids?.arxiv_id?e.ids.arxiv_id.replace(/^.*\//,""):void 0,r=e.doi?e.doi.replace("https://doi.org/",""):void 0,a=(e.authorships||[]).map(e=>e.author?.display_name||"").filter(Boolean),s=e.publication_year?.toString()||"",n=(e.concepts||[]).map(e=>e.display_name),i=n[0]||"N/A";return{id:e.id?.replace("https://openalex.org/","openalex:")||`oa:${Math.random()}`,title:e.title||"Untitled",summary:e.abstract||"暂无摘要",authors:a,published:s,categories:n,primaryCategory:i,pdfUrl:e.open_access?.oa_url||(t?`https://arxiv.org/pdf/${t}`:"#"),abstractUrl:t?`https://arxiv.org/abs/${t}`:e.id||"#",arxivId:t,doi:r,citationCount:e.cited_by_count,venue:e.primary_location?.source?.display_name||void 0}}),totalResults:l}}async function c(e,t){let r=!1,a=[],s=[{name:"arXiv",fn:()=>n(e)},{name:"Semantic Scholar",fn:()=>i(e)},{name:"OpenAlex",fn:()=>o(e)}].map(async e=>{t?.({source:e.name,status:"searching"});try{let a=await e.fn();return r||t?.({source:e.name,status:"done",count:a.papers.length}),r=!0,a}catch(r){throw t?.({source:e.name,status:"failed"}),a.push(`- ${e.name}: ${r.message}`),r}});try{return await Promise.any(s)}catch{throw Error(`论文搜索失败，三条路线均不可用：
+${a.join("\n")}
+
+可能原因：网络问题或 API 限流，请稍后重试。`)}}var d=e.i(62901),u=e.i(19287);async function p(e){let t=(0,u.getApiKey)();if(!t)throw Error("未配置 API Key");let r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${t}`},body:JSON.stringify({model:"deepseek-chat",messages:e,temperature:.3,max_tokens:4096})}),a=await r.json();if(a.error)throw Error(a.error);return a.choices?.[0]?.message?.content||"（无回答）"}function m({paper:e,index:r}){return(0,t.jsx)("div",{className:"border border-slate-200 rounded-lg p-3 bg-white hover:border-slate-300 transition-colors",children:(0,t.jsxs)("div",{className:"flex items-start gap-3",children:[(0,t.jsxs)("span",{className:"text-xs font-mono text-slate-400 shrink-0 mt-0.5 w-5 text-right",children:["[",r,"]"]}),(0,t.jsxs)("div",{className:"flex-1 min-w-0",children:[(0,t.jsx)("h4",{className:"text-sm font-semibold text-slate-900 leading-snug mb-1",children:e.title}),(0,t.jsxs)("div",{className:"text-xs text-slate-500 line-clamp-1 mb-1.5",children:[e.authors.slice(0,3).join(", "),e.authors.length>3?" et al.":""]}),(0,t.jsxs)("div",{className:"flex items-center gap-2 flex-wrap",children:[(0,t.jsx)("span",{className:"text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded",children:e.published}),e.venue&&(0,t.jsx)("span",{className:"text-[11px] text-slate-400 italic",children:e.venue}),void 0!==e.citationCount&&(0,t.jsxs)("span",{className:"text-[11px] text-slate-400",children:["被引 ",e.citationCount]}),(0,t.jsx)("span",{className:"text-[11px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-mono",children:e.primaryCategory})]}),(0,t.jsxs)("div",{className:"flex items-center gap-2 mt-2",children:[e.arxivId&&(0,t.jsx)("a",{href:`https://arxiv.org/abs/${e.arxivId}`,target:"_blank",rel:"noopener",className:"text-xs px-2 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100 font-medium",children:"arXiv"}),e.pdfUrl&&"#"!==e.pdfUrl&&(0,t.jsx)("a",{href:e.pdfUrl,target:"_blank",rel:"noopener",className:"text-xs px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 font-medium",children:"PDF"}),e.doi&&(0,t.jsx)("a",{href:`https://doi.org/${e.doi}`,target:"_blank",rel:"noopener",className:"text-xs text-slate-400 hover:text-indigo-500 underline",children:"DOI"})]})]})]})})}e.s(["PaperChat",0,function(){let[e,l]=(0,r.useState)([{role:"assistant",content:`你好！我是 **DP 论文助手**，按 MatChat 模式帮你检索材料科学论文。
+
+**用法示例：**
+- *"DP-GEN 主动学习在高熵合金中的应用"*
+- *"使用 DeePMD 研究二维材料力学性能"*
+- *"钙钛矿太阳能电池稳定性最新进展"*
+- *"LAMMPS + DeePMD 集成方法综述"*
+
+💡 **配置 DeepSeek API Key** 后，搜索到的论文会由 AI 分析总结，给出带引用的综合回答。`}]),[x,h]=(0,r.useState)(""),[f,g]=(0,r.useState)(!1),[y,b]=(0,r.useState)([]),[v,j]=(0,r.useState)(!1),[_,S]=(0,r.useState)(""),[N,P]=(0,r.useState)(""),[w,A]=(0,r.useState)([]),[k,C]=(0,r.useState)(!1),[I,D]=(0,r.useState)(""),[$,z]=(0,r.useState)(null),[M,O]=(0,r.useState)(!1),[q,T]=(0,r.useState)(""),[L,R]=(0,r.useState)(!1),[E,U]=(0,r.useState)("chat"),K=(0,r.useRef)(null);(0,r.useEffect)(()=>{R((0,u.hasApiKey)())},[]),(0,r.useEffect)(()=>{K.current?.scrollIntoView({behavior:"smooth"})},[e,y]);let F=async e=>{g(!0),b([]);let t={role:"user",content:e};l(e=>[...e,t]);let r=e;if(L)try{r=(await p([{role:"system",content:`你是一个材料科学论文检索助手。用户会问一个研究问题，请提取最适合搜索引擎的英文关键词（不要回答问题，只返回关键词）。
+
+规则：
+- 返回 2-4 个英文关键词/短语，用逗号分隔
+- 关键词要覆盖用户问题的核心概念
+- 适合用于 arXiv / Semantic Scholar / OpenAlex 搜索
+
+示例：
+用户：DP-GEN 主动学习在高熵合金中的应用
+→ deep potential, active learning, high entropy alloy
+
+用户：DeePMD 在二维材料力学中的应用
+→ deepmd, 2D materials, mechanical properties, neural network potential
+
+用户：钙钛矿太阳能电池稳定性
+→ perovskite solar cell, stability, degradation mechanism`},{role:"user",content:e}])).trim()}catch{}let a=[],s=[],c=new Set,d=[{name:"arXiv",fn:()=>n({query:r,maxResults:15})},{name:"Semantic Scholar",fn:()=>i({query:r,maxResults:10})},{name:"OpenAlex",fn:()=>o({query:r,maxResults:15})}],u=(e,t,r)=>{b(a=>{let s=a.findIndex(t=>t.source===e),n={source:e,status:t,count:r};if(s>=0){let e=[...a];return e[s]=n,e}return[...a,n]})};await Promise.all(d.map(async e=>{u(e.name,"searching");try{let t=await e.fn();for(let r of(u(e.name,"done",t.papers.length),t.papers)){let e=r.arxivId||r.doi||r.id;c.has(e)||"Untitled"===r.title||"暂无摘要"===r.summary||(c.add(e),a.push(r))}}catch(t){u(e.name,"failed"),s.push(t.message)}})),a.sort((e,t)=>(t.citationCount||0)-(e.citationCount||0));let m=a.slice(0,20);if(0===m.length){l(e=>[...e,{role:"assistant",content:`抱歉，没有搜索到相关论文。
+
+可能原因：
+- 关键词不够精确
+- API 限流
+
+请尝试换一种表述重新提问。`,papers:[]}]),g(!1);return}if(L){let t=m.map((e,t)=>`[${t+1}] ${e.title}
+作者: ${e.authors.slice(0,5).join(", ")}
+年份: ${e.published}
+期刊: ${e.venue||"N/A"}
+被引: ${e.citationCount??"N/A"}
+摘要: ${e.summary.replace(/\s+/g," ").trim().slice(0,800)}
+arXiv: ${e.arxivId?`https://arxiv.org/abs/${e.arxivId}`:"N/A"}
+DOI: ${e.doi?`https://doi.org/${e.doi}`:"N/A"}`).join("\n\n---\n\n"),r="";try{r=await p([{role:"system",content:`你是一个材料科学论文分析专家。用户提出了一个研究问题，我们已搜索到以下相关论文。
+
+请完成以下任务：
+1. **综合回答**用户的问题，引用搜索到的论文（用 [1], [2] 等编号引用）
+2. **分析研究趋势**：这些论文反映了什么研究趋势？有哪些主流方法？
+3. **指出关键发现**：如果有特别重要的论文或突破性发现，突出说明
+
+格式要求：
+- 使用中文回答
+- 引用论文请用 [1], [2] 格式，同一篇论文始终使用同一编号
+- 回答结束时列出所有引用编号对应的论文标题和链接
+- 保持专业、简洁、有深度`},{role:"user",content:`用户问题：${e}
+
+搜索到的论文列表：
+
+${t}`}])}catch(e){r=`AI 分析失败: ${e.message}`}l(e=>[...e,{role:"assistant",content:r,papers:m}])}else l(e=>[...e,{role:"assistant",content:`搜索到 ${m.length} 篇相关论文（已去重）。
+
+💡 配置 DeepSeek API Key 后，AI 会自动分析这些论文并给出综合回答。`,papers:m}]);g(!1)},B=async e=>{if(e.preventDefault(),_.trim()&&!k){C(!0),D(""),b([]);try{let e=await c({query:_.trim(),maxResults:20,category:N||void 0,sortBy:"relevance",sortOrder:"descending"},e=>b(t=>{let r=t.findIndex(t=>t.source===e.source);if(r>=0){let a=[...t];return a[r]=e,a}return[...t,e]}));A(e.papers)}catch(e){D(e.message||"搜索失败")}finally{C(!1)}}};return(0,t.jsxs)("div",{className:"space-y-4",children:[(0,t.jsxs)("div",{className:"flex items-center gap-2 border-b border-zinc-200 pb-3",children:[(0,t.jsx)("button",{onClick:()=>U("chat"),className:`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${"chat"===E?"bg-zinc-900 text-white":"text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"}`,children:"🤖 AI 问答模式"}),(0,t.jsx)("button",{onClick:()=>U("classic"),className:`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${"classic"===E?"bg-zinc-900 text-white":"text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"}`,children:"📋 经典搜索"}),(0,t.jsx)("div",{className:"flex-1"}),L?(0,t.jsxs)("span",{className:"text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center gap-1",children:["🟢 AI 已启用",(0,t.jsx)("button",{onClick:()=>{(0,u.clearApiKey)(),R(!1)},className:"ml-1 hover:text-red-500",title:"清除 Key",children:"×"})]}):(0,t.jsx)("button",{onClick:()=>O(!M),className:"text-xs bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full hover:bg-zinc-200",children:"⚙️ 配置 API Key"})]}),M&&(0,t.jsxs)("div",{className:"p-4 border border-zinc-200 rounded-xl bg-zinc-50",children:[(0,t.jsxs)("div",{className:"flex gap-2",children:[(0,t.jsx)("input",{type:"password",value:q,onChange:e=>T(e.target.value),placeholder:"输入 DeepSeek API Key (sk-...)",autoComplete:"off",className:"flex-1 px-3 py-1.5 text-sm border border-zinc-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-white",style:{backgroundColor:"#fff",color:"#18181b"}}),(0,t.jsx)("button",{onClick:()=>{(0,u.setApiKey)(q)&&(R(!0),O(!1)),T("")},className:"px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-500",children:"保存"})]}),(0,t.jsx)("p",{className:"text-xs text-zinc-400 mt-1",children:"API Key 仅存储在浏览器本地"})]}),"chat"===E&&(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)("div",{className:"flex gap-2 flex-wrap",children:s.slice(0,8).map(e=>(0,t.jsx)("button",{type:"button",onClick:()=>{var t;h(t=e.query),F(t)},disabled:f,className:"px-3 py-1 text-xs font-medium rounded-full border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors disabled:opacity-50",children:e.label},e.label))}),(0,t.jsxs)("div",{className:"border border-zinc-200 rounded-xl bg-white min-h-[400px] flex flex-col",children:[(0,t.jsxs)("div",{className:"flex-1 overflow-y-auto px-4 py-4 space-y-4 max-h-[500px]",children:[e.map((e,r)=>(0,t.jsxs)("div",{children:[(0,t.jsx)("div",{className:`flex ${"user"===e.role?"justify-end":"justify-start"}`,children:(0,t.jsx)("div",{className:`max-w-[88%] rounded-xl px-4 py-3 text-sm ${"user"===e.role?"bg-indigo-100 text-indigo-900":"bg-zinc-100 text-zinc-800"}`,children:(0,t.jsx)("div",{className:"prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-indigo-600 prose-code:text-xs",children:(0,t.jsx)(d.Markdown,{content:e.content})})})}),e.papers&&e.papers.length>0&&(0,t.jsxs)("div",{className:"mt-2 ml-4 space-y-2",children:[(0,t.jsxs)("p",{className:"text-xs font-medium text-zinc-400 flex items-center gap-1",children:["📄 共 ",e.papers.length," 篇相关论文"]}),e.papers.map((e,r)=>(0,t.jsx)(m,{paper:e,index:r+1},e.id))]})]},r)),f&&(0,t.jsxs)("div",{className:"space-y-3 bg-zinc-50 border border-zinc-200 rounded-xl p-4",children:[(0,t.jsxs)("div",{className:"flex items-center gap-2",children:[(0,t.jsxs)("div",{className:"flex gap-1",children:[(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"}),(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce",style:{animationDelay:"0.1s"}}),(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce",style:{animationDelay:"0.2s"}})]}),(0,t.jsx)("span",{className:"text-sm font-medium text-zinc-700",children:"正在搜索论文..."})]}),(0,t.jsxs)("div",{className:"flex gap-2 flex-wrap",children:[["arXiv","Semantic Scholar","OpenAlex"].map(e=>{let r=y.find(t=>t.source===e);return r&&"searching"!==r.status?"done"===r.status?(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100",children:["✓ ",e," ",r.count," 篇"]},e):(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-500 border border-red-100",children:["✕ ",e," 失败"]},e):(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100",children:[(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"}),e," 搜索中..."]},e)}),L&&y.some(e=>"done"===e.status)&&(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 border border-purple-100",children:[(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"}),"AI 分析中..."]})]})]}),(0,t.jsx)("div",{ref:K})]}),(0,t.jsxs)("form",{onSubmit:e=>{e.preventDefault(),x.trim()&&!f&&(F(x.trim()),h(""))},className:"border-t border-zinc-100 p-4",children:[(0,t.jsxs)("div",{className:"flex gap-2",children:[(0,t.jsx)("input",{type:"text",value:x,onChange:e=>h(e.target.value),placeholder:"输入论文检索问题，如：DP-GEN 主动学习在高熵合金中的应用",autoComplete:"off",disabled:f,className:"flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white",style:{backgroundColor:"#fff",color:"#18181b"}}),(0,t.jsx)("button",{type:"submit",disabled:f||!x.trim(),className:"px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors",children:f?"搜索中...":"🔍 检索"})]}),(0,t.jsxs)("p",{className:"text-xs text-zinc-400 mt-2",children:["AI 自动生成搜索关键词 → 三路检索（arXiv + Semantic Scholar + OpenAlex）→ AI 分析总结",!L&&" · 💡 配置 API Key 可启用 AI 分析"]})]})]})]}),"classic"===E&&(0,t.jsxs)("div",{className:"space-y-4",children:[(0,t.jsxs)("form",{onSubmit:B,className:"space-y-3",children:[(0,t.jsxs)("div",{className:"flex gap-2",children:[(0,t.jsx)("input",{type:"text",value:_,onChange:e=>S(e.target.value),placeholder:"搜索 arXiv 论文...",autoComplete:"on",className:"flex-1 px-4 py-2.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white",style:{backgroundColor:"#fff",color:"#18181b"}}),(0,t.jsx)("button",{type:"submit",disabled:k||!_.trim(),className:"px-5 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 disabled:opacity-50 transition-colors shrink-0",children:k?"搜索中...":"🔍 搜索"})]}),(0,t.jsx)("select",{value:N,onChange:e=>P(e.target.value),className:"px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500",children:a.map(e=>(0,t.jsx)("option",{value:e.value,children:e.label},e.value))})]}),k&&y.length>0&&(0,t.jsx)("div",{className:"flex gap-2 flex-wrap",children:["arXiv","Semantic Scholar","OpenAlex"].map(e=>{let r=y.find(t=>t.source===e);return r&&"searching"!==r.status?"done"===r.status?(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-100",children:["✓ ",e," ",r.count," 篇"]},e):(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-500 border border-red-100",children:["✕ ",e," 失败"]},e):(0,t.jsxs)("span",{className:"inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100",children:[(0,t.jsx)("span",{className:"w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"}),e," 搜索中..."]},e)})}),I&&(0,t.jsx)("div",{className:"p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700",children:I}),w.length>0&&(0,t.jsxs)("div",{className:"space-y-3",children:[(0,t.jsxs)("p",{className:"text-sm text-zinc-500",children:["显示 ",w.length," 篇论文"]}),w.map(e=>{let r=$?.id===e.id;return(0,t.jsx)("div",{className:`border rounded-xl transition-all ${r?"border-zinc-400 bg-zinc-50":"border-zinc-200 bg-white"}`,children:(0,t.jsxs)("div",{className:"p-4",children:[(0,t.jsxs)("div",{className:"flex items-start gap-3",children:[(0,t.jsx)("button",{onClick:()=>z(r?null:e),className:"shrink-0 mt-0.5 text-zinc-400 hover:text-zinc-600",children:(0,t.jsx)("svg",{className:`w-4 h-4 transition-transform ${r?"rotate-90":""}`,fill:"none",stroke:"currentColor",viewBox:"0 0 24 24",children:(0,t.jsx)("path",{strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:2,d:"M9 5l7 7-7 7"})})}),(0,t.jsxs)("div",{className:"flex-1 min-w-0",children:[(0,t.jsxs)("div",{className:"flex items-start justify-between gap-2",children:[(0,t.jsx)("h3",{className:"font-semibold text-zinc-900 text-sm leading-relaxed",children:e.title}),(0,t.jsxs)("div",{className:"flex items-center gap-1 shrink-0",children:[(0,t.jsx)("a",{href:e.pdfUrl,target:"_blank",rel:"noopener",className:"px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 font-medium",children:"PDF"}),(0,t.jsx)("a",{href:e.abstractUrl,target:"_blank",rel:"noopener",className:"px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 font-medium",children:"arXiv"})]})]}),(0,t.jsxs)("div",{className:"flex items-center gap-2 mt-1.5 text-xs text-zinc-400 flex-wrap",children:[(0,t.jsxs)("span",{children:[e.authors.slice(0,3).join(", "),e.authors.length>3?" et al.":""]}),(0,t.jsx)("span",{children:"·"}),(0,t.jsx)("span",{children:e.published}),e.venue&&(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)("span",{children:"·"}),(0,t.jsx)("span",{className:"text-zinc-500 italic",children:e.venue})]}),(0,t.jsx)("span",{children:"·"}),(0,t.jsx)("span",{className:"bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500",children:e.primaryCategory}),void 0!==e.citationCount&&(0,t.jsxs)(t.Fragment,{children:[(0,t.jsx)("span",{children:"·"}),(0,t.jsxs)("span",{className:"text-zinc-500",children:["被引 ",e.citationCount]})]})]})]})]}),r&&(0,t.jsxs)("div",{className:"mt-4 pt-4 border-t border-zinc-100",children:[(0,t.jsx)("h4",{className:"text-xs font-medium text-zinc-500 mb-2",children:"摘要"}),(0,t.jsx)("p",{className:"text-sm text-zinc-600 leading-relaxed",children:e.summary}),e.doi&&(0,t.jsxs)("p",{className:"mt-2 text-xs text-zinc-400",children:["DOI: ",(0,t.jsx)("a",{href:`https://doi.org/${e.doi}`,target:"_blank",rel:"noopener",className:"text-indigo-500 hover:underline",children:e.doi})]}),(0,t.jsxs)("div",{className:"mt-3 text-xs text-zinc-400",children:["完整作者: ",e.authors.join(", ")]})]})]})},e.id)})]}),!k&&0===w.length&&!I&&(0,t.jsxs)("div",{className:"text-center py-16 text-zinc-400",children:[(0,t.jsx)("div",{className:"text-4xl mb-4",children:"📄"}),(0,t.jsx)("p",{className:"text-lg",children:"搜索 arXiv 上的 DP/MLP 相关论文"})]})]})]})}],80495)},38579,e=>{e.v(t=>Promise.all(["static/chunks/0uu9x_.ql_3u3.css","static/chunks/0c.q_ydm7z8im.js"].map(t=>e.l(t))).then(()=>t(51547)))}]);

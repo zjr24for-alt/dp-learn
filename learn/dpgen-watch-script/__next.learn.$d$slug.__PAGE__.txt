@@ -1,6 +1,67 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T6d4,# DP-GEN 自动监控脚本
+
+```bash
+#!/bin/bash
+LOGFILE=/mnt/d/azuoye/vasp/TiC_MLP/dpgen/dpgen.log  # ← 改成实际路径
+INTERVAL=30  # 每30秒检查一次
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo "=== dpgen 监控启动 $(date) ==="
+
+while true; do
+    # 1. 检查dpgen进程是否存活
+    if ! pgrep -f "dpgen run" > /dev/null; then
+        echo -e "${RED}[$(date +%H:%M:%S)] ❌ dpgen进程已死！${NC}"
+        echo -e "\a\a\a"
+    else
+        echo -e "${GREEN}[$(date +%H:%M:%S)] ✅ dpgen运行中 (PID: $(pgrep -f 'dpgen run'))${NC}"
+    fi
+
+    # 2. 扫描log里的报错关键词
+    if [ -f "$LOGFILE" ]; then
+        errors=$(tail -n 100 "$LOGFILE" | grep -iE "error|exception|killed|oom|segfault|traceback|failed" | grep -v "^#")
+        if [ -n "$errors" ]; then
+            echo -e "${RED}[$(date +%H:%M:%S)] ⚠️  发现报错：${NC}"
+            echo "$errors" | tail -5
+            echo -e "\a\a\a"
+        fi
+
+        # 3. 显示最新进度
+        progress=$(tail -n 5 "$LOGFILE" | grep -E "iter|train|model_devi|fp|step")
+        if [ -n "$progress" ]; then
+            echo -e "${YELLOW}  最新进度: $(echo $progress | tail -1)${NC}"
+        fi
+    else
+        echo -e "${YELLOW}[$(date +%H:%M:%S)] log文件还不存在，等待中...${NC}"
+    fi
+
+    echo "---"
+    sleep $INTERVAL
+done
+```
+
+## 使用方法
+
+```bash
+chmod +x ~/watch_dpgen.sh
+bash ~/watch_dpgen.sh
+```
+
+## 功能说明
+
+| 功能 | 实现方式 |
+|------|---------|
+| 进程存活检测 | `pgrep -f "dpgen run"` |
+| 报错关键词扫描 | 最近100行中匹配 error/exception/killed/oom/segfault/traceback/failed |
+| 进度显示 | 匹配 iter/train/model_devi/fp/step |
+| 报警 | 终端响铃 `\a` |
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DP-GEN 自动监控脚本\",\"description\":\"一个 bash 脚本实现 dpgen 进程存活检测、日志报错扫描、最新进度显示，带颜色和响铃报警\",\"datePublished\":\"2026-07-31\",\"dateModified\":\"2026-07-31\",\"keywords\":\"dpgen, 监控, bash, 脚本, 自动化\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dpgen-watch-script","builtinArticle":{"slug":"dpgen-watch-script","title":"DP-GEN 自动监控脚本","category":"dpgen-workflow","summary":"一个 bash 脚本实现 dpgen 进程存活检测、日志报错扫描、最新进度显示，带颜色和响铃报警","content":"$3","tags":["dpgen","监控","bash","脚本","自动化"],"sourceFiles":["11.txt"],"createdAt":"2026-07-31","updatedAt":"2026-07-31"},"prevArticle":{"slug":"dpgen-check-commands","title":"DP-GEN 常用检查指令"},"nextArticle":{"slug":"kpoints-float-bug-fix","title":"KPOINTS Float Bug 修复（dpgen 源码修改）"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

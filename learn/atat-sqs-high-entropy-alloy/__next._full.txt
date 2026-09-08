@@ -1,0 +1,103 @@
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","atat-sqs-high-entropy-alloy"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","atat-sqs-high-entropy-alloy","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:Tdd6,# 高熵合金建模：ATAT · SQS 特殊准随机结构
+
+## 什么时候需要 SQS
+
+| 体系 | 建模方式 |
+|------|---------|
+| 纯元素 / 有序化合物（TiC 等） | CIF + ASE 直接建胞即可 |
+| **高熵合金 / 无序固溶体** | **ATAT mcsqs 生成 SQS 超胞** |
+| 有序中间相 / 间隙固溶体 | 由晶格+占位规则手工构造 |
+
+> 核心判断：体系是否存在**化学无序**（多种元素随机占位）。只要占位无序，就需要 SQS 而不是简单替位超胞。
+
+## 为什么用 SQS 而不是随机替位
+
+随机替位的小超胞往往能量和短程有序不具代表性——**几十个原子的超胞里，随机抽样的原子排布方差很大**。SQS 的目标不是能量最低，而是让超胞里的**短程关联函数（pair/multi-body correlation）最接近理想随机固溶体**，这样小超胞也能代表宏观合金。
+
+```text
+SQS 优化目标：
+  匹配 pair 关联 Γ₂(R)，进而匹配多体关联 Γ₃、Γ₄...
+  在给定超胞尺寸下，把关联函数误差压到目标（通常 ≤ 1e-3 量级）
+```
+
+## mcsqs 完整流程
+
+```bash
+# 1. 准备：先把目标成分写成随机占位的初始超胞（VASP/ASE 格式）
+#    示例 32 原子，截断半径 10 Å
+mcsqs -n 32 -rc 10.0
+
+# 2. 迭代优化（核心），直到关联函数误差达目标
+#    - 目标成分在 clust 文件中定义（mcsqs 默认读 clusters.out）
+#    - 输出 sqs.out：最优结构的 POSCAR 格式
+mcsqs  # 可在同一目录继续运行以延长优化
+
+# 3. 检查关联函数匹配质量
+corrdump -rnd -c > sqs_pair.out
+# 对比目标关联函数，重点看前几个近邻壳层的 pair 项
+
+# 4. 转成 VASP 用的 POSCAR
+cell2vasp < sqs.out > POSCAR
+
+# 5. 核对：原子数、化学计量比、晶格常数
+```
+
+## mcsqs 关键参数
+
+| 参数 | 含义 | 推荐 |
+|------|------|------|
+| `-n` | 超胞原子数 | 32~64（越大关联函数越好匹配，计算越贵） |
+| `-rc` | 截断半径 (Å) | ≥ 10 Å，覆盖第一二近邻壳层 |
+| `-ip` | 每次交换的原子对数 | 默认 1，可增大加快收敛 |
+| `-sig` | 随机种子 | 固定后可复现 |
+
+## 收敛判断：关联函数误差
+
+```text
+目标：corrdump 输出的 pair 关联函数与理想随机值误差 ≤ 1e-3 量级
+理想随机 pair 关联 Γ₂(理想) 由成分直接算：Γ₂ = Σ c_i² - 1   （A-B 二元）
+```
+
+判断要点：
+1. **前几个近邻壳层**（第一、第二、第三 NN）的 pair 关联要准——它们决定短程有序和大多数物理性质
+2. 远壳层（> 10 Å）误差可容忍，因为长程关联影响小
+3. 多体关联（Γ₃、Γ₄）在高熵合金中也需要，但优先保证 pair 匹配
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| mcsqs 长时间不收敛 | 增大 `-n` 或 `-ip`，或从多个随机种子重跑取最优 |
+| sqs.out 不是 POSCAR 格式 | 用 cell2vasp 或 atomsk 转换 |
+| 关联函数对不上目标成分 | 检查 clusters.out 里成分设置是否正确 |
+| SQS 结构能量偏高 | 正常——SQS 是"最随机的结构"不是"能量最低的结构" |
+| 命令随 ATAT 版本略有差异 | 以你安装的 ATAT 版本 `mcsqs -h` 为准 |
+
+## 与后续 DP-GEN 流程衔接
+
+- SQS 产出的 POSCAR 直接作为 `sys_configs`（init_bulk 的 from_poscar_path 或探索的初始结构）
+- 高熵合金的 `type_map` 元素多，记得核对 `mass_map` 和 `fp_pp_files` 顺序一一对应
+- 原子数较大的 SQS 超胞，MD 探索会偏贵——可用 `super_cell: [1,1,1]` 直接跑，不必再扩胞
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"高熵合金建模：ATAT · SQS 特殊准随机结构\",\"description\":\"高熵合金/无序固溶体用 ATAT 的 mcsqs 生成特殊准随机结构（SQS），重点讲为什么用 SQS、mcsqs 完整流程与关联函数收敛判断\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"ATAT, SQS, 高熵合金, 无序固溶体, 建模, mcsqs\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"atat-sqs-high-entropy-alloy","builtinArticle":{"slug":"atat-sqs-high-entropy-alloy","title":"高熵合金建模：ATAT · SQS 特殊准随机结构","category":"atomistic-sim","summary":"高熵合金/无序固溶体用 ATAT 的 mcsqs 生成特殊准随机结构（SQS），重点讲为什么用 SQS、mcsqs 完整流程与关联函数收敛判断","content":"$13","tags":["ATAT","SQS","高熵合金","无序固溶体","建模","mcsqs"],"sourceFiles":["atat-sqs-high-entropy-alloy.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"phonopy-phono3py-workflow","title":"晶格动力学工具：Phonopy + phono3py 实战"},"nextArticle":null}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"高熵合金建模：ATAT · SQS 特殊准随机结构 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"高熵合金/无序固溶体用 ATAT 的 mcsqs 生成特殊准随机结构（SQS），重点讲为什么用 SQS、mcsqs 完整流程与关联函数收敛判断"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/atat-sqs-high-entropy-alloy"}],["$","meta","6",{"property":"og:title","content":"高熵合金建模：ATAT · SQS 特殊准随机结构"}],["$","meta","7",{"property":"og:description","content":"高熵合金/无序固溶体用 ATAT 的 mcsqs 生成特殊准随机结构（SQS），重点讲为什么用 SQS、mcsqs 完整流程与关联函数收敛判断"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/atat-sqs-high-entropy-alloy"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-02"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-02"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"高熵合金建模：ATAT · SQS 特殊准随机结构"}],["$","meta","14",{"name":"twitter:description","content":"高熵合金/无序固溶体用 ATAT 的 mcsqs 生成特殊准随机结构（SQS），重点讲为什么用 SQS、mcsqs 完整流程与关联函数收敛判断"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

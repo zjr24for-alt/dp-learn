@@ -1,6 +1,125 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:Tfdd,# 晶体结构识别：CNA 与 PTM 实战
+
+## CNA vs PTM 对比
+
+| 特性 | CNA (CommonNeighborAnalysis) | PTM (PolyhedralTemplateMatching) |
+|------|---------------------------|----------------------------------|
+| **原理** | 统计原子对间的共近邻拓扑 | 匹配局域原子环境到多面体模板 |
+| **识别能力** | FCC, HCP, BCC, ICO (二十面体) | FCC, HCP, BCC, ICO, SC, Diamond, Graphene |
+| **热振动容忍度** | 差（高温下 Other 增多） | **好**（专为高温设计） |
+| **速度** | 快 | 较快 |
+| **适用温度** | < 0.5 T_melt | 全温度范围 |
+
+> **推荐**：现代分析默认用 PTM，CNA 仅在低温固态或快速筛查时用。
+
+## PTM 使用（GUI）
+
+```text
+1. Pipeline 中 → Add Modifier → PolyhedralTemplateMatching
+2. 参数：
+   - rmsd_cutoff: 默认 0.1（越大越宽松）
+   - output_orientation: ☑ 输出晶体取向
+   - output_interatomic_distance: ☑ 输出局域原子间距
+3. 结果：每个原子获得 'Structure Type' 属性
+   - 0=Other, 1=FCC, 2=HCP, 3=BCC, 4=ICO, ...
+```
+
+## 结构上色
+
+```text
+Add Modifier → Assign Color → 基于 Structure Type 着色
+典型配色：FCC=绿, HCP=红, BCC=蓝, Other=灰
+```
+
+## PTM 使用（Python）
+
+```python
+from ovito.io import import_file
+from ovito.modifiers import PolyhedralTemplateMatchingModifier
+from ovito.vis import assign_color_to_particles
+import numpy as np
+
+pipeline = import_file("dump.lammpstrj")
+
+# 添加 PTM
+pipeline.modifiers.append(PolyhedralTemplateMatchingModifier(
+    rmsd_cutoff=0.1,
+    output_orientation=True,
+))
+
+# 统计每帧结构占比
+for frame in range(pipeline.source.num_frames):
+    data = pipeline.compute(frame)
+
+    structure_types = data.particles['Structure Type']
+    n_total = len(structure_types)
+    n_fcc = np.sum(structure_types == 1)
+    n_hcp = np.sum(structure_types == 2)
+    n_bcc = np.sum(structure_types == 3)
+    n_other = np.sum(structure_types == 0)
+
+    print(f"Frame {frame}: FCC={n_fcc/n_total:.1%}, "
+          f"HCP={n_hcp/n_total:.1%}, BCC={n_bcc/n_total:.1%}, "
+          f"Other={n_other/n_total:.1%}")
+```
+
+## CNA 使用（Python）
+
+```python
+from ovito.modifiers import CommonNeighborAnalysisModifier
+
+pipeline.modifiers.append(CommonNeighborAnalysisModifier(
+    mode=CommonNeighborAnalysisModifier.Mode.AdaptiveCutoff,
+    # Adaptive: 自动确定每个原子的截断半径
+    # FixedCutoff: 手动设置 cutoff（如 3.5 Å）
+    # BondBased: 基于显式键合信息
+))
+
+# 结果同样在 data.particles['Structure Type']
+# CNA: 0=Other, 1=FCC, 2=HCP, 3=BCC, 4=ICO
+```
+
+## 结构占比时间演化图
+
+```python
+import matplotlib.pyplot as plt
+
+fcc_fractions, hcp_fractions, bcc_fractions, other_fractions = [], [], [], []
+
+for frame in range(pipeline.source.num_frames):
+    data = pipeline.compute(frame)
+    types = data.particles['Structure Type']
+    n = len(types)
+    fcc_fractions.append(np.sum(types == 1) / n)
+    hcp_fractions.append(np.sum(types == 2) / n)
+    bcc_fractions.append(np.sum(types == 3) / n)
+    other_fractions.append(np.sum(types == 0) / n)
+
+frames = range(len(fcc_fractions))
+plt.figure(figsize=(10, 5))
+plt.plot(frames, fcc_fractions, 'g-', label='FCC')
+plt.plot(frames, hcp_fractions, 'r-', label='HCP')
+plt.plot(frames, bcc_fractions, 'b-', label='BCC')
+plt.plot(frames, other_fractions, 'gray', label='Other')
+plt.xlabel('Frame'); plt.ylabel('Fraction')
+plt.legend(); plt.grid(alpha=0.3)
+plt.tight_layout()
+# 应用：看变形过程中 FCC→HCP 马氏体相变、辐照导致的 amorphization 等
+```
+
+## 实战技巧
+
+1. **CNA 对 atom_style 要求**：需要完整的原子坐标，不支持 charge 等混合 style
+2. **PTM 对截断半径敏感**：如果结构被大量标为 Other，提高 rmsd_cutoff
+3. **变形后的结构**：先做 PTM（识别变形后的局域环境），CNA 可能会大量 Other
+4. **界面/表面**：表面原子通常被标为 Other —— 用 SelectType 过滤后再统计
+5. **与 DXA 联动**：PTM → 仅保留缺陷区原子 → DXA 位错分析（减少内存和噪声）
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"晶体结构识别：CNA 与 PTM 实战\",\"description\":\"使用 CommonNeighborAnalysis 和 PolyhedralTemplateMatching 识别 FCC/BCC/HCP 结构，统计结构占比随时间演化\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"OVITO, CNA, PTM, 结构识别, FCC, HCP, BCC, Python\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"ovito-cna-ptm","builtinArticle":{"slug":"ovito-cna-ptm","title":"晶体结构识别：CNA 与 PTM 实战","category":"ovito-tips","summary":"使用 CommonNeighborAnalysis 和 PolyhedralTemplateMatching 识别 FCC/BCC/HCP 结构，统计结构占比随时间演化","content":"$3","tags":["OVITO","CNA","PTM","结构识别","FCC","HCP","BCC","Python"],"sourceFiles":["ovito-cna-ptm.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"ovito-basics","title":"OVITO 基础操作与数据导入"},"nextArticle":{"slug":"ovito-dxa-defects","title":"缺陷与位错分析：DXA + Wigner-Seitz"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

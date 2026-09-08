@@ -1,6 +1,129 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:Tf84,# OVITO 基础操作与数据导入
+
+## OVITO 是什么
+
+OVITO (Open Visualization Tool) 是原子模拟数据的可视化和分析工具，由德国达姆施塔特工业大学开发。
+
+**核心功能**：
+- 导入 LAMMPS dump、XYZ、POSCAR、CIF 等 20+ 种格式
+- Pipeline 编辑器：可叠加多个 modifier（类似滤镜链）
+- Python 脚本接口（`ovito` Python 模块）
+- 高质量渲染（Tachyon 光线追踪）
+
+## 安装
+
+```bash
+# GUI 版本：从 ovito.org 下载安装程序
+
+# Python 模块（无需 GUI，适合 HPC 批处理）
+pip install ovito
+conda install --strict-channel-priority -c https://conda.ovito.org -c conda-forge ovito
+```
+
+## GUI 界面速览
+
+```text
+┌──────────────────────────────────────────────┐
+│  菜单栏 (File/Edit/View/...)                   │
+├────────┬─────────────────┬───────────────────┤
+│        │                 │                   │
+│ Pipeline│   3D 视图       │   属性面板        │
+│ 编辑器  │   (Viewport)    │   (Properties)    │
+│        │                 │                   │
+│ 列出所有│  鼠标操作：      │  当前选中的        │
+│ modifier│  左键旋转        │  modifier 参数     │
+│ 链      │  滚轮缩放        │                   │
+│        │  中键平移        │                   │
+└────────┴─────────────────┴───────────────────┘
+```
+
+## 数据导入
+
+### 支持格式（常用）
+
+| 格式 | 扩展名 | 来源 |
+|------|--------|------|
+| LAMMPS dump | .dump, .lammpstrj | LAMMPS |
+| XYZ | .xyz | ASE, 通用 |
+| POSCAR/CONTCAR | (无扩展名) | VASP |
+| CIF | .cif | 晶体数据库 |
+| LAMMPS data | .data, .lmp | LAMMPS |
+| NetCDF | .nc | AMBER, CHARMM |
+| extXYZ | .xyz | ASE（含应力/速度等扩展信息） |
+
+### 导入 LAMMPS dump
+
+```bash
+# LAMMPS dump 含多帧轨迹
+dump mydump all custom 1000 dump.lammpstrj id type x y z fx fy fz
+```
+
+在 OVITO 中：
+1. File → Load File → 选择 `dump.lammpstrj`
+2. OVITO 自动检测多帧 → 底部出现时间滑块
+3. Pipeline 中自动添加 `Load file` modifier
+
+### 导入 VASP POSCAR
+
+OVITO 可以直接读 VASP 格式，但有时需要手动指定格式：
+
+```python
+# Python: 导入 POSCAR
+from ovito.io import import_file
+pipeline = import_file("POSCAR", input_format="vasp/poscar")
+```
+
+### 多文件导入
+
+如果需要把多个独立的 dump 文件拼接成一个 trajectory：
+
+```text
+File → Load File → 选择多个文件（按 Ctrl 多选）
+                → ☑ 勾选 "Load as a trajectory sequence"
+```
+
+## Pipeline 编辑器
+
+Pipeline 类似 Blender 的 modifier 堆栈或 Photoshop 的图层。**数据从上到下流动**：
+
+```text
+[Load file]           ← 最上层：原始数据
+    ↓
+[CommonNeighborAnalysis] ← 添加结构类型属性
+    ↓
+[ExpressionSelection]    ← 选择特定结构类型的原子
+    ↓
+[DeleteSelected]         ← 删除不需要的原子
+    ↓
+[Render]                 ← 最下层：渲染输出
+```
+
+**右键 modifier** → 可启用/禁用、复制、移动。
+
+## 常用快捷键
+
+| 操作 | 快捷键 |
+|------|--------|
+| 旋转视图 | 鼠标左键拖动 |
+| 缩放 | 滚轮 |
+| 平移 | 鼠标中键拖动 |
+| 复位视图 | `R` |
+| 播放/暂停动画 | `Space` |
+| 导出图像 | `Ctrl+E` |
+| 导出动画 | File → Export Rendered Movie |
+
+## 基础可视化调整
+
+- **原子大小**：选中 Particles 的 vis element → radius 滑块
+- **颜色编码**：`Color coding` modifier → 按 Type / Position / 自定义 Property
+- **背景色**：Viewport → Background Color
+- **周期性边界显示**：Simulation cell → ☑ Show periodic images (N×N×N)
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"OVITO 基础操作与数据导入\",\"description\":\"OVITO Pro GUI 界面、Pipeline 编辑器、LAMMPS/POSCAR/XYZ 格式导入、视图操作与基础可视化\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"OVITO, 可视化, LAMMPS, dump, Pipeline, 数据导入\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"ovito-basics","builtinArticle":{"slug":"ovito-basics","title":"OVITO 基础操作与数据导入","category":"ovito-tips","summary":"OVITO Pro GUI 界面、Pipeline 编辑器、LAMMPS/POSCAR/XYZ 格式导入、视图操作与基础可视化","content":"$3","tags":["OVITO","可视化","LAMMPS","dump","Pipeline","数据导入"],"sourceFiles":["ovito-basics.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":null,"nextArticle":{"slug":"ovito-cna-ptm","title":"晶体结构识别：CNA 与 PTM 实战"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

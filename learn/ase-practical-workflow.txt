@@ -1,20 +1,178 @@
-1:"$Sreact.fragment"
-2:I[63780,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"Navbar"]
-3:I[39756,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-4:I[37457,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-5:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-6:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
-a:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"ViewportBoundary"]
-c:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"MetadataBoundary"]
-e:I[68027,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default",1]
-:HL["/dp-learn/_next/static/chunks/09p0yn84u5atm.css","style"]
-:HL["/dp-learn/_next/static/media/797e433ab948586e-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/dp-learn/_next/static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"P":null,"c":["","learn","ase-practical-workflow"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","ase-practical-workflow","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/06jauabyjhbca.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L2",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":"DP Learn — 基于 DP-GEN + DeePMD + VASP + LAMMPS 的学习笔记 · 部署于 GitHub Pages"}]}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[["$","$L5",null,{"slug":"$undefined"}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true,"nonce":"$undefined"}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],{},null,false,null]},null,false,"$@9"]},null,false,"$@9"]},null,false,null],["$","$1","h",{"children":[null,["$","$La",null,{"children":"$Lb"}],["$","div",null,{"hidden":true,"children":["$","$Lc",null,{"children":["$","$7",null,{"name":"Next.Metadata","children":"$Ld"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$e",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"AoJz3IC3AuQsnD4hRAx1t"}
-f:[]
-9:"$Wf"
-b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-10:I[27201,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"IconMark"]
-8:null
-d:[["$","title","0",{"children":"DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"DP-GEN / DeePMD / VASP / LAMMPS 学习辅助网站，整合个人实战笔记与官方文档，支持智能问答与学习进度追踪"}],["$","link","2",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L10","3",{}]]
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","ase-practical-workflow"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","ase-practical-workflow","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:T1074,# ASE 实战：结构操作与高通量计算
+
+## ASE 是什么
+
+Atomic Simulation Environment（ASE）是 Python 写的原子模拟工具箱。核心价值：
+
+- **操作结构**（建超胞、切表面、加缺陷、读写文件）
+- **对接各种 calculator**（VASP、QE、GPAW、EMT、LAMMPS…）
+- **构建高通量工作流**（批处理几百个结构）
+
+## 基本结构操作
+
+```python
+from ase import Atoms
+from ase.build import bulk, fcc111, surface, make_supercell
+from ase.io import read, write
+import numpy as np
+
+# 1. 创建晶体
+cu = bulk('Cu', 'fcc', a=3.61)          # Cu FCC 原胞
+cu_sc = cu * (3, 3, 3)                   # 3×3×3 超胞
+
+# 2. 切表面
+cu111 = fcc111('Cu', a=3.61, size=(2, 2, 4), vacuum=10.0)
+# → 2×2 面内，4 层原子，10 Å 真空层
+
+# 3. 读写文件
+atoms = read('POSCAR')                    # 从 VASP POSCAR 读
+write('structure.cif', atoms)             # 导出 CIF
+write('structure.xyz', atoms)             # 导出 XYZ
+```
+
+## 搭建复杂结构
+
+```python
+from ase.build import molecule, sort, add_adsorbate
+from ase.build import graphene_nanoribbon, nanotube
+
+# 分子
+h2o = molecule('H2O')
+
+# 在表面上吸附
+slab = fcc111('Pt', a=3.92, size=(3, 3, 4), vacuum=10)
+add_adsorbate(slab, h2o, height=2.5, position='ontop')
+
+# 掺杂：替换第 5 个原子为 Ni
+slab[4].symbol = 'Ni'
+
+# 空位：删除第 10 个原子
+del slab[10]
+
+# 随机置换合金
+from ase.build import bulk
+cu_supercell = bulk('Cu', 'fcc', a=3.61) * (4, 4, 4)
+for atom in cu_supercell:
+    if np.random.random() < 0.1:
+        atom.symbol = 'Ni'              # Cu90Ni10 随机合金
+```
+
+## 对接 Calculator
+
+```python
+# --- EMT (测试用，超快) ---
+from ase.calculators.emt import EMT
+atoms.calc = EMT()
+e = atoms.get_potential_energy()     # 0.01 秒
+
+# --- VASP ---
+from ase.calculators.vasp import Vasp
+calc = Vasp(
+    xc='PBE',
+    encut=500,
+    kpts=(4, 4, 1),
+    ismear=0,
+    sigma=0.05,
+    ibrion=-1,
+    nsw=0,
+    lwave=False,
+    lcharg=False,
+    directory='vasp_calc',           # 工作目录（互不污染）
+)
+atoms.calc = calc
+atoms.get_potential_energy()         # 几分钟到几小时
+
+# --- GPAW (免费 DFT，GPU 友好) ---
+from gpaw import GPAW
+calc = GPAW(xc='PBE', mode='pw', kpts=(4, 4, 1))
+```
+
+## 弛豫优化
+
+```python
+from ase.optimize import BFGS, BFGSLineSearch
+from ase.constraints import FixAtoms
+
+# 固定底部两层原子
+mask = [atom.tag > 2 for atom in slab]  # tag > 2 = 非底层的原子
+slab.set_constraint(FixAtoms(mask=mask))
+
+# BFGS 弛豫
+slab.calc = Vasp(xc='PBE', encut=500, kpts=(4,4,1),
+                 ibrion=-1, nsw=0,
+                 directory='relax')
+opt = BFGS(slab, trajectory='relax.traj')
+opt.run(fmax=0.02)  # 力收敛到 0.02 eV/Å
+```
+
+## 高通量工作流
+
+```python
+from ase.db import connect
+from ase.optimize import BFGS
+
+db = connect('high_throughput.db')
+
+# 枚举 FCC 合金不同成分的晶格常数
+for elem in ['Cu', 'Ag', 'Au', 'Ni', 'Pd', 'Pt']:
+    for a in np.linspace(3.4, 4.2, 9):
+        atoms = bulk(elem, 'fcc', a=a)
+        atoms.calc = EMT()   # 高通量筛选先用 EMT 快速扫
+        e = atoms.get_potential_energy()
+
+        db.write(atoms, element=elem, lattice_constant=a, energy=e)
+
+# 查询数据库
+for row in db.select(element='Cu', sort='energy'):
+    print(f"a={row.lattice_constant:.3f}, E={row.energy:.3f}")
+```
+
+## 集成 Phonopy 算声子
+
+```python
+from phonopy import Phonopy
+from phonopy.structure.atoms import PhonopyAtoms
+
+# ASE → Phonopy
+phonopy_atoms = PhonopyAtoms(
+    symbols=atoms.get_chemical_symbols(),
+    scaled_positions=atoms.get_scaled_positions(),
+    cell=atoms.cell,
+)
+phonon = Phonopy(phonopy_atoms, supercell_matrix=[[2,0,0],[0,2,0],[0,0,2]])
+phonon.generate_displacements(distance=0.01)
+
+# 对每个位移结构算力 → FORCE_CONSTANTS → 声子谱
+```
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 不同 calculator 的 directory 会互相覆盖 | 每次设不同的 directory |
+| EMT 不能用于发表（太粗糙） | 仅用于工作流测试和调试 |
+| ASE VASP calculator 的 kpts 需手动设 | 不会自动生成，务必检查 |
+| read('POSCAR') 不保留原子速度 | 如需速度，用 extxyz 格式 |
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"ASE 实战：结构操作与高通量计算\",\"description\":\"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"ASE, 结构操作, calculator, 高通量, 弛豫, Phonopy\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"ase-practical-workflow","builtinArticle":{"slug":"ase-practical-workflow","title":"ASE 实战：结构操作与高通量计算","category":"atomistic-sim","summary":"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码","content":"$13","tags":["ASE","结构操作","calculator","高通量","弛豫","Phonopy"],"sourceFiles":["ase-practical-workflow.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"ml-potentials-overview","title":"机器学习势函数全景概述"},"nextArticle":{"slug":"phonopy-phono3py-workflow","title":"晶格动力学工具：Phonopy + phono3py 实战"}}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"ASE 实战：结构操作与高通量计算 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/ase-practical-workflow"}],["$","meta","6",{"property":"og:title","content":"ASE 实战：结构操作与高通量计算"}],["$","meta","7",{"property":"og:description","content":"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/ase-practical-workflow"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-02"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-02"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"ASE 实战：结构操作与高通量计算"}],["$","meta","14",{"name":"twitter:description","content":"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

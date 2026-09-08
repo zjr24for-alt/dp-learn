@@ -1,20 +1,182 @@
-1:"$Sreact.fragment"
-2:I[63780,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"Navbar"]
-3:I[39756,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-4:I[37457,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default"]
-5:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-6:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-7:"$Sreact.suspense"
-a:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"ViewportBoundary"]
-c:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"MetadataBoundary"]
-e:I[68027,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"default",1]
-:HL["/dp-learn/_next/static/chunks/09p0yn84u5atm.css","style"]
-:HL["/dp-learn/_next/static/media/797e433ab948586e-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/dp-learn/_next/static/media/caa3a2e1cccd8315-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"P":null,"c":["","learn","ovito-dxa-defects"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","ovito-dxa-defects","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",16],[["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/06jauabyjhbca.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L2",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":"DP Learn — 基于 DP-GEN + DeePMD + VASP + LAMMPS 的学习笔记 · 部署于 GitHub Pages"}]}]]}]}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[null,["$","$L3",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L4",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$1","c",{"children":[["$","$L5",null,{"slug":"$undefined"}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true,"nonce":"$undefined"}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true,"nonce":"$undefined"}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],{},null,false,null]},null,false,"$@9"]},null,false,"$@9"]},null,false,null],["$","$1","h",{"children":[null,["$","$La",null,{"children":"$Lb"}],["$","div",null,{"hidden":true,"children":["$","$Lc",null,{"children":["$","$7",null,{"name":"Next.Metadata","children":"$Ld"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$e",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/09p0yn84u5atm.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"AoJz3IC3AuQsnD4hRAx1t"}
-f:[]
-9:"$Wf"
-b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-10:I[27201,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"IconMark"]
-8:null
-d:[["$","title","0",{"children":"DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"DP-GEN / DeePMD / VASP / LAMMPS 学习辅助网站，整合个人实战笔记与官方文档，支持智能问答与学习进度追踪"}],["$","link","2",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L10","3",{}]]
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","ovito-dxa-defects"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","ovito-dxa-defects","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:T143f,# 缺陷与位错分析：DXA + Wigner-Seitz
+
+## DXA（Dislocation Analysis）能做什么
+
+DXA 从原子坐标中提取位错网络：
+
+| 输出量 | 含义 |
+|--------|------|
+| 位错线 | 每条线的路径和 Burgers 矢量 |
+| 位错密度 ρ = L/V | 总位错线长 / 体积 (m⁻²) |
+| 位错类型 | 1/2<110> 完美位错、<112> 不全位错、<100> 等 |
+| 空间分布 | 每条线在 3D 空间的位置 |
+
+## DXA 工作流（GUI + Python）
+
+### GUI
+```text
+1. 先做 PTM：Add Modifier → PolyhedralTemplateMatching
+2. 删除完美晶格原子（只保留缺陷区）：
+   Add Modifier → ExpressionSelection
+     expression: StructureType==1 || StructureType==2
+                      (选 FCC + HCP 作为"好"原子)
+   Add Modifier → DeleteSelected
+3. DXA 分析：
+   Add Modifier → DislocationAnalysis (DXA)
+   参数：circuit_max_length, trial_circuit_length
+```
+
+### Python
+
+```python
+from ovito.io import import_file
+from ovito.modifiers import (
+    PolyhedralTemplateMatchingModifier,
+    ExpressionSelectionModifier,
+    DeleteSelectedModifier,
+    DislocationAnalysisModifier,
+)
+import numpy as np
+
+pipeline = import_file("nanoindentation.dump")
+
+# 1. PTM 结构识别
+pipeline.modifiers.append(PolyhedralTemplateMatchingModifier())
+
+# 2. 只保留缺陷区原子（非 FCC + 非 HCP）
+pipeline.modifiers.append(ExpressionSelectionModifier(
+    expression="StructureType==1 || StructureType==2"
+))
+pipeline.modifiers.append(DeleteSelectedModifier())
+
+# 3. DXA 分析
+pipeline.modifiers.append(DislocationAnalysisModifier())
+
+# 结果
+data = pipeline.compute()
+total_line_length = data.attributes['DislocationAnalysis.total_line_length']
+cell_volume = data.attributes['DislocationAnalysis.cell_volume']
+print(f"位错密度: {total_line_length / cell_volume:.3e} Å⁻² = {total_line_length / cell_volume * 1e20:.1f} × 10¹⁴ m⁻²")
+
+# 统计伯氏矢量分布
+burgers_vectors = data.dislocations['dislocations/Burgers vector']
+for bv in burgers_vectors:
+    print(f"Burgers vector: ({bv[0]:.2f}, {bv[1]:.2f}, {bv[2]:.2f}), "
+          f"length: {np.linalg.norm(bv):.3f} Å")
+```
+
+## DXA 位错类型判断（FCC）
+
+```python
+def classify_dislocation(burgers_vector, lattice_constant=3.615):
+    """分类 FCC 晶体的位错类型 (a = lattice_constant)"""
+    b = np.array(burgers_vector)
+    b_mag = np.linalg.norm(b)
+    a = lattice_constant
+
+    # 1/2<110> 完美位错
+    if abs(b_mag - a/np.sqrt(2)) < 0.1:
+        return "完美 1/2<110>"
+    # 1/6<112> Shockley 不全位错
+    elif abs(b_mag - a/np.sqrt(6)) < 0.1:
+        return "Shockley 1/6<112>"
+    # 1/6<110> 压杆位错 (Stair-rod)
+    elif abs(b_mag - a/np.sqrt(3)) < 0.1:
+        return "Stair-rod 1/6<110>"
+    # 1/3<100> Hirth 位错
+    elif abs(b_mag - a/3) < 0.1:
+        return "Hirth 1/3<100>"
+    else:
+        return f"Other (|b|={b_mag:.3f} Å)"
+```
+
+## Wigner-Seitz 缺陷分析
+
+用于计算辐照损伤、级联碰撞后的点缺陷：
+
+```python
+from ovito.modifiers import WignerSeitzAnalysisModifier
+
+# 需要参考构型（未损伤的理想结构）
+pipeline = import_file("cascade.dump")
+ideal_pipeline = import_file("ideal.dump")  # 无缺陷参考
+
+pipeline.modifiers.append(WignerSeitzAnalysisModifier(
+    reference_configuration=ideal_pipeline.source,
+    affine_mapping=WignerSeitzAnalysisModifier.AffineMapping.ToReference,
+))
+
+data = pipeline.compute()
+# data.particles['Occupancy']: 1=占用, 0=空位, >1=间隙
+# data.particles['Vacancy Count']: 空位计数
+# data.particles['Interstitial Count']: 间隙计数
+```
+
+## 大体系 DXA 内存优化
+
+DXA 在 > 10⁶ 原子时内存爆炸。策略：
+
+```python
+from ovito.modifiers import ExpandSelectionModifier
+
+# 1. PTM 识别
+pipeline.modifiers.append(PolyhedralTemplateMatchingModifier())
+
+# 2. 选择缺陷区种子
+pipeline.modifiers.append(ExpressionSelectionModifier(
+    expression="StructureType != 1 && StructureType != 2"
+))
+
+# 3. 扩展选择区域（包含缺陷附近的 N 层原子）
+pipeline.modifiers.append(ExpandSelectionModifier(
+    num_neighbors=10,    # 向外扩展 10 层
+    mode=ExpandSelectionModifier.ExpansionMode.BondFree,
+    cutoff=3.5,
+))
+
+# 4. 反选（删除远离缺陷的完美区）
+pipeline.modifiers.append(ExpressionSelectionModifier(
+    expression="Selection == 0"
+))
+pipeline.modifiers.append(DeleteSelectedModifier())
+
+# 5. 仅在缺陷区运行 DXA（大幅减少 DXA 计算量）
+pipeline.modifiers.append(DislocationAnalysisModifier())
+
+# !注意：位错线连接可能丢失 ~10-15%，只计核心区密度可接受
+```
+
+参考：[Memory-Optimized-DXA-OVITO](https://github.com/prash-dwivedi/Memory-Optimized-DXA-OVITO)
+
+## DXA 常见问题
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| DXA 找不到位错 | 先导删除了太多原子 | 保留足够厚的缺陷周围区域 |
+| 位错线不连续 | 原子间距 > circuit_max_length | 增大 trial_circuit_length |
+| OOM (内存溢出) | 全体系 DXA | 用 ExpandSelection 只跑缺陷区 |
+| 位错密度偏大 | 表面原子被识别为缺陷 | 分析前删除表面附近原子 |
+| 缺陷网格干扰可视化 | DXA 输出含 surface mesh | 渲染时禁用 SurfaceMeshVis |
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"缺陷与位错分析：DXA + Wigner-Seitz\",\"description\":\"DislocationAnalysis (DXA) 提取位错线/密度/Burgers 矢量，Wigner-Seitz 分析点缺陷，大体系 DXA 内存优化\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"OVITO, DXA, 位错分析, Wigner-Seitz, 缺陷, Burgers矢量, 位错密度\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"ovito-dxa-defects","builtinArticle":{"slug":"ovito-dxa-defects","title":"缺陷与位错分析：DXA + Wigner-Seitz","category":"ovito-tips","summary":"DislocationAnalysis (DXA) 提取位错线/密度/Burgers 矢量，Wigner-Seitz 分析点缺陷，大体系 DXA 内存优化","content":"$13","tags":["OVITO","DXA","位错分析","Wigner-Seitz","缺陷","Burgers矢量","位错密度"],"sourceFiles":["ovito-dxa-defects.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"ovito-cna-ptm","title":"晶体结构识别：CNA 与 PTM 实战"},"nextArticle":{"slug":"ovito-python-scripting","title":"OVITO Python 脚本自动化与高质量渲染"}}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"缺陷与位错分析：DXA + Wigner-Seitz | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"DislocationAnalysis (DXA) 提取位错线/密度/Burgers 矢量，Wigner-Seitz 分析点缺陷，大体系 DXA 内存优化"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/ovito-dxa-defects"}],["$","meta","6",{"property":"og:title","content":"缺陷与位错分析：DXA + Wigner-Seitz"}],["$","meta","7",{"property":"og:description","content":"DislocationAnalysis (DXA) 提取位错线/密度/Burgers 矢量，Wigner-Seitz 分析点缺陷，大体系 DXA 内存优化"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/ovito-dxa-defects"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-02"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-02"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"缺陷与位错分析：DXA + Wigner-Seitz"}],["$","meta","14",{"name":"twitter:description","content":"DislocationAnalysis (DXA) 提取位错线/密度/Burgers 矢量，Wigner-Seitz 分析点缺陷，大体系 DXA 内存优化"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

@@ -1,6 +1,93 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T6bc,# KPOINTS Float Bug 修复
+
+## 问题背景
+
+使用 DP-GEN（v0.13.2）进行 VASP FP 计算时：
+- KPOINTS 被自动生成，网格写成浮点数（如 `2.0 2.0 2.0`）
+- VASP 报错：`Error reading KPOINTS file (line 4)`
+- 删除 `KSPACING` 会导致 dpgen 报错：`RuntimeError: KSPACING must be given in INCAR`
+
+## 问题本质
+
+DP-GEN 默认逻辑：
+1. 强制使用 `KSPACING` 自动生成 KPOINTS
+2. 即使提供 `"fp_kpoints"` 也会被覆盖
+3. 自动生成存在 float bug（不符合 VASP 整数网格要求）
+
+## 解决方案（源码修改）
+
+### 修改文件
+
+```
+dpgen/generator/run.py
+```
+
+### 修改函数
+
+```
+make_fp_vasp_kp()
+```
+
+### 修改内容
+
+在函数开头添加：
+
+```python
+def make_fp_vasp_kp(iter_index, jdata):
+    # 如果用户提供了 KPOINTS，则跳过自动生成
+    if "fp_kpoints" in jdata and jdata["fp_kpoints"]:
+        return
+```
+
+### 可选增强（避免 KSPACING 报错）
+
+将：
+```python
+kspacing = standard_incar["KSPACING"]
+```
+改为：
+```python
+kspacing = standard_incar.get("KSPACING", None)
+if kspacing is None:
+    return
+```
+
+## 使用规范
+
+### param.json
+```json
+"fp_kpoints": "./KPOINTS"
+```
+
+### INCAR
+```bash
+KGAMMA = .TRUE.
+# 不再依赖 KSPACING
+```
+
+### KPOINTS（分子体系推荐）
+```
+Gamma
+0
+Gamma
+1 1 1
+0 0 0
+```
+
+## 注意事项
+- 修改源码后需重新生成 FP 任务
+- 旧 task 目录需删除，否则仍使用错误 KPOINTS
+- 每次更换 conda 环境或重装 dpgen 需重新检查此修改
+
+## 检查脚本
+
+```bash
+DPGEN_PATH=$(python -c "import dpgen; import os; print(os.path.dirname(dpgen.__file__))")
+grep -q 'fp_kpoints' "$DPGEN_PATH/generator/run.py" && echo "✅ 补丁已应用" || echo "❌ 需要重新打补丁"
+```
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"KPOINTS Float Bug 修复（dpgen 源码修改）\",\"description\":\"DP-GEN v0.13.2 自动生成 KPOINTS 时出现浮点数 bug 导致 VASP 拒绝运行，需修改源码修复\",\"datePublished\":\"2026-07-31\",\"dateModified\":\"2026-07-31\",\"keywords\":\"dpgen, KPOINTS, VASP, bugfix, 源码修改\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"kpoints-float-bug-fix","builtinArticle":{"slug":"kpoints-float-bug-fix","title":"KPOINTS Float Bug 修复（dpgen 源码修改）","category":"dpgen-workflow","summary":"DP-GEN v0.13.2 自动生成 KPOINTS 时出现浮点数 bug 导致 VASP 拒绝运行，需修改源码修复","content":"$3","tags":["dpgen","KPOINTS","VASP","bugfix","源码修改"],"sourceFiles":["vasp源码变动.md","check_dpgen_patch.sh"],"createdAt":"2026-07-31","updatedAt":"2026-07-31"},"prevArticle":{"slug":"dpgen-watch-script","title":"DP-GEN 自动监控脚本"},"nextArticle":{"slug":"stop-dpgen-safely","title":"如何安全暂停/终止 dpgen"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

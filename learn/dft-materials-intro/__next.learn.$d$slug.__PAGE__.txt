@@ -1,6 +1,127 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:Te3d,# DFT 与材料计算基础
+
+## 一句话理解 DFT
+
+密度泛函理论（DFT）的核心思想：**不直接算 N 个电子的波函数（3N 维），而是算电子密度 ρ(r)（3 维）**。Hohenberg-Kohn 定理保证了 ρ(r) 包含基态所有信息，Kohn-Sham 方法把它变成了可实际计算的方程。
+
+> 记忆：DFT = 用电子密度代替波函数，把 3N 维问题降为 3 维问题。
+
+## Kohn-Sham 方程实战理解
+
+不用背公式，记住这 4 项就够了：
+
+```text
+KS 有效势 = 外势(V_ion) + Hartree势(V_H) + 交换关联势(V_xc)
+```
+
+| 项 | 物理含义 | 计算代价 |
+|----|---------|---------|
+| 外势 V_ion | 原子核对电子的吸引 | 赝势/PAW 处理 |
+| Hartree 势 V_H | 电子间经典库仑排斥 | FFT 可解 |
+| 交换关联势 V_xc | 泡利不相容 + 量子关联修正 | **唯一的近似项！** |
+
+**DFT 只有一个地方做了近似：交换关联泛函**。其他部分都是精确的。
+
+## 交换关联泛函：Jacob's Ladder
+
+```text
+精度 ↑
+  第五阶: RPA / double-hybrid（极贵，小体系）
+  第四阶: hybrid (HSE06, PBE0)（部分精确交换，半导体/表面）
+  第三阶: meta-GGA (SCAN, r²SCAN)（包含动能密度）
+  第二阶: GGA (PBE, PW91, PBEsol)（密度+梯度，主流）
+  第一阶: LDA（仅密度，金属凑合能用）
+```
+
+### 选型指南
+
+| 体系 | 推荐泛函 | 原因 |
+|------|---------|------|
+| 金属/合金 | PBE | GGA 对金属表现稳健 |
+| 半导体（带隙） | HSE06 | hybrid 修正带隙低估 |
+| 固体弹性/晶格常数 | PBEsol | 专门优化固体平衡性质 |
+| 分子/团簇 | PBE0 | hybrid 对分子能量好 |
+| 强关联体系 | DFT+U (PBE+U) | 补 Hubbard U 修正 d/f 电子 |
+| 范德华体系 | PBE-D3 / optB88-vdW | 加色散修正 |
+
+## 截断能（ENCUT）收敛测试
+
+平面波基组的多少由 ENCUT 决定。越大越精确，但越贵。
+
+```bash
+# VASP: 对 ENCUT 做收敛测试
+for ENCUT in 300 350 400 450 500 550 600; do
+  mkdir encut_$ENCUT
+  cp {INCAR,KPOINTS,POSCAR,POTCAR} encut_$ENCUT/
+  sed -i "s/ENCUT = .*/ENCUT = $ENCUT/" encut_$ENCUT/INCAR
+  cd encut_$ENCUT && mpirun -np 4 vasp_std && cd ..
+done
+# 比较各目录 OUTCAR 中的 total energy，差值 < 1 meV/atom 即收敛
+```
+
+**经验值**：PBE 通常 ENCUT = max(ENMAX * 1.3, 400 eV)，其中 ENMAX 在 POTCAR 里查。
+
+## k 点采样与收敛
+
+k 点密度指导原则：
+
+```text
+k_i × a_i ≈ 30–40 Å  （大多数计算）
+k_i × a_i ≈ 20–25 Å  （初步粗算）
+```
+
+其中 a_i 是晶格常数（Å），k_i 是该方向的 k 点数。
+
+```bash
+# 用 VASPKIT 自动生成
+vaspkit -task 102   # 生成 KPOINTS（输入 K 点密度）
+```
+
+### 特殊 k 点类型
+
+| 网格类型 | 适用场景 |
+|---------|---------|
+| Monkhorst-Pack (M) | 一般晶体 |
+| Γ-centered (G) | 六方晶系、半导体带隙 |
+| 高对称路径 | 能带计算 |
+
+## 实战工作流
+
+```text
+1. 拿到 POSCAR → 确认晶格参数
+2. 查 POTCAR 中 ENMAX → 设 ENCUT = 1.3 × max(ENMAX)
+3. 用 vaspkit 生成 KPOINTS（密度 ~40）
+4. INCAR 基本参数（见下方模板）
+5. 跑一次静态计算 → 检查 OUTCAR 能量和力
+6. 做 ENCUT/k 点收敛 → 确认精度
+```
+
+## INCAR 最小模板（PBE 静态计算）
+
+```bash
+# 基础设置
+ENCUT = 500
+ISMEAR = 0      # 半导体用 0 (Gaussian)
+SIGMA = 0.05
+IBRION = -1     # 不做离子弛豫（静态）
+NSW = 0
+PREC = Accurate
+
+# 电子步
+NELM = 100
+EDIFF = 1E-6
+
+# 输出
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+
+# 如果是金属 → ISMEAR = 1 (Methfessel-Paxton)
+```
+
+> 记忆口诀：**结构查 POSCAR、截断查 POTCAR、k 点查 vaspkit、泛函看体系**。
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DFT 与材料计算基础\",\"description\":\"从实战角度理解 Kohn-Sham 方程、交换关联泛函、截断能收敛与 k 点采样，不做理论推导只讲怎么用\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"DFT, Kohn-Sham, 交换关联泛函, ENCUT, k点, VASP, 收敛测试\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dft-materials-intro","builtinArticle":{"slug":"dft-materials-intro","title":"DFT 与材料计算基础","category":"comp-materials","summary":"从实战角度理解 Kohn-Sham 方程、交换关联泛函、截断能收敛与 k 点采样，不做理论推导只讲怎么用","content":"$3","tags":["DFT","Kohn-Sham","交换关联泛函","ENCUT","k点","VASP","收敛测试"],"sourceFiles":["dft-materials-intro.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":null,"nextArticle":{"slug":"band-structure-dos","title":"能带结构与态密度分析实战"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

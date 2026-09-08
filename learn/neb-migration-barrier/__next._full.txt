@@ -1,0 +1,133 @@
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","neb-migration-barrier"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","neb-migration-barrier","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:Tcb1,# NEB / CI-NEB 迁移能垒计算
+
+## 什么场景用 NEB
+
+| 场景 | 说明 |
+|------|------|
+| 原子扩散 / 迁移 | 杂质、间隙原子、空位跳跃 |
+| 表面反应 | 吸附物迁移、脱附 |
+| 位错运动 / 相变 | 大尺度构型转变 |
+| **与 ML 势对比** | 验证 deepmd 势的迁移能垒精度 |
+
+NEB（Nudged Elastic Band）找**最小能量路径（MEP）**上的鞍点，给出迁移能垒 E_a。
+
+## 完整工作流
+
+### 1. 优化初态与末态
+
+```text
+要求：
+- 初态：迁移前最稳定结构（含缺陷/杂质的超胞）
+- 末态：迁移后最稳定结构
+- 都用高精度参数优化到力收敛
+```
+
+### 2. 线性插值生成初始路径
+
+```python
+# ASE 线性插值：初态→末态之间生成 N-2 个 image
+from ase.neb import NEB
+from ase.io import read, write
+from ase.optimize import BFGS
+
+initial = read('initial.vasp')
+final   = read('final.vasp')
+
+images = [initial.copy() for _ in range(7)]  # 7 个 image（含端点）
+images[-1] = final
+neb = NEB(images, climb=True, k=0.5)  # climb=True = CI-NEB
+neb.interpolate()  # 线性插值初始路径
+
+for img in images:
+    write(f'img_{images.index(img)}.vasp', img)
+```
+
+**image 数量**：通常 7~11 个（含端点 2 个 + 中间 5~9 个）。太少路径粗糙，太多每个都要算。
+
+### 3. 执行 NEB 计算
+
+**VTST 版 VASP（推荐，能垒精度高）：**
+
+```incar
+# INCAR 关键项
+ICHAIN = 0        # NEB 方法
+LCLIMB = .TRUE.   # CI-NEB（找鞍点）
+IMAGES = 5        # 中间 image 数（需编译带 VTST 的 VASP）
+SPRING = -5.0     # 弹性常数
+LNEBCELL = .FALSE.
+EDIFFG = -0.02    # 力收敛判据
+IBRION = 1        # 需要 NEB 专用优化器
+ISYM = 0          # NEB 关闭对称性
+```
+
+**LAMMPS neb 命令（deepmd 势可选）：**
+
+```lammps
+# 用 LAMMPS 的 neb 命令（VASP 之外的另一条路）
+# 初始路径由多个 data 文件给出，配合 fix neb 使用
+```
+
+### 4. 收敛判据
+
+```text
+- 切向力 < 0.02 eV/Å
+- 能量收敛
+- 同时满足 → 提取能垒
+```
+
+### 5. 提取鞍点能垒
+
+```bash
+# VTST 工具：提取 MEP 数据
+nebmake.pl  # 或 nebresults.pl
+# 输出 MEP 能量曲线 → 最高点能量 − 初态能量 = 迁移能垒 E_a
+```
+
+### 6. 鞍点确认（关键一步）
+
+```text
+确认鞍点是真正的过渡态：
+- 对鞍点结构做频率计算
+- 必须且仅有一个虚频（虚频方向对应迁移方向）
+- 如果多个虚频或没有虚频 → 结构不是鞍点，需调整
+```
+
+## 与 ML 势（deepmd）对比的要点
+
+1. 用同一初态/末态和同一 image 数跑 deepmd 势的 NEB
+2. 能垒误差应在 0.1 eV 量级内（与 DFT 端态/鞍点对比）
+3. deepmd 势可以做更长路径、更大超胞的 NEB——这是它的优势
+4. 注意 deepmd 势的鞍点位置可能与 DFT 略有偏移，需重新确认虚频
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 路径初始插值不合理（原子穿模） | 用 IDPP 插值（`neb.interpolate(method='idpp')`） |
+| 收敛慢 | 减小 image 间距离，或用 CI-NEB 加快 |
+| 找不到虚频 | 结构停在鞍点附近但不是鞍点，重新优化 |
+| 多个虚频 | 路径偏移了真实 MEP，用爬坡方法（`climb`）重找 |
+| 端点能量不一致 | 端点必须各自充分弛豫 |
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"NEB / CI-NEB 迁移能垒计算\",\"description\":\"用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"NEB, CI-NEB, 迁移能垒, 过渡态, VTST, 扩散\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"neb-migration-barrier","builtinArticle":{"slug":"neb-migration-barrier","title":"NEB / CI-NEB 迁移能垒计算","category":"comp-materials","summary":"用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认","content":"$13","tags":["NEB","CI-NEB","迁移能垒","过渡态","VTST","扩散"],"sourceFiles":["neb-migration-barrier.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"defect-formation-energy","title":"DFT 缺陷形成能计算（vacancy / interstitial / 带电缺陷）"},"nextArticle":null}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"NEB / CI-NEB 迁移能垒计算 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/neb-migration-barrier"}],["$","meta","6",{"property":"og:title","content":"NEB / CI-NEB 迁移能垒计算"}],["$","meta","7",{"property":"og:description","content":"用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/neb-migration-barrier"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-02"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-02"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"NEB / CI-NEB 迁移能垒计算"}],["$","meta","14",{"name":"twitter:description","content":"用 NEB/CI-NEB 计算原子迁移能垒：初末态准备、image 插值、VTST VASP 或 LAMMPS neb 执行、收敛判据与鞍点确认"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

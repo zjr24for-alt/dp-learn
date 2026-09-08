@@ -1,0 +1,221 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:T19cc,# dpdata 全能数据转换指南
+
+dpdata 是 DeepModeling 生态的数据处理枢纽，负责在各种 DFT/MD 输出格式与 DeePMD 训练格式之间做转换。
+
+## 核心概念
+
+```text
+┌─────────────┐     dpdata      ┌──────────────┐
+│ DFT 输出     │ ──────────────→ │ DeePMD 训练   │
+│ OUTCAR/xml   │   LabeledSystem │ set.xxx/     │
+│ log/xyz/...  │                 │ coord.npy    │
+└─────────────┘                 │ energy.npy   │
+                                │ force.npy    │
+                                └──────────────┘
+```
+
+两个核心类：
+- **System**: 只有坐标和晶胞（无标签），用于结构操作
+- **LabeledSystem**: 坐标 + 能量 + 力 + 应力（有标签），用于训练数据
+
+## 安装
+
+```bash
+# conda 安装（推荐）
+conda install -c conda.deepmodeling dpdata
+
+# pip 安装
+pip install dpdata
+```
+
+## 支持的输入格式
+
+| 格式标识 | 来源软件 | 读取文件 | 说明 |
+|---------|---------|---------|------|
+| vasp/outcar | VASP | OUTCAR | 最常用，含能量/力/应力 |
+| vasp/xml | VASP | vasprun.xml | 更结构化，推荐大数据量 |
+| vasp/poscar | VASP | POSCAR | 只有结构，无标签 |
+| deepmd/npy | DeePMD | set.xxx/ | DeePMD 原生 numpy 格式 |
+| deepmd/raw | DeePMD | set.xxx/ | DeePMD 原生文本格式 |
+| gaussian/log | Gaussian | .log | 高斯输出 |
+| gaussian/md | Gaussian | .log | 高斯 MD 轨迹 |
+| cp2k/output | CP2K | output | CP2K 输出 |
+| pwscf/input | Quantum ESPRESSO | .in | QE 输入 |
+| pwscf/output | Quantum ESPRESSO | .out | QE 输出 |
+| siesta/output | SIESTA | .out | SIESTA 输出 |
+|quip/gap/xyz | QUIP/GAP | .xyz | GAP 势函数训练数据 |
+
+## 基本用法
+
+### 1. 读取 VASP 数据
+
+```python
+import dpdata
+
+# 从 OUTCAR 读取（最常用）
+# fmt 指定格式，dpdata 会自动解析 OUTCAR 中的能量、力、应力
+system = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")
+
+# 从 vasprun.xml 读取（更稳定，推荐大数据量）
+system = dpdata.LabeledSystem("vasprun.xml", fmt="vasp/xml")
+
+# 自动检测格式（省略 fmt）
+system = dpdata.LabeledSystem("OUTCAR")  # dpdata 自动识别
+
+# 查看基本信息
+print(f"原子数: {system.get_natoms()}")       # 如 64
+print(f"元素种类: {system.get_atom_names()}")  # 如 ['Ti', 'C']
+print(f"帧数: {len(system)}")                  # 如 100
+print(f"原子类型: {system.get_atom_types()}")   # 如 [0,0,...,1,1,...]
+```
+
+### 2. 导出为 DeePMD 训练格式
+
+```python
+# 导出为 npy 格式（推荐，速度快）
+# 生成目录结构：
+# training_data/
+# ├── type_map.raw    # 元素映射 ["Ti", "C"]
+# ├── type.raw        # 每个原子的类型编码 [0,0,...,1,1,...]
+# └── set.000/
+#     ├── box.npy      # 晶胞 (n_frames, 9)
+#     ├── coord.npy    # 坐标 (n_frames, n_atoms*3)
+#     ├── energy.npy   # 能量 (n_frames,)
+#     ├── force.npy    # 力 (n_frames, n_atoms*3)
+#     └── virial.npy   # 应力 (n_frames, 9)
+system.to_deepmd_npy("training_data/")
+
+# 导出为 raw 格式（文本，便于检查）
+system.to_deepmd_raw("training_data_raw/")
+```
+
+### 3. 数据合并（DP-GEN 数据回流核心操作）
+
+```python
+import dpdata
+from pathlib import Path
+
+# 场景：收集 DP-GEN 一轮 FP 标注的所有 OUTCAR，合并为训练集
+systems = []
+for task_dir in sorted(Path("iter.000000/02.fp").glob("task.*")):
+    outcar = task_dir / "OUTCAR"
+    if outcar.exists() and outcar.stat().st_size > 0:
+        try:
+            # 读取单个 task 的 OUTCAR
+            s = dpdata.LabeledSystem(str(outcar), fmt="vasp/outcar")
+            if len(s) > 0:  # 确保有有效帧
+                systems.append(s)
+        except Exception as e:
+            print(f"跳过 {task_dir}: {e}")  # OUTCAR 不完整时跳过
+
+if not systems:
+    raise ValueError("没有找到有效的 OUTCAR 文件！")
+
+# 合并所有系统（dpdata 用 append 做拼接）
+merged = systems[0]
+for s in systems[1:]:
+    merged.append(s)
+
+print(f"合并完成: {len(merged)} 帧, {merged.get_natoms()} 原子")
+
+# 导出
+merged.to_deepmd_npy("new_training_data/")
+```
+
+### 4. 格式互转
+
+```python
+# OUTCAR → POSCAR（提取结构）
+system = dpdata.System("OUTCAR", fmt="vasp/outcar")
+system.to_vasp_poscar("CONTCAR_extracted")
+
+# DeePMD npy → POSCAR
+system = dpdata.System("training_data/", fmt="deepmd/npy")
+system.to_vasp_poscar("from_deepmd.vasp")
+
+# OUTCAR → LAMMPS data
+system.to_lammps_lmp("data.lammps")
+
+# LAMMPS dump → DeePMD
+system = dpdata.System("dump.lammpstrj", fmt="lammps/dump")
+```
+
+## 进阶用法
+
+### 数据切分（训练集/测试集分离）
+
+```python
+import numpy as np
+
+system = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")
+n_frames = len(system)
+
+# 随机打乱并切分 80/20
+indices = np.random.permutation(n_frames)
+n_train = int(0.8 * n_frames)
+
+train_idx = sorted(indices[:n_train])
+test_idx = sorted(indices[n_train:])
+
+# 切分
+train_system = system.sub_system(train_idx)
+test_system = system.sub_system(test_idx)
+
+train_system.to_deepmd_npy("train/")
+test_system.to_deepmd_npy("test/")
+```
+
+### 多目录批量读取
+
+```python
+import dpdata
+from pathlib import Path
+
+# 批量读取多个 AIMD 轨迹
+all_systems = dpdata.LabeledSystem()
+for outcar in Path("aimd_runs/").glob("*/OUTCAR"):
+    s = dpdata.LabeledSystem(str(outcar))
+    all_systems.append(s)
+
+print(f"总计: {len(all_systems)} 帧")
+all_systems.to_deepmd_npy("aimd_training_data/")
+```
+
+### 深度等价（Deep Equivalent）数据处理
+
+```python
+# 用 dpdata 的 shift_energy 调整能量参考
+# 不同 DFT 计算的能量参考不一致时需要对齐
+system = dpdata.LabeledSystem("OUTCAR")
+# system.data["energies"] += shift_value  # 手动偏移
+```
+
+## 常见问题
+
+### 1. "No valid data found in OUTCAR"
+- OUTCAR 不完整（VASP 未正常结束）
+- 检查 OUTCAR 末尾是否有 "Voluntary context switches" 行
+- 解决：用 try-except 包裹读取，跳过坏文件
+
+### 2. virial.npy 缺失
+- 旧版 VASP 的 OUTCAR 可能不含 stress 信息
+- 检查 OUTCAR 中是否有 "in kB" 行
+- 解决：在 INCAR 中确保 ISIF ≥ 2
+
+### 3. type_map 不一致
+- 合并多个数据源时，type_map 必须完全一致
+- TiC 体系：type_map = ["Ti", "C"]，顺序固定
+- 解决：检查每个 set.xxx 的 type_map.raw
+
+### 4. 内存不足
+- 大量 AIMD 轨迹可能几百 GB
+- 解决：分批读取并导出，或使用 dpdata 的 lazy 模式
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式\",\"description\":\"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"dpdata, 数据转换, LabeledSystem, deepmd, 格式\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dpdata-overview","builtinArticle":{"slug":"dpdata-overview","title":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式","category":"deepmd-training","summary":"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南","tags":["dpdata","数据转换","LabeledSystem","deepmd","格式"],"sourceFiles":["deepmodeling/dpdata"],"content":"$3","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"lammps-deepmd-integration","title":"LAMMPS + DeePMD 集成：配置、运行与排错"},"nextArticle":{"slug":"net-size-tuning","title":"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

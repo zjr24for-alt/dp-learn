@@ -1,6 +1,181 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:T1ad9,# DP 势函数生成完整流程
+
+## 总流程概览
+
+MLP 开发主线（主动学习闭环）：
+
+```text
+初始DFT数据
+   ↓
+训练初始模型（DeepMD）
+   ↓
+LAMMPS探索（DP-GEN）
+   ↓
+偏差筛选
+   ↓
+VASP重新标注
+   ↓
+数据回流
+   ↓
+下一轮训练
+   ↓
+最终势函数 graph.pb
+```
+
+这就是**主动学习闭环**。一句话记忆：**结构 → 模型探索 → 偏差筛选 → DFT标注 → 数据回流 → 再训练**。
+
+完整流程分为五个阶段：**建模 → DFT 参数确定 → 初始数据集 → 主动学习循环 → 收敛判定**。
+
+---
+
+## 一、建模阶段
+
+- **原始晶体结构**：CIF 文件（ICSD / Materials Project 等数据库获取，清洗无序占位、修正晶格参数）
+- **结构拓展**：ATAT 工具
+  - 构建超胞、固溶体组分、基础缺陷（空位、间隙、置换原子）初始构型
+- **输出**：一批干净的 POSCAR 初始结构文件
+
+## 二、DFT 计算参数确定
+
+依据相关文献选定统一计算参数：泛函、赝势、截断能、k 点网格、收敛阈值、自旋 / 范德华修正、U 值等。
+
+> ⚠️ **硬性规则**：全流程 DFT 参数禁止中途变更。
+
+## 三、构建初始数据集（DPGEN）
+
+执行 `dpgen init_bulk`：仅生成完美块体晶格均匀拉伸、剪切形变构型，完成 DFT 标注，构成初代数据集。
+
+> ⚠️ **局限**：仅覆盖平衡态完整晶体，缺少缺陷、高温、非平衡、冲击 / 碰撞构型。
+
+### init_bulk + 不同温度探索是否可行？
+
+✅ **完全可行，也是标准操作。** 只用 `dpgen init_bulk` 生成 0K 近平衡均匀形变晶体初始数据集，后续 `dpgen run` 主动学习探索阶段设置任意目标温度（室温、高温、辐照高温、熔融温度）。
+
+**关键区分**：
+- **init_bulk**：没有温度概念，全部是静态 0K 晶格形变构型（均匀伸缩、剪切），只做 DFT 静态单点计算
+- **dpgen run / explore**：DP-MD 在设定的有限温度下开展动力学采样，通过 NVT/NPT 控温引入热扰动
+
+> ⚠️ **冷启动问题**：初始数据集全是 0K 近平衡完美晶体，DP 势初期只学习平衡晶格附近信息。第一轮 explore 直接设极高温度（接近熔化/辐照局部高温），DP 势外推能力极差，极易出现原子飞散、结构爆炸、筛选大量物理无效构型浪费 DFT 算力。
+
+**推荐实操策略（辐照模拟场景）**：
+1. 第 1 轮主动学习：较低温度区间，先采样温和热畸变构型
+2. 后续迭代：逐步抬升 MD 温度，慢慢向目标高温/极端工况靠近
+3. 目标工况含瞬时极高能量畸变（级联碰撞）：人工补充缺陷构型 / AIMD 瞬态构型加入初始集，缓解冷启动外推难题
+
+**常见疑问**：初始集全是 0K 数据，能描述高温体系吗？
+数据集本身不含温度信息，只存储「结构-能量-力」映射。高温对应的是原子高度畸变的结构——只要主动学习通过高温 MD 不断采集高温畸变构型并标注 DFT，模型就能逐步学到高温区域。
+
+### 渐进升温配置示例
+
+`param.json` 中 `model_devi_jobs` 按轮次逐步升温，第一轮保守、后续轮次逐步逼近目标温度：
+
+```json
+{
+  "model_devi_jobs": [
+    {
+      "sys_idx": [0],
+      "temps": [300, 600, 1000],
+      "press": [1, 1, 1],
+      "trj_freq": 10,
+      "nsteps": 3000,
+      "ensemble": "nvt"
+    },
+    {
+      "sys_idx": [0],
+      "temps": [600, 1000, 1500],
+      "press": [1, 1, 1],
+      "trj_freq": 10,
+      "nsteps": 5000,
+      "ensemble": "nvt"
+    },
+    {
+      "sys_idx": [0],
+      "temps": [1000, 1500, 2000],
+      "press": [1, 1, 1],
+      "trj_freq": 10,
+      "nsteps": 10000,
+      "ensemble": "npt",
+      "taop": 0.5
+    }
+  ]
+}
+```
+
+> **原理**：每一轮对应 `model_devi_jobs` 的一个条目（第 iter_index 轮用第 index 个 job）。第 0 轮从温和温度起步，第 1 轮扩展到中高温，第 2 轮进入目标高温区并切换 NPT 允许体积涨落。温度跨度控制在 2-3 倍以内，避免模型外推崩溃。
+
+## 四、主动学习循环（核心）
+
+1. 训练 DP 集成模型（4 模型标准配置）
+2. Explore 采样（LAMMPS 基于 DP 势动力学探索）
+3. 不确定性筛选高置信度待标注构型
+4. DFT 单点计算，扩充数据集
+5. 数据并入训练集，进入下一轮迭代
+
+### ✅ 重点难点：数据集扩充方向约束
+
+**核心原则**：不存在通用万能势，主动学习不能盲目大范围随机采样；扩充构型空间要有明确边界，由后续模拟场景决定。
+
+| 目标用途 | 扩充方向 | 采样取舍 |
+|------|---------|---------|
+| 常温静态缺陷扩散 | 空位、间隙子、缺陷迁移过渡态、低应变构型 | 无需大量高温熔融、极端冲击结构 |
+| 辐照级联碰撞模拟 | 高温、大原子位移、高密度缺陷、局部熔融、高能碰撞瞬态构型 | 单纯平衡晶体采样完全不足 |
+| 固溶体力学形变 | 不同组分、塑性剪切、位错相关构型 | — |
+
+> 🚫 **常见踩坑**：无目标漫无目的地放开 MD 温度、扰动幅度，生成大量和研究工况无关构型。不仅浪费 DFT 算力，还会导致模型在关注的关键区域精度不足。
+
+### 配套操作
+
+每一轮迭代，针对性修改 `dpgen explore` 模块配置（温度区间、初始构型、扰动幅度、压强、缺陷初始结构），对齐既定扩充方向。
+
+## 五、收敛判定
+
+- 独立测试集能量、力 RMSE 达标
+- 连续多轮新增待标注构型显著减少
+- → 势函数收敛，输出 `*.dp` 势文件
+
+---
+
+## 标准目录模板
+
+```text
+TiC_MLP/
+├── dpgen/
+│   ├── param.json          # 主控参数
+│   ├── machine.json        # 机器配置
+│   ├── input.json          # 训练输入参数
+│   ├── INCAR_fp            # VASP INCAR 模板
+│   ├── POTCAR_Ti / POTCAR_C # 赝势文件
+│   ├── init_data/
+│   │   └── set.000/        # 初始训练数据
+│   ├── iter.000000/
+│   │   ├── 00.train/       # 训练：产出 graph.*.pb
+│   │   ├── 01.model_devi/  # 探索：产出 model_devi.out + traj/
+│   │   └── 02.fp/          # 标注：产出 OUTCAR
+│   ├── iter.000001/        # 第二轮...
+│   └── final_model/
+│       └── graph.pb        # 最终势函数
+└── scripts/
+    ├── make_fp_tasks.py
+    ├── collect_fp.py
+    └── merge_training_data.py
+```
+
+## 各阶段核心文件
+
+| 阶段 | 最重要文件 | 作用 |
+|------|-----------|------|
+| 训练 | graph.*.pb | 4个模型的 committee |
+| 探索 | model_devi.out | 偏差筛选依据 |
+| 标注 | OUTCAR | 包含能量、力、应力 |
+| 数据回流 | set.xxx/ | 下一轮训练输入 |
+
+> 优先级：**OUTCAR > model_devi.out > graph.pb > set.xxx**
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DP 势函数生成完整流程\",\"description\":\"DP 势函数生成五阶段完整流程（建模→DFT参数→初始数据集→主动学习循环→收敛判定），含数据集扩充方向约束难点标注与标准目录模板\",\"datePublished\":\"2026-07-31\",\"dateModified\":\"2026-07-31\",\"keywords\":\"dpgen, workflow, 主动学习, 目录结构, MLP\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dpgen-workflow-overview","builtinArticle":{"slug":"dpgen-workflow-overview","title":"DP 势函数生成完整流程","category":"dpgen-workflow","summary":"DP 势函数生成五阶段完整流程（建模→DFT参数→初始数据集→主动学习循环→收敛判定），含数据集扩充方向约束难点标注与标准目录模板","content":"$3","tags":["dpgen","workflow","主动学习","目录结构","MLP"],"sourceFiles":["工作流程以及模版文件夹.md"],"createdAt":"2026-07-31","updatedAt":"2026-07-31"},"prevArticle":null,"nextArticle":{"slug":"dpgen-check-commands","title":"DP-GEN 常用检查指令"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

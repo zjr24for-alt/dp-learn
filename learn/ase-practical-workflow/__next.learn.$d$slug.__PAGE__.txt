@@ -1,6 +1,164 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:T1074,# ASE 实战：结构操作与高通量计算
+
+## ASE 是什么
+
+Atomic Simulation Environment（ASE）是 Python 写的原子模拟工具箱。核心价值：
+
+- **操作结构**（建超胞、切表面、加缺陷、读写文件）
+- **对接各种 calculator**（VASP、QE、GPAW、EMT、LAMMPS…）
+- **构建高通量工作流**（批处理几百个结构）
+
+## 基本结构操作
+
+```python
+from ase import Atoms
+from ase.build import bulk, fcc111, surface, make_supercell
+from ase.io import read, write
+import numpy as np
+
+# 1. 创建晶体
+cu = bulk('Cu', 'fcc', a=3.61)          # Cu FCC 原胞
+cu_sc = cu * (3, 3, 3)                   # 3×3×3 超胞
+
+# 2. 切表面
+cu111 = fcc111('Cu', a=3.61, size=(2, 2, 4), vacuum=10.0)
+# → 2×2 面内，4 层原子，10 Å 真空层
+
+# 3. 读写文件
+atoms = read('POSCAR')                    # 从 VASP POSCAR 读
+write('structure.cif', atoms)             # 导出 CIF
+write('structure.xyz', atoms)             # 导出 XYZ
+```
+
+## 搭建复杂结构
+
+```python
+from ase.build import molecule, sort, add_adsorbate
+from ase.build import graphene_nanoribbon, nanotube
+
+# 分子
+h2o = molecule('H2O')
+
+# 在表面上吸附
+slab = fcc111('Pt', a=3.92, size=(3, 3, 4), vacuum=10)
+add_adsorbate(slab, h2o, height=2.5, position='ontop')
+
+# 掺杂：替换第 5 个原子为 Ni
+slab[4].symbol = 'Ni'
+
+# 空位：删除第 10 个原子
+del slab[10]
+
+# 随机置换合金
+from ase.build import bulk
+cu_supercell = bulk('Cu', 'fcc', a=3.61) * (4, 4, 4)
+for atom in cu_supercell:
+    if np.random.random() < 0.1:
+        atom.symbol = 'Ni'              # Cu90Ni10 随机合金
+```
+
+## 对接 Calculator
+
+```python
+# --- EMT (测试用，超快) ---
+from ase.calculators.emt import EMT
+atoms.calc = EMT()
+e = atoms.get_potential_energy()     # 0.01 秒
+
+# --- VASP ---
+from ase.calculators.vasp import Vasp
+calc = Vasp(
+    xc='PBE',
+    encut=500,
+    kpts=(4, 4, 1),
+    ismear=0,
+    sigma=0.05,
+    ibrion=-1,
+    nsw=0,
+    lwave=False,
+    lcharg=False,
+    directory='vasp_calc',           # 工作目录（互不污染）
+)
+atoms.calc = calc
+atoms.get_potential_energy()         # 几分钟到几小时
+
+# --- GPAW (免费 DFT，GPU 友好) ---
+from gpaw import GPAW
+calc = GPAW(xc='PBE', mode='pw', kpts=(4, 4, 1))
+```
+
+## 弛豫优化
+
+```python
+from ase.optimize import BFGS, BFGSLineSearch
+from ase.constraints import FixAtoms
+
+# 固定底部两层原子
+mask = [atom.tag > 2 for atom in slab]  # tag > 2 = 非底层的原子
+slab.set_constraint(FixAtoms(mask=mask))
+
+# BFGS 弛豫
+slab.calc = Vasp(xc='PBE', encut=500, kpts=(4,4,1),
+                 ibrion=-1, nsw=0,
+                 directory='relax')
+opt = BFGS(slab, trajectory='relax.traj')
+opt.run(fmax=0.02)  # 力收敛到 0.02 eV/Å
+```
+
+## 高通量工作流
+
+```python
+from ase.db import connect
+from ase.optimize import BFGS
+
+db = connect('high_throughput.db')
+
+# 枚举 FCC 合金不同成分的晶格常数
+for elem in ['Cu', 'Ag', 'Au', 'Ni', 'Pd', 'Pt']:
+    for a in np.linspace(3.4, 4.2, 9):
+        atoms = bulk(elem, 'fcc', a=a)
+        atoms.calc = EMT()   # 高通量筛选先用 EMT 快速扫
+        e = atoms.get_potential_energy()
+
+        db.write(atoms, element=elem, lattice_constant=a, energy=e)
+
+# 查询数据库
+for row in db.select(element='Cu', sort='energy'):
+    print(f"a={row.lattice_constant:.3f}, E={row.energy:.3f}")
+```
+
+## 集成 Phonopy 算声子
+
+```python
+from phonopy import Phonopy
+from phonopy.structure.atoms import PhonopyAtoms
+
+# ASE → Phonopy
+phonopy_atoms = PhonopyAtoms(
+    symbols=atoms.get_chemical_symbols(),
+    scaled_positions=atoms.get_scaled_positions(),
+    cell=atoms.cell,
+)
+phonon = Phonopy(phonopy_atoms, supercell_matrix=[[2,0,0],[0,2,0],[0,0,2]])
+phonon.generate_displacements(distance=0.01)
+
+# 对每个位移结构算力 → FORCE_CONSTANTS → 声子谱
+```
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 不同 calculator 的 directory 会互相覆盖 | 每次设不同的 directory |
+| EMT 不能用于发表（太粗糙） | 仅用于工作流测试和调试 |
+| ASE VASP calculator 的 kpts 需手动设 | 不会自动生成，务必检查 |
+| read('POSCAR') 不保留原子速度 | 如需速度，用 extxyz 格式 |
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"ASE 实战：结构操作与高通量计算\",\"description\":\"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"ASE, 结构操作, calculator, 高通量, 弛豫, Phonopy\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"ase-practical-workflow","builtinArticle":{"slug":"ase-practical-workflow","title":"ASE 实战：结构操作与高通量计算","category":"atomistic-sim","summary":"ASE 构建结构、读写格式文件、设置 calculator、跑弛豫、做高通量筛选的全流程 Python 代码","content":"$3","tags":["ASE","结构操作","calculator","高通量","弛豫","Phonopy"],"sourceFiles":["ase-practical-workflow.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"ml-potentials-overview","title":"机器学习势函数全景概述"},"nextArticle":{"slug":"phonopy-phono3py-workflow","title":"晶格动力学工具：Phonopy + phono3py 实战"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

@@ -1,6 +1,105 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+6:"$Sreact.suspense"
+3:Tc9e,# 晶格动力学工具：Phonopy + phono3py 实战
+
+## 工具分工
+
+| 工具 | 算什么 | 输入 | 输出 |
+|------|--------|------|------|
+| **Phonopy** | 简谐声子（二阶力常数 Φ₂） | 位移结构的力 | 声子色散、DOS、热力学 |
+| **phono3py** | 非简谐声子（三阶力常数 Φ₃） | 位移对的力 | 声子寿命、晶格热导率 κ_L |
+| **ALAMODE** | 高阶非简谐 | 结构+力 | LO-TO 劈裂、温度依赖声子谱 |
+
+## Phonopy 快速回顾（关键参数）
+
+```bash
+# 1. 生成超胞和位移
+phonopy -d --dim="3 3 3" -c POSCAR-unitcell
+
+# 2. 对每个 disp-*/ 跑 VASP 静态计算
+# INCAR: IBRION=-1, NSW=0, PREC=Accurate, ADDGRID=.TRUE.
+
+# 3. 收集力
+phonopy -f disp-*/vasprun.xml
+
+# 4. 声子色散 + DOS
+phonopy -p band.conf -c POSCAR-unitcell
+phonopy -p dos.conf -c POSCAR-unitcell
+
+# 5. 热力学
+phonopy -t -p mesh.conf -c POSCAR-unitcell
+# → thermal_properties.yaml: T, F, S, Cv
+```
+
+## phono3py 完整工作流
+
+phono3py 需要算**三阶力常数**（Φ₃），即两个原子同时产生位移时的力。计算量是 Phonopy 的 O(N_atom × n_displacements) 倍。
+
+```bash
+# 1. 生成超胞和位移对
+phono3py -d --dim="2 2 2" --pa="auto" -c POSCAR-unitcell
+# --pa="auto" 启用平移不变性约束（大幅减少位移对数量）
+
+# 2. 对所有 disp-*/ 目录跑 VASP 静态
+# 三阶计算数量远多于二阶！（可缓存/并行化）
+
+# 3. 收集力
+phono3py --cf3 disp-*/vasprun.xml
+
+# 4. 计算晶格热导率
+phono3py --mesh="11 11 11" --fc3 --fc2 --br
+# --br: Boltzmann 输运方程 (RTA 近似)
+# 输出 kappa-mxxx.txt: T(K), kappa_xx, kappa_yy, kappa_zz (W/m-K)
+```
+
+## 晶格热导率公式（RTA）
+
+```text
+κ_L^{αβ} = (1 / N_q V) Σ_{q,ν} C_{qν} v_{qν}^α v_{qν}^β τ_{qν}
+```
+
+物理理解：
+- **C_qν**：每个声子模的热容
+- **v_qν**：声子群速度（从色散曲线的斜率）
+- **τ_qν**：声子寿命（来自三阶非简谐散射）
+- 求和遍及所有 q 点和声子支
+
+## 声子寿命分析
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# phono3py 输出 linewidth → 声子寿命 τ = 1/(2×linewidth)
+data = np.loadtxt('linewidth.dat', skiprows=1)
+freq = data[:, 0]       # THz
+linewidth = data[:, 1]  # THz
+tau = 1.0 / (2.0 * np.pi * linewidth * 1e12)  # seconds
+
+plt.scatter(freq, tau*1e12, s=1)
+plt.xscale('log'); plt.yscale('log')
+plt.xlabel('Frequency (THz)')
+plt.ylabel('Phonon lifetime (ps)')
+plt.title('τ ∝ ω^(-2) 低频长寿命，高频短寿命')
+```
+
+## 收敛测试清单
+
+| 参数 | 测试范围 | 标准 |
+|------|---------|------|
+| 超胞尺寸 | 2×2×2 → 4×4×4 | 声子频率变化 < 1 cm⁻¹ |
+| q 点网格 (DOS) | 11³ → 31³ | Cv 变化 < 1% |
+| q 点网格 (κ_L) | 11³ → 25³ | κ_L 变化 < 5% |
+| 截断半径 (三阶) | 3rd NN → 6th NN | κ_L 变化 < 5% |
+
+## 实战加速策略
+
+1. **对称性减少位移数**：`--pa="auto"` 利用空间群减少位移对
+2. **超胞不要太大**：2×2×2 对简谐够用，3×3×3 对非简谐通常是实践上限
+3. **先跑 Phonopy 再跑 phono3py**：用 Phonopy 确认结构稳定（无虚频）再做非简谐
+4. **力收敛要更严格**：三阶力常数对力误差更敏感（推荐 EDIFF=1E-8）
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"晶格动力学工具：Phonopy + phono3py 实战\",\"description\":\"从二阶力常数到声子谱/态密度，三阶力常数到声子寿命和晶格热导率，完整计算管线\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"Phonopy, phono3py, 晶格动力学, 声子寿命, 热导率, RTA\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"phonopy-phono3py-workflow","builtinArticle":{"slug":"phonopy-phono3py-workflow","title":"晶格动力学工具：Phonopy + phono3py 实战","category":"atomistic-sim","summary":"从二阶力常数到声子谱/态密度，三阶力常数到声子寿命和晶格热导率，完整计算管线","content":"$3","tags":["Phonopy","phono3py","晶格动力学","声子寿命","热导率","RTA"],"sourceFiles":["phonopy-phono3py-workflow.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"ase-practical-workflow","title":"ASE 实战：结构操作与高通量计算"},"nextArticle":{"slug":"atat-sqs-high-entropy-alloy","title":"高熵合金建模：ATAT · SQS 特殊准随机结构"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":"$L5"}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+5:["$","$6",null,{"name":"Next.MetadataOutlet","children":"$@7"}]
+7:null

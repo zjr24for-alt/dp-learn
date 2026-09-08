@@ -1,0 +1,51 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T6e1,# DP-GEN param.json 关键参数速查
+
+## type_map
+```json
+"type_map": ["Ti", "C"]
+```
+- 元素列表，决定 training data 中原子类型的编码顺序
+- **AI 提示**：type_map 顺序影响 DeePMD 训练时 type.raw 的映射，保持一致！(来源: DP-GEN 文档)
+
+## model_devi 块
+
+```json
+"model_devi_f_trust_lo": 0.10,  // 力偏差下界 (eV/Å)，低于此值：准确，跳过
+"model_devi_f_trust_hi": 0.40,  // 力偏差上界 (eV/Å)，高于此值：不准，丢弃
+"model_devi_e_trust_lo": 0.02,  // 能量偏差下界 (eV)
+"model_devi_e_trust_hi": 0.20,  // 能量偏差上界 (eV)
+"model_devi_numb_models": 4,    // committee 模型数，通常 4
+"model_devi_dt_freq": 10        // 每多少 MD 步计算一次偏差
+```
+
+## fp (First-Principles) 块
+
+```json
+"fp_style": "vasp",
+"fp_task_max": 200,      // 单轮最大 VASP 任务数
+"fp_task_min": 5,        // 单轮最小 VASP 任务数（低于此数终止迭代）
+"fp_incar": "INCAR_fp",  // VASP INCAR 模板路径
+"fp_pp_path": "./",      // 赝势目录
+"fp_pp_files": ["POTCAR_Ti", "POTCAR_C"]
+```
+
+- **AI 提示**：fp_task_max 控制每轮 DFT 成本，200 是经验安全值(来源: DP-GEN 实战教程)
+
+## INCAR 模板要点
+
+```text
+ISIF   = 2      # 只优化原子位置，不改变晶胞
+ISMEAR = 0      # 半导体/绝缘体用 Gaussian smearing
+SIGMA  = 0.05   # smearing 宽度
+ENCUT  = 520    # 截断能 (eV)，至少为 POTCAR ENMAX 的 1.3 倍
+EDIFF  = 1E-6   # 电子收敛标准
+EDIFFG = -0.02  # 离子弛豫力收敛标准 (eV/Å)
+```
+
+- **AI 注意**：ENCUT 一定要设对！TiC 体系建议 ≥ 520 eV (来源: VASP 文档)
+- **AI 注意**：ISIF = 2 是 DP-GEN 最常用设置，因为只关心原子位置不关心晶胞变化 (来源: DP-GEN 实战)0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DP-GEN param.json 关键参数速查\",\"description\":\"param.json 中 model_devi、fp、training 块的核心参数含义与推荐值\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"dpgen, param.json, 参数配置, VASP\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dpgen-param-json-reference","builtinArticle":{"slug":"dpgen-param-json-reference","title":"DP-GEN param.json 关键参数速查","category":"dpgen-workflow","summary":"param.json 中 model_devi、fp、training 块的核心参数含义与推荐值","tags":["dpgen","param.json","参数配置","VASP"],"sourceFiles":["deepmodeling/dpgen"],"content":"$3","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"dpgen-practical-guidelines","title":"DP-GEN 实战指南：从参数配置到收敛判断"},"nextArticle":{"slug":"dpdata-dpgen-integration","title":"dpdata 在 DP-GEN 工作流中的实战应用"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

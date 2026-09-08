@@ -1,0 +1,90 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:Tb88,# 网络大小调优指南
+
+## 核心结论
+
+1. **fitting_net 对精度影响较小**：从 [240,240,240] 缩小到 [20,20,20]，力 RMSE 仅增加 2-5%
+2. **embedding_net 对精度影响很大**：从 [25,50,100] 缩小到 [4,8,16]，力 RMSE 可能增加 50-100%
+3. **推荐策略**：embedding_net 不要太小，fitting_net 可以适当缩小以节省计算
+
+## 官方 Benchmark 数据
+
+### Al₂O₃ 体系（embedding_net: [25,50,100]）
+
+| fitting_net | 能量 RMSE (eV/atom) | 力 RMSE (eV/Å) |
+|-------------|---------------------|-----------------|
+| [240,240,240] | 7.26e-05 | 0.040 |
+| [80,80,80] | 7.50e-05 | 0.040 |
+| [20,20,20] | 7.64e-05 | 0.041 |
+| [10,10,10] | 7.97e-05 | 0.042 |
+| [5,5,5] | 8.05e-05 | 0.042 |
+| [] (线性) | 1.31e-04 | 0.054 |
+
+> **解读**：fitting_net 从 [240,240,240] 缩到 [20,20,20]，力 RMSE 仅从 0.040 增到 0.041 eV/Å，几乎无差别。但去掉隐藏层（线性回归）精度显著下降。
+
+### Al₂O₃ 体系（fitting_net: [240,240,240]）
+
+| embedding_net | 能量 RMSE (eV/atom) | 力 RMSE (eV/Å) |
+|---------------|---------------------|-----------------|
+| [25,50,100] | 7.26e-05 | 0.040 |
+| [10,20,40] | 1.21e-04 | 0.047 |
+| [5,10,20] | 1.40e-04 | 0.057 |
+| [4,8,16] | 2.53e-04 | 0.073 |
+| [2,4,8] | 2.20e-04 | 0.075 |
+| [1,2,4] | 5.43e-04 | 0.097 |
+
+> **解读**：embedding_net 从 [25,50,100] 缩到 [4,8,16]，力 RMSE 从 0.040 增到 0.073 eV/Å，增加 82%！embedding_net 是精度的关键。
+
+### Cu 体系
+
+| fitting_net | 力 RMSE (eV/Å) | embedding_net | 力 RMSE (eV/Å) |
+|-------------|----------------|---------------|----------------|
+| [240,240,240] | 0.089 | [25,50,100] | 0.089 |
+| [20,20,20] | 0.090 | [10,20,40] | 0.090 |
+| [10,10,10] | 0.090 | [5,10,20] | 0.090 |
+| [] (线性) | 0.090 | [4,8,16] | 0.095 |
+
+> **解读**：Cu 体系 fitting_net 几乎无影响（变化 <1%），但 embedding_net 缩小到 [4,8,16] 时精度开始明显下降。
+
+### H₂O 体系
+
+| fitting_net | 力 RMSE (eV/Å) | embedding_net | 力 RMSE (eV/Å) |
+|-------------|----------------|---------------|----------------|
+| [240,240,240] | 0.052 | [25,50,100] | 0.052 |
+| [80,80,80] | 0.053 | [10,20,40] | 0.063 |
+| [20,20,20] | 0.058 | [5,10,20] | 0.073 |
+| [10,10,10] | 0.062 | [4,8,16] | 0.080 |
+
+## 实用调参策略
+
+### 快速筛选（大体系 / 有限计算资源）
+```json
+"fitting_net": { "neuron": [20, 20, 20] },
+"descriptor": { "neuron": [10, 20, 40] }
+```
+
+### 标准精度（大多数场景）
+```json
+"fitting_net": { "neuron": [120, 120, 120] },
+"descriptor": { "neuron": [25, 50, 100] }
+```
+
+### 高精度（小体系 / 发表级精度）
+```json
+"fitting_net": { "neuron": [240, 240, 240] },
+"descriptor": { "neuron": [25, 50, 100] }
+```
+
+### 调优流程
+1. 先用标准参数跑一轮 baseline
+2. 缩小 fitting_net 看精度变化（通常影响小）
+3. 如果精度不够，优先增大 embedding_net
+4. 如果计算太慢，优先缩小 fitting_net
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡\",\"description\":\"基于官方 benchmark 数据，不同 fitting_net/embedding_net 大小对 Al₂O₃、Cu、H₂O 体系精度的影响\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"deepmd, 网络大小, fitting_net, embedding_net, 调优, benchmark\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"net-size-tuning","builtinArticle":{"slug":"net-size-tuning","title":"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡","category":"deepmd-training","summary":"基于官方 benchmark 数据，不同 fitting_net/embedding_net 大小对 Al₂O₃、Cu、H₂O 体系精度的影响","tags":["deepmd","网络大小","fitting_net","embedding_net","调优","benchmark"],"sourceFiles":["deepmodeling/deepmd-kit/doc/troubleshooting/howtoset_netsize.md"],"content":"$3","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"dpdata-overview","title":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式"},"nextArticle":{"slug":"lcurve-out-guide","title":"lcurve.out 训练曲线解读与异常诊断"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

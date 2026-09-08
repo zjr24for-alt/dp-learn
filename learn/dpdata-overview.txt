@@ -1,0 +1,235 @@
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","dpdata-overview"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","dpdata-overview","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:T19cc,# dpdata 全能数据转换指南
+
+dpdata 是 DeepModeling 生态的数据处理枢纽，负责在各种 DFT/MD 输出格式与 DeePMD 训练格式之间做转换。
+
+## 核心概念
+
+```text
+┌─────────────┐     dpdata      ┌──────────────┐
+│ DFT 输出     │ ──────────────→ │ DeePMD 训练   │
+│ OUTCAR/xml   │   LabeledSystem │ set.xxx/     │
+│ log/xyz/...  │                 │ coord.npy    │
+└─────────────┘                 │ energy.npy   │
+                                │ force.npy    │
+                                └──────────────┘
+```
+
+两个核心类：
+- **System**: 只有坐标和晶胞（无标签），用于结构操作
+- **LabeledSystem**: 坐标 + 能量 + 力 + 应力（有标签），用于训练数据
+
+## 安装
+
+```bash
+# conda 安装（推荐）
+conda install -c conda.deepmodeling dpdata
+
+# pip 安装
+pip install dpdata
+```
+
+## 支持的输入格式
+
+| 格式标识 | 来源软件 | 读取文件 | 说明 |
+|---------|---------|---------|------|
+| vasp/outcar | VASP | OUTCAR | 最常用，含能量/力/应力 |
+| vasp/xml | VASP | vasprun.xml | 更结构化，推荐大数据量 |
+| vasp/poscar | VASP | POSCAR | 只有结构，无标签 |
+| deepmd/npy | DeePMD | set.xxx/ | DeePMD 原生 numpy 格式 |
+| deepmd/raw | DeePMD | set.xxx/ | DeePMD 原生文本格式 |
+| gaussian/log | Gaussian | .log | 高斯输出 |
+| gaussian/md | Gaussian | .log | 高斯 MD 轨迹 |
+| cp2k/output | CP2K | output | CP2K 输出 |
+| pwscf/input | Quantum ESPRESSO | .in | QE 输入 |
+| pwscf/output | Quantum ESPRESSO | .out | QE 输出 |
+| siesta/output | SIESTA | .out | SIESTA 输出 |
+|quip/gap/xyz | QUIP/GAP | .xyz | GAP 势函数训练数据 |
+
+## 基本用法
+
+### 1. 读取 VASP 数据
+
+```python
+import dpdata
+
+# 从 OUTCAR 读取（最常用）
+# fmt 指定格式，dpdata 会自动解析 OUTCAR 中的能量、力、应力
+system = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")
+
+# 从 vasprun.xml 读取（更稳定，推荐大数据量）
+system = dpdata.LabeledSystem("vasprun.xml", fmt="vasp/xml")
+
+# 自动检测格式（省略 fmt）
+system = dpdata.LabeledSystem("OUTCAR")  # dpdata 自动识别
+
+# 查看基本信息
+print(f"原子数: {system.get_natoms()}")       # 如 64
+print(f"元素种类: {system.get_atom_names()}")  # 如 ['Ti', 'C']
+print(f"帧数: {len(system)}")                  # 如 100
+print(f"原子类型: {system.get_atom_types()}")   # 如 [0,0,...,1,1,...]
+```
+
+### 2. 导出为 DeePMD 训练格式
+
+```python
+# 导出为 npy 格式（推荐，速度快）
+# 生成目录结构：
+# training_data/
+# ├── type_map.raw    # 元素映射 ["Ti", "C"]
+# ├── type.raw        # 每个原子的类型编码 [0,0,...,1,1,...]
+# └── set.000/
+#     ├── box.npy      # 晶胞 (n_frames, 9)
+#     ├── coord.npy    # 坐标 (n_frames, n_atoms*3)
+#     ├── energy.npy   # 能量 (n_frames,)
+#     ├── force.npy    # 力 (n_frames, n_atoms*3)
+#     └── virial.npy   # 应力 (n_frames, 9)
+system.to_deepmd_npy("training_data/")
+
+# 导出为 raw 格式（文本，便于检查）
+system.to_deepmd_raw("training_data_raw/")
+```
+
+### 3. 数据合并（DP-GEN 数据回流核心操作）
+
+```python
+import dpdata
+from pathlib import Path
+
+# 场景：收集 DP-GEN 一轮 FP 标注的所有 OUTCAR，合并为训练集
+systems = []
+for task_dir in sorted(Path("iter.000000/02.fp").glob("task.*")):
+    outcar = task_dir / "OUTCAR"
+    if outcar.exists() and outcar.stat().st_size > 0:
+        try:
+            # 读取单个 task 的 OUTCAR
+            s = dpdata.LabeledSystem(str(outcar), fmt="vasp/outcar")
+            if len(s) > 0:  # 确保有有效帧
+                systems.append(s)
+        except Exception as e:
+            print(f"跳过 {task_dir}: {e}")  # OUTCAR 不完整时跳过
+
+if not systems:
+    raise ValueError("没有找到有效的 OUTCAR 文件！")
+
+# 合并所有系统（dpdata 用 append 做拼接）
+merged = systems[0]
+for s in systems[1:]:
+    merged.append(s)
+
+print(f"合并完成: {len(merged)} 帧, {merged.get_natoms()} 原子")
+
+# 导出
+merged.to_deepmd_npy("new_training_data/")
+```
+
+### 4. 格式互转
+
+```python
+# OUTCAR → POSCAR（提取结构）
+system = dpdata.System("OUTCAR", fmt="vasp/outcar")
+system.to_vasp_poscar("CONTCAR_extracted")
+
+# DeePMD npy → POSCAR
+system = dpdata.System("training_data/", fmt="deepmd/npy")
+system.to_vasp_poscar("from_deepmd.vasp")
+
+# OUTCAR → LAMMPS data
+system.to_lammps_lmp("data.lammps")
+
+# LAMMPS dump → DeePMD
+system = dpdata.System("dump.lammpstrj", fmt="lammps/dump")
+```
+
+## 进阶用法
+
+### 数据切分（训练集/测试集分离）
+
+```python
+import numpy as np
+
+system = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")
+n_frames = len(system)
+
+# 随机打乱并切分 80/20
+indices = np.random.permutation(n_frames)
+n_train = int(0.8 * n_frames)
+
+train_idx = sorted(indices[:n_train])
+test_idx = sorted(indices[n_train:])
+
+# 切分
+train_system = system.sub_system(train_idx)
+test_system = system.sub_system(test_idx)
+
+train_system.to_deepmd_npy("train/")
+test_system.to_deepmd_npy("test/")
+```
+
+### 多目录批量读取
+
+```python
+import dpdata
+from pathlib import Path
+
+# 批量读取多个 AIMD 轨迹
+all_systems = dpdata.LabeledSystem()
+for outcar in Path("aimd_runs/").glob("*/OUTCAR"):
+    s = dpdata.LabeledSystem(str(outcar))
+    all_systems.append(s)
+
+print(f"总计: {len(all_systems)} 帧")
+all_systems.to_deepmd_npy("aimd_training_data/")
+```
+
+### 深度等价（Deep Equivalent）数据处理
+
+```python
+# 用 dpdata 的 shift_energy 调整能量参考
+# 不同 DFT 计算的能量参考不一致时需要对齐
+system = dpdata.LabeledSystem("OUTCAR")
+# system.data["energies"] += shift_value  # 手动偏移
+```
+
+## 常见问题
+
+### 1. "No valid data found in OUTCAR"
+- OUTCAR 不完整（VASP 未正常结束）
+- 检查 OUTCAR 末尾是否有 "Voluntary context switches" 行
+- 解决：用 try-except 包裹读取，跳过坏文件
+
+### 2. virial.npy 缺失
+- 旧版 VASP 的 OUTCAR 可能不含 stress 信息
+- 检查 OUTCAR 中是否有 "in kB" 行
+- 解决：在 INCAR 中确保 ISIF ≥ 2
+
+### 3. type_map 不一致
+- 合并多个数据源时，type_map 必须完全一致
+- TiC 体系：type_map = ["Ti", "C"]，顺序固定
+- 解决：检查每个 set.xxx 的 type_map.raw
+
+### 4. 内存不足
+- 大量 AIMD 轨迹可能几百 GB
+- 解决：分批读取并导出，或使用 dpdata 的 lazy 模式
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式\",\"description\":\"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"dpdata, 数据转换, LabeledSystem, deepmd, 格式\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"dpdata-overview","builtinArticle":{"slug":"dpdata-overview","title":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式","category":"deepmd-training","summary":"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南","tags":["dpdata","数据转换","LabeledSystem","deepmd","格式"],"sourceFiles":["deepmodeling/dpdata"],"content":"$13","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"lammps-deepmd-integration","title":"LAMMPS + DeePMD 集成：配置、运行与排错"},"nextArticle":{"slug":"net-size-tuning","title":"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡"}}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/dpdata-overview"}],["$","meta","6",{"property":"og:title","content":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式"}],["$","meta","7",{"property":"og:description","content":"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/dpdata-overview"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-04"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-04"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"dpdata 全能数据转换：从 VASP/Gaussian 到 DeePMD 格式"}],["$","meta","14",{"name":"twitter:description","content":"dpdata 支持的输入/输出格式、LabeledSystem 用法、数据合并与切分、多格式互转的完整指南"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

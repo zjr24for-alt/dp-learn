@@ -1,6 +1,154 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:Tf25,# DFT 计算弹性常数与力学性质
+
+## 弹性常数矩阵
+
+对于一般晶体，弹性常数是 6×6 矩阵 Cij（Voigt 记号）：
+
+```text
+应力 σ_i = Σ_j C_{ij} × 应变 ε_j    (i,j = 1..6)
+```
+
+其中 1=xx, 2=yy, 3=zz, 4=yz, 5=xz, 6=xy。
+
+### 不同晶系的独立 Cij
+
+| 晶系 | 独立 Cij 数 | 关键分量 |
+|------|------------|---------|
+| 立方 | 3 | C11, C12, C44 |
+| 六方 | 5 | C11, C12, C13, C33, C44 |
+| 四方 | 6 | C11, C12, C13, C33, C44, C66 |
+| 正交 | 9 | 全部非对角线对 |
+| 三斜 | 21 | 全部可能 |
+
+## 应力-应变法流程
+
+```text
+1. 完全弛豫结构 → 得到平衡晶格
+2. 对每种应变模式施加 ±1%, ±2% 应变
+3. 对每个变形结构做静态计算 → 提取应力张量
+4. 用 σ = C·ε 线性拟合求 Cij
+```
+
+## VASP 实现
+
+### Step 1: 弛豫
+```bash
+# INCAR 弛豫设置
+IBRION = 2
+ISIF = 3       # 同时优化原子位置+晶格+体积
+NSW = 100
+EDIFFG = -0.001 # 力收敛标准 eV/Å
+ENCUT = 1.3 × ENMAX   # 略高于通常值（弹性对截断能敏感）
+PREC = Accurate
+```
+
+### Step 2: VASP 应变计算
+```bash
+# INCAR 弹性常数直接计算（IBRION=6 应力-应变法）
+IBRION = 6
+ISIF = 3
+NFREE = 2      # 每个方向 ±2 个位移
+POTIM = 0.015  # 位移幅度 Å
+```
+
+VASP 会自动施加对称应变，从 OUTCAR 提取：
+
+```bash
+grep "TOTAL ELASTIC MODULI" OUTCAR -A 20
+```
+
+### Step 3: 手动提取（如需更高精度）
+
+对每个晶格向量施加小幅应变：
+
+```python
+import numpy as np
+
+# 对 POSCAR 的晶格矩阵施加单轴/剪切应变
+def apply_strain(lattice, strain_type, delta):
+    """
+    strain_type: 'xx', 'yy', 'zz', 'yz', 'xz', 'xy'
+    delta: 应变大小 (如 0.01 = 1%)
+    """
+    eps = np.zeros((3, 3))
+    if strain_type == 'xx': eps[0, 0] = delta
+    elif strain_type == 'yy': eps[1, 1] = delta
+    elif strain_type == 'zz': eps[2, 2] = delta
+    elif strain_type == 'yz': eps[1, 2] = eps[2, 1] = delta / 2
+    elif strain_type == 'xz': eps[0, 2] = eps[2, 0] = delta / 2
+    elif strain_type == 'xy': eps[0, 1] = eps[1, 0] = delta / 2
+    return lattice @ (np.eye(3) + eps)
+
+# 对 delta = -0.02, -0.01, 0.01, 0.02 各跑一次静态
+# 提取应力张量 → 线性拟合 → Cij
+```
+
+## 从 Cij 到工程弹性模量
+
+### Voigt-Reuss-Hill (VRH) 近似
+
+```python
+import numpy as np
+
+def calc_moduli_vrh(C):
+    """立方晶系 VRH 平均"""
+    C11, C12, C44 = C[0,0], C[0,1], C[3,3]
+
+    # Voigt 上界 (等应变假设)
+    B_V = (C11 + 2*C12) / 3
+    G_V = (C11 - C12 + 3*C44) / 5
+
+    # Reuss 下界 (等应力假设)
+    S = np.linalg.inv(C)  # 柔度矩阵
+    S11, S12, S44 = S[0,0], S[0,1], S[3,3]
+    B_R = 1 / (3*S11 + 6*S12)
+    G_R = 5 / (4*S11 - 4*S12 + 3*S44)
+
+    # Hill 平均
+    B_H = (B_V + B_R) / 2
+    G_H = (G_V + G_R) / 2
+
+    # 杨氏模量和泊松比
+    E = 9*B_H*G_H / (3*B_H + G_H)
+    nu = (3*B_H - 2*G_H) / (2*(3*B_H + G_H))
+
+    return {
+        'B_V': B_V, 'B_R': B_R, 'B_H': B_H,  # GPa
+        'G_V': G_V, 'G_R': G_R, 'G_H': G_H,  # GPa
+        'E': E,                                 # GPa
+        'nu': nu,
+        'B_G_ratio': B_H / G_H                 # Pugh 判据
+    }
+```
+
+### Pugh 判据与机械稳定性
+
+| 判据 | 条件 | 含义 |
+|------|------|------|
+| Pugh 比 B/G | > 1.75 → 延性 | 体模量 vs 剪切模量 |
+| | < 1.75 → 脆性 | |
+| Cauchy 压力 C12 - C44 | > 0 → 金属键/延性 | 角向键强度 |
+| | < 0 → 共价键/脆性 | |
+
+**Born 稳定性判据（立方晶系）：**
+```text
+C11 - C12 > 0
+C11 + 2C12 > 0  （即 B > 0）
+C44 > 0
+```
+
+## 实战注意
+
+1. **截断能要足够高**：弹性常数对 ENCUT 敏感，推荐 ENCUT = 1.5 × max(ENMAX)
+2. **k 点要加密**：推荐密度 ≥ 40 Å
+3. **应变幅度要收敛**：试 0.5%, 1%, 2%，选 Cij 不随幅度变化的最小值
+4. **结构的 Ising 效应**：弛豫要收敛到每原子受力 < 0.001 eV/Å
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DFT 计算弹性常数与力学性质\",\"description\":\"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"弹性常数, Cij, VRH, 体模量, 剪切模量, 杨氏模量, Pugh判据\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"elastic-constants-dft","builtinArticle":{"slug":"elastic-constants-dft","title":"DFT 计算弹性常数与力学性质","category":"comp-materials","summary":"应力-应变法计算弹性常数矩阵 Cij，通过 VRH 近似推导体模量/剪切模量/杨氏模量和泊松比","content":"$3","tags":["弹性常数","Cij","VRH","体模量","剪切模量","杨氏模量","Pugh判据"],"sourceFiles":["elastic-constants-dft.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"band-structure-dos","title":"能带结构与态密度分析实战"},"nextArticle":{"slug":"phonon-thermodynamics","title":"声子谱与热力学性质计算"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

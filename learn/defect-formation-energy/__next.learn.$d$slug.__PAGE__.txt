@@ -1,0 +1,86 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:Tb0f,# DFT 缺陷形成能计算
+
+## 核心公式
+
+```text
+ΔE_f = E_def − E_perfect + Σ n_i·μ_i + q(E_VBM + ε_F) + E_corr
+```
+
+各项含义：
+- **E_def / E_perfect**：含缺陷超胞与完美超胞的总能
+- **n_i**：缺陷源的移除/添加原子数（n_i > 0 表示移除原子）
+- **μ_i**：缺陷源的化学势（取稳定相平衡下的值）
+- **q**：电荷态（0 表示中性缺陷）
+- **E_VBM**：完美晶体的价带顶
+- **ε_F**：费米能级（取 0 到带隙之间扫描）
+- **E_corr**：有限尺寸修正（带电缺陷时不可忽略）
+
+## 完整计算流程
+
+### 1. 构建足够大的超胞
+
+```text
+要求：≥ 2×2×2，通常 64~128 原子
+原因：抑制周期性镜像作用，否则缺陷间相互作用污染形成能
+判断：继续扩胞看形成能是否收敛（变化 < 0.05 eV 即可）
+```
+
+### 2. 同参数优化完美与含缺陷超胞
+
+- **完全一致的参数**：ENCUT、KPOINTS、POTCAR、ISMEAR 必须相同
+- 只优化原子位置，晶胞形状固定（保持体积接近完美晶体）
+- 带电缺陷：用 `NELECT` 加减电子数实现电荷态
+
+### 3. 化学势取法（最关键也最容易错）
+
+```text
+二元体系 AB：
+  μ_A ≤ μ_A(bulk)          （元素不能比单质更富）
+  μ_A + μ_B = μ_AB(bulk)   （稳定化合物条件）
+
+富 A 端点：μ_A = μ_A(bulk)，μ_B = μ_AB(bulk) − μ_A(bulk)
+富 B 端点：μ_B = μ_B(bulk)，μ_A = μ_AB(bulk) − μ_B(bulk)
+```
+
+**要点**：分别取富 A / 富 B 两个端点，绘制缺陷相图（形成能 vs 化学势），而不是只算一个点。
+
+### 4. 带电缺陷修正
+
+带电缺陷因周期性镜像引入长程库仑作用，需要修正：
+
+| 方法 | 工具 | 适用 |
+|------|------|------|
+| Freysoldt 修正（DFT） | sxdefectalign | 带电缺陷，推荐 |
+| 经验修正（Makov-Payne） | 手算 | 粗略估算 |
+| 增大超胞 | 重新计算 | 最稳妥但最贵 |
+
+### 5. 相图绘制
+
+```text
+横轴：费米能级 ε_F（0 → E_g）
+纵轴：形成能 ΔE_f
+每条线：一个缺陷在某个电荷态下的形成能
+稳定区：形成能最低的电荷态/缺陷类型
+```
+
+## 与机器学习势（deepmd）对比的要点
+
+1. **超胞尺寸与 k 点完全一致**，否则误差不可比
+2. deepmd 势的缺陷形成能应落在 DFT 参考值 0.1 eV 量级内
+3. 缺陷结构需要先充分弛豫——未弛豫的缺陷形成能偏高
+4. 对深能级缺陷，比较多个电荷态的形成能曲线，而非只看中性
+
+## 常见坑
+
+| 问题 | 解决 |
+|------|------|
+| 形成能不收敛 | 超胞不够大，或弛豫不充分 |
+| 富 A/富 B 端点结果差异大 | 正常，画出相图看两端 |
+| 带电缺陷 E_corr 很大 | 必须做 Freysoldt 修正，经验修正常不够 |
+| 与实验不符 | 检查化学势是否对应稳定相（考虑相图区间） |
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DFT 缺陷形成能计算（vacancy / interstitial / 带电缺陷）\",\"description\":\"点缺陷形成能完整计算流程：超胞构建、化学势取法、带电缺陷修正（Freysoldt），以及与机器学习势的对比要点\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"缺陷, 形成能, DFT, VASP, Freysoldt, 化学势\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"defect-formation-energy","builtinArticle":{"slug":"defect-formation-energy","title":"DFT 缺陷形成能计算（vacancy / interstitial / 带电缺陷）","category":"comp-materials","summary":"点缺陷形成能完整计算流程：超胞构建、化学势取法、带电缺陷修正（Freysoldt），以及与机器学习势的对比要点","content":"$3","tags":["缺陷","形成能","DFT","VASP","Freysoldt","化学势"],"sourceFiles":["defect-formation-energy.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":{"slug":"phonon-thermodynamics","title":"声子谱与热力学性质计算"},"nextArticle":{"slug":"neb-migration-barrier","title":"NEB / CI-NEB 迁移能垒计算"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

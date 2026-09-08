@@ -1,0 +1,83 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T9e8,# lcurve.out 训练曲线解读
+
+## 列含义
+
+```text
+#  step      rmse_val    rmse_trn    rmse_e_val  rmse_e_trn    rmse_f_val  rmse_f_trn         lr
+0      3.33e+01    3.41e+01      1.03e+01    1.03e+01      8.39e-01    8.72e-01    1.0e-03
+```
+
+| 列名 | 含义 | 单位 |
+|------|------|------|
+| step | 训练步数 | - |
+| rmse_val | 验证集总损失 | - |
+| rmse_trn | 训练集总损失 | - |
+| rmse_e_val | 验证集能量 RMSE | eV/atom |
+| rmse_e_trn | 训练集能量 RMSE | eV/atom |
+| rmse_f_val | 验证集力 RMSE | eV/Å |
+| rmse_f_trn | 训练集力 RMSE | eV/Å |
+| lr | 当前学习率 | - |
+
+> **关键**：能量 RMSE 是按原子数归一化的（per-atom），力 RMSE 不是。
+
+## 正常曲线形态
+
+```text
+初始阶段 (0-10k步):  loss 快速下降（从 ~30 降到 ~5）
+中期阶段 (10k-100k): loss 缓慢下降（从 ~5 降到 ~1）
+后期阶段 (100k+):    loss 趋于平稳（< 1），val/trn 接近
+```
+
+## 异常诊断
+
+### 1. loss_f 震荡不降
+- **原因**：学习率太大
+- **解决**：降低 start_lr（如 0.001 → 0.0005）
+
+### 2. loss_f 突然跳高
+- **原因**：数据中有异常帧（力 > 50 eV/Å）
+- **解决**：检查并剔除异常帧
+
+### 3. val loss 远高于 trn loss
+- **原因**：过拟合（训练数据量不足或训练步数太多）
+- **解决**：增加训练数据、减少 numb_steps、增加 dropout
+
+### 4. loss 不收敛（停留在高位）
+- **原因 A**：数据质量问题（DFT 计算不收敛）
+- **原因 B**：网络太小（embedding_net 不够大）
+- **原因 C**：batch_size 太大
+- **解决**：检查数据质量、增大网络、减小 batch_size
+
+### 5. 能量 RMSE 低但力 RMSE 高
+- **原因**：力的损失权重不够
+- **解决**：增大 start_pref_f（如 1000 → 2000）
+
+## 可视化脚本
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.genfromtxt("lcurve.out", names=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+# 力 RMSE
+ax1.plot(data["step"], data["rmse_f_val"], label="val")
+ax1.plot(data["step"], data["rmse_f_trn"], label="trn", alpha=0.7)
+ax1.set_xlabel("Step"); ax1.set_ylabel("Force RMSE (eV/Å)")
+ax1.set_yscale("log"); ax1.legend(); ax1.grid()
+
+# 能量 RMSE
+ax2.plot(data["step"], data["rmse_e_val"], label="val")
+ax2.plot(data["step"], data["rmse_e_trn"], label="trn", alpha=0.7)
+ax2.set_xlabel("Step"); ax2.set_ylabel("Energy RMSE (eV/atom)")
+ax2.set_yscale("log"); ax2.legend(); ax2.grid()
+
+plt.tight_layout(); plt.savefig("lcurve.png", dpi=150); plt.show()
+```
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"lcurve.out 训练曲线解读与异常诊断\",\"description\":\"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"deepmd, lcurve, 训练曲线, 诊断, loss\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"lcurve-out-guide","builtinArticle":{"slug":"lcurve-out-guide","title":"lcurve.out 训练曲线解读与异常诊断","category":"deepmd-training","summary":"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法","tags":["deepmd","lcurve","训练曲线","诊断","loss"],"sourceFiles":["deepmodeling/deepmd-kit/doc/train/training.md"],"content":"$3","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"net-size-tuning","title":"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡"},"nextArticle":null}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

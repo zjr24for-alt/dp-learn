@@ -1,6 +1,114 @@
 1:"$Sreact.fragment"
-2:I[6327,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js","/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","/dp-learn/_next/static/chunks/0sxv79cc511je.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/06jauabyjhbca.js","/dp-learn/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0h4rrqvtaz67..js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0w8hhyuaub5be.js","async":true}],["$","script","script-2",{"src":"/dp-learn/_next/static/chunks/0sxv79cc511je.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"AoJz3IC3AuQsnD4hRAx1t"}
-5:null
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:T8f4,# VASP PBS 任务模板
+
+## 模板 1：独立简单任务
+
+适合单个结构优化/单点能计算：
+
+```bash
+#!/bin/bash
+#PBS -N JOB_NAME
+#PBS -q QUEUE_NAME
+#PBS -l nodes=1:ppn=NCORES
+#PBS -j oe
+#PBS -V
+#PBS -S /bin/bash
+
+# 环境配置
+source INTEL_ENV_SCRIPT_PATH
+cd "$PBS_O_WORKDIR" || exit 1
+export OMP_NUM_THREADS=1
+NP=$(wc -l < "$PBS_NODEFILE")
+VASP=VASP_EXEC_PATH
+
+# 运行 VASP
+echo "Start at $(date)" > run.log
+mpirun -np "$NP" "$VASP" > vasp.out 2>&1
+rc=$?
+
+# 收敛判断
+if [ $rc -eq 0 ] && grep -q "reached required accuracy" OUTCAR 2>/dev/null; then
+    echo "Job success" >> run.log
+else
+    echo "Job failed: rc=$rc" >> run.log
+    exit 1
+fi
+
+echo "End at $(date)" >> run.log
+```
+
+## 模板 2：DP-GEN 批量 FP
+
+```bash
+#!/bin/bash
+#PBS -N JOB_NAME
+#PBS -q QUEUE_NAME
+#PBS -l nodes=1:ppn=NCORES
+#PBS -j oe
+#PBS -V
+#PBS -S /bin/bash
+
+source INTEL_ENV_SCRIPT_PATH
+cd "$PBS_O_WORKDIR" || exit 1
+export OMP_NUM_THREADS=1
+NP=$(wc -l < "$PBS_NODEFILE")
+VASP=VASP_EXEC_PATH
+
+SUCCESS_LOG="success.log"
+FAILED_LOG="failed.log"
+: > "$SUCCESS_LOG"
+: > "$FAILED_LOG"
+
+shopt -s nullglob
+
+for d in task.*/; do
+    echo "Running $d at $(date)"
+    cd "$d" || { echo "CD FAILED: $d" >> "../$FAILED_LOG"; continue; }
+
+    # 前置检查
+    if [ ! -f POSCAR ] || [ ! -f INCAR ] || [ ! -f POTCAR ] || [ ! -f KPOINTS ]; then
+        echo "MISSING FILES: $d" >> "../$FAILED_LOG"
+        cd ..
+        continue
+    fi
+
+    mpirun -np "$NP" "$VASP" > vasp.out 2>&1
+    rc=$?
+
+    if [ $rc -ne 0 ]; then
+        echo "FAILED (RUN ERR $rc): $d" >> "../$FAILED_LOG"
+    elif grep -q "reached required accuracy" OUTCAR 2>/dev/null; then
+        echo "OK: $d" >> "../$SUCCESS_LOG"
+    else
+        echo "FAILED (NOT CONVERGED): $d" >> "../$FAILED_LOG"
+    fi
+
+    cd ..
+done
+
+echo "All tasks finished at $(date)" >> "$SUCCESS_LOG"
+```
+
+## 占位符替换清单
+
+| 占位符 | 实际值（示例） |
+|--------|---------------|
+| JOB_NAME | TiC_fp / dpgen_fp |
+| QUEUE_NAME | batch |
+| NCORES | 52 |
+| INTEL_ENV_SCRIPT_PATH | /public/software/intel2020u2/intel2020u2_env.sh |
+| VASP_EXEC_PATH | /public/software/vasp.5.4.4/bin/vasp_std |
+
+## 提交前必做检查
+
+```bash
+dos2unix job.pbs precheck_fp_kspacing.sh
+chmod +x precheck_fp_kspacing.sh
+./precheck_fp_kspacing.sh || exit 1
+qsub job.pbs
+```
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"VASP PBS 任务模板（独立任务 + 批量FP）\",\"description\":\"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"VASP, PBS, 超算, job脚本, 批量计算\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"vasp-pbs-templates","builtinArticle":{"slug":"vasp-pbs-templates","title":"VASP PBS 任务模板（独立任务 + 批量FP）","category":"vasp-hpc","summary":"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单","content":"$3","tags":["VASP","PBS","超算","job脚本","批量计算"],"sourceFiles":["pbs脚本示例.md","job.pbs","手动fp.txt"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":null,"nextArticle":{"slug":"hpc-queue-limits","title":"超算队列资源限制"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+6:null

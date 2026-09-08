@@ -1,0 +1,100 @@
+1:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"LoadingBoundaryProvider"]
+2:"$Sreact.fragment"
+3:I[63780,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"Navbar"]
+4:I[39756,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+5:I[37457,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default"]
+6:I[18191,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"BackToTop"]
+8:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+9:"$Sreact.suspense"
+c:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"ViewportBoundary"]
+e:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"MetadataBoundary"]
+10:I[68027,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"default",1]
+:HL["/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","style"]
+:HL["/dp-learn/_next/static/media/GeistMonoVariable-s.p.09zddjkbdep5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/dp-learn/_next/static/media/GeistVariable-s.p.09~u27dqhyhd6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"P":null,"c":["","learn","lcurve-out-guide"],"q":"","i":false,"f":[[["",{"children":["learn",{"children":[["slug","lcurve-out-guide","d",null],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",20],[["$","$L1",null,{"loading":[["$","div","l",{"className":"max-w-6xl mx-auto px-4 py-16 text-center","children":[["$","div",null,{"className":"inline-flex gap-1.5","children":[["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce"}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.1s"}}],["$","span",null,{"className":"w-2 h-2 bg-zinc-400 rounded-full animate-bounce","style":{"animationDelay":"0.2s"}}]]}],["$","p",null,{"className":"text-sm text-zinc-400 mt-3","children":"加载中..."}]]}],[],[]],"children":["$","$2","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}],["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","async":true,"nonce":"$undefined"}]],["$","html",null,{"lang":"zh-CN","className":"geistsans_f332fc87-module__9d0HnG__variable geistmono_2d296630-module__QMbPkG__variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col bg-zinc-50 text-zinc-900","children":[["$","$L3",null,{}],["$","main",null,{"className":"flex-1","children":["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}]}],["$","$L6",null,{}],["$","footer",null,{"className":"border-t border-zinc-200 py-6 text-center text-sm text-zinc-500","children":["$","div",null,{"className":"max-w-6xl mx-auto px-4","children":["DP Learn — Deep Potential / DeePMD / VASP / LAMMPS 学习笔记 · ",["$","a",null,{"href":"https://github.com/zjr24for-alt/dp-learn","className":"hover:text-zinc-700 underline","children":"GitHub"}]]}]}]]}]}]]}]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":[null,["$","$L4",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["$","$2","c",{"children":["$L7",[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true,"nonce":"$undefined"}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true,"nonce":"$undefined"}]],["$","$L8",null,{"children":["$","$9",null,{"name":"Next.MetadataOutlet","children":"$@a"}]}]]}],{},null,false,null]},null,false,"$@b"]},null,false,"$@b"]},null,false,null],["$","$2","h",{"children":[null,["$","$Lc",null,{"children":"$Ld"}],["$","div",null,{"hidden":true,"children":["$","$Le",null,{"children":["$","$9",null,{"name":"Next.Metadata","children":"$Lf"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],false]],"m":"$undefined","G":["$10",[["$","link","0",{"rel":"stylesheet","href":"/dp-learn/_next/static/chunks/0x.99gcmu20v9.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]]],"S":true,"h":null,"s":"$undefined","l":"$undefined","p":"$undefined","d":"$undefined","b":"ZUiKqrh7LTyetw4Ggy5XI"}
+11:[]
+b:"$W11"
+12:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+13:T9e8,# lcurve.out 训练曲线解读
+
+## 列含义
+
+```text
+#  step      rmse_val    rmse_trn    rmse_e_val  rmse_e_trn    rmse_f_val  rmse_f_trn         lr
+0      3.33e+01    3.41e+01      1.03e+01    1.03e+01      8.39e-01    8.72e-01    1.0e-03
+```
+
+| 列名 | 含义 | 单位 |
+|------|------|------|
+| step | 训练步数 | - |
+| rmse_val | 验证集总损失 | - |
+| rmse_trn | 训练集总损失 | - |
+| rmse_e_val | 验证集能量 RMSE | eV/atom |
+| rmse_e_trn | 训练集能量 RMSE | eV/atom |
+| rmse_f_val | 验证集力 RMSE | eV/Å |
+| rmse_f_trn | 训练集力 RMSE | eV/Å |
+| lr | 当前学习率 | - |
+
+> **关键**：能量 RMSE 是按原子数归一化的（per-atom），力 RMSE 不是。
+
+## 正常曲线形态
+
+```text
+初始阶段 (0-10k步):  loss 快速下降（从 ~30 降到 ~5）
+中期阶段 (10k-100k): loss 缓慢下降（从 ~5 降到 ~1）
+后期阶段 (100k+):    loss 趋于平稳（< 1），val/trn 接近
+```
+
+## 异常诊断
+
+### 1. loss_f 震荡不降
+- **原因**：学习率太大
+- **解决**：降低 start_lr（如 0.001 → 0.0005）
+
+### 2. loss_f 突然跳高
+- **原因**：数据中有异常帧（力 > 50 eV/Å）
+- **解决**：检查并剔除异常帧
+
+### 3. val loss 远高于 trn loss
+- **原因**：过拟合（训练数据量不足或训练步数太多）
+- **解决**：增加训练数据、减少 numb_steps、增加 dropout
+
+### 4. loss 不收敛（停留在高位）
+- **原因 A**：数据质量问题（DFT 计算不收敛）
+- **原因 B**：网络太小（embedding_net 不够大）
+- **原因 C**：batch_size 太大
+- **解决**：检查数据质量、增大网络、减小 batch_size
+
+### 5. 能量 RMSE 低但力 RMSE 高
+- **原因**：力的损失权重不够
+- **解决**：增大 start_pref_f（如 1000 → 2000）
+
+## 可视化脚本
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+data = np.genfromtxt("lcurve.out", names=True)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+
+# 力 RMSE
+ax1.plot(data["step"], data["rmse_f_val"], label="val")
+ax1.plot(data["step"], data["rmse_f_trn"], label="trn", alpha=0.7)
+ax1.set_xlabel("Step"); ax1.set_ylabel("Force RMSE (eV/Å)")
+ax1.set_yscale("log"); ax1.legend(); ax1.grid()
+
+# 能量 RMSE
+ax2.plot(data["step"], data["rmse_e_val"], label="val")
+ax2.plot(data["step"], data["rmse_e_trn"], label="trn", alpha=0.7)
+ax2.set_xlabel("Step"); ax2.set_ylabel("Energy RMSE (eV/atom)")
+ax2.set_yscale("log"); ax2.legend(); ax2.grid()
+
+plt.tight_layout(); plt.savefig("lcurve.png", dpi=150); plt.show()
+```
+7:[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"lcurve.out 训练曲线解读与异常诊断\",\"description\":\"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"deepmd, lcurve, 训练曲线, 诊断, loss\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L12",null,{"slug":"lcurve-out-guide","builtinArticle":{"slug":"lcurve-out-guide","title":"lcurve.out 训练曲线解读与异常诊断","category":"deepmd-training","summary":"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法","tags":["deepmd","lcurve","训练曲线","诊断","loss"],"sourceFiles":["deepmodeling/deepmd-kit/doc/train/training.md"],"content":"$13","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"net-size-tuning","title":"网络大小调优：fitting_net 与 embedding_net 的精度-速度权衡"},"nextArticle":null}]]
+d:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+14:I[27201,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"IconMark"]
+a:null
+f:[["$","title","0",{"children":"lcurve.out 训练曲线解读与异常诊断 | DP Learn — Deep Potential 学习笔记"}],["$","meta","1",{"name":"description","content":"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法"}],["$","meta","2",{"name":"author","content":"dp-learn"}],["$","meta","3",{"name":"keywords","content":"DP-GEN,DeePMD,Deep Potential,VASP,LAMMPS,机器学习势函数,分子动力学,DFT,计算材料学"}],["$","meta","4",{"name":"robots","content":"index, follow"}],["$","link","5",{"rel":"canonical","href":"https://dp-learn.vercel.app/learn/lcurve-out-guide"}],["$","meta","6",{"property":"og:title","content":"lcurve.out 训练曲线解读与异常诊断"}],["$","meta","7",{"property":"og:description","content":"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法"}],["$","meta","8",{"property":"og:url","content":"https://dp-learn.vercel.app/learn/lcurve-out-guide"}],["$","meta","9",{"property":"og:type","content":"article"}],["$","meta","10",{"property":"article:published_time","content":"2026-06-04"}],["$","meta","11",{"property":"article:modified_time","content":"2026-06-04"}],["$","meta","12",{"name":"twitter:card","content":"summary_large_image"}],["$","meta","13",{"name":"twitter:title","content":"lcurve.out 训练曲线解读与异常诊断"}],["$","meta","14",{"name":"twitter:description","content":"lcurve.out 各列含义、正常/异常曲线形态、常见训练问题的诊断方法"}],["$","link","15",{"rel":"icon","href":"/dp-learn/favicon.ico?favicon.0x3dzn~oxb6tn.ico","sizes":"256x256","type":"image/x-icon"}],["$","$L14","16",{}]]

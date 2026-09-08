@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /progress
+
+Sitemap: https://dp-learn.vercel.app/sitemap.xml
