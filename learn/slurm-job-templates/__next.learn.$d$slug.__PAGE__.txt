@@ -1,8 +1,8 @@
 1:"$Sreact.fragment"
 2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
-4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
-5:"$Sreact.suspense"
-3:T9e3,# Slurm 作业模板
+6:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+3:Ta64,# Slurm 作业模板
 
 ## Slurm 常用命令速查
 
@@ -27,7 +27,6 @@
 #SBATCH --output=vasp.out
 #SBATCH --error=vasp.err
 
-# 加载环境
 module purge
 module load intel/2020u2
 module load vasp/5.4.4
@@ -35,7 +34,6 @@ module load vasp/5.4.4
 # 清理 conda 污染
 unset LD_LIBRARY_PATH
 
-# 运行
 mpirun -np 16 vasp_std > vasp.out 2>&1
 ```
 
@@ -54,7 +52,6 @@ module load intel/2020u2
 module load vasp/5.4.4
 unset LD_LIBRARY_PATH
 
-# 遍历 task 目录并提交
 for task_dir in task.*; do
   cd "$task_dir"
   mpirun -np 16 vasp_std > vasp.out 2>&1 &
@@ -74,7 +71,7 @@ wait
 #SBATCH --gres=gpu:1
 #SBATCH --time=12:00:00
 
-source /home/user/miniconda3/etc/profile.d/conda.sh
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate deepmd
 unset LD_LIBRARY_PATH
 
@@ -93,7 +90,7 @@ lmp -in in.lammps -sf gpu
 #SBATCH --gres=gpu:1
 #SBATCH --time=48:00:00
 
-source /home/user/miniconda3/etc/profile.d/conda.sh
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate deepmd
 unset LD_LIBRARY_PATH
 
@@ -104,18 +101,23 @@ dp --pt train input.json
 
 ```json
 {
-  "batch_type": "Slurm",
-  "context_type": "local",
-  "local_root": "./",
+  "machine": {
+    "batch_type": "Slurm",
+    "context_type": "local",
+    "local_root": "./"
+  },
   "resources": {
-    "numb_node": 1,
-    "numb_gpu": 1,
-    "task_per_node": 4,
-    "partition": "gpu",
-    "walltime": "24:00:00"
+    "number_node": 1,
+    "cpu_per_node": 4,
+    "gpu_per_node": 1,
+    "queue_name": "gpu",
+    "group_size": 1,
+    "custom_flags": ["#SBATCH --time=24:00:00"]
   }
 }
 ```
+
+> 字段名用 `number_node` / `cpu_per_node` / `gpu_per_node`，不要用老的 `numb_node` / `numb_gpu` / `task_per_node`。
 
 ## PBS vs Slurm 命令对照
 
@@ -131,5 +133,7 @@ dp --pt train input.json
 | 时间 | #PBS -l walltime=24:00:00 | #SBATCH --time=24:00:00 |
 | 输出 | #PBS -o out.log | #SBATCH --output=out.log |
 | 队列名 | #PBS -q gpuq | #SBATCH -p gpu |
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"Slurm 作业模板：DP-GEN / VASP / LAMMPS\",\"description\":\"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查\",\"datePublished\":\"2026-06-04\",\"dateModified\":\"2026-06-04\",\"keywords\":\"slurm, HPC, 作业提交, sbatch, 超算\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"slurm-job-templates","builtinArticle":{"slug":"slurm-job-templates","title":"Slurm 作业模板：DP-GEN / VASP / LAMMPS","category":"vasp-hpc","summary":"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查","tags":["slurm","HPC","作业提交","sbatch","超算"],"sourceFiles":["slurm.schedmd.com"],"content":"$3","createdAt":"2026-06-04","updatedAt":"2026-06-04"},"prevArticle":{"slug":"precheck-fp-script","title":"FP 任务提交前检查脚本"},"nextArticle":null}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
-6:null
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"Slurm 作业模板：DP-GEN / VASP / LAMMPS\",\"description\":\"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查与 PBS 对照\",\"datePublished\":\"2026-10-29\",\"dateModified\":\"2026-10-29\",\"keywords\":\"slurm, HPC, 作业提交, sbatch, 超算\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"slurm-job-templates","builtinArticle":{"slug":"slurm-job-templates","title":"Slurm 作业模板：DP-GEN / VASP / LAMMPS","category":"vasp-hpc","summary":"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查与 PBS 对照","tags":["slurm","HPC","作业提交","sbatch","超算"],"sourceFiles":["slurm.schedmd.com"],"content":"$3","createdAt":"2026-10-29","updatedAt":"2026-10-29"},"prevArticle":{"slug":"precheck-fp-script","title":"FP 任务提交前检查脚本"},"nextArticle":null}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],"$L4"],"$L5"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QqfN4xwsPv693q9GKbJsN"}
+4:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+5:["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]
+8:null

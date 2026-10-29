@@ -1,0 +1,156 @@
+1:"$Sreact.fragment"
+2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
+7:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+8:"$Sreact.suspense"
+3:T180c,# DP-GEN 运行状态、续跑与静默陷阱
+
+这一篇讲的是**"dpgen 没报错，但结果不对"**的那类问题。它们不会在日志里喊出来，只会让实验结论悄悄失效。
+
+## 一、状态记在哪：三个位置各管什么
+
+| 位置 | 是什么 | 用途 |
+|------|--------|------|
+| `record.dpgen` | 进度 checkpoint，每行 `(迭代号 阶段号)` | 判断跑到哪一步 |
+| `dpgen_work/<hash>/` | 执行缓存 | **实时进度看这里** |
+| `iter.NNNNNN/` | 最终产物 | collect 完成后才有完整文件 |
+
+### record.dpgen 的语义
+
+- 阶段号 0–8
+- **看到阶段号 N = 第 N 阶段已完成**，下一步执行 N+1
+- **绝不清 `record.dpgen` 和 `iter.*`**——那是 checkpoint，清掉等于从头重算
+
+### 三条反直觉判读
+
+| 现象 | 正确解读 |
+|------|---------|
+| 训练中 `iter.N/00.train/000/` 没有 `frozen_model.pb` | ✅ 正常，还没 collect 完，**不是失败** |
+| `dpgen_work/<hash>/` 任务目录空了 | ✅ 可能已 collect 完成，**不是失败** |
+| 找不到训练实时进度 | 去 `dpgen_work/<hash>/` 找 `lcurve.out`，不在 `iter/` |
+
+## 二、自然终止：某一轮"只重训没探索"
+
+`make_model_devi` 若发现 `model_devi_jobs[iter]` 不存在 → `cont=False` → break → 打印 `finished`。
+
+**所以"某一轮只训练没探索"不是出错，是该 iter 的 jobs 条目没加。**
+
+同理，`model_devi_jobs` 条目数必须 ≥ 迭代次数，否则 dpgen 提前报 Finished。
+
+## 三、🔴 copy_model：训练被静默跳过
+
+这是最隐蔽的坑。`make_train` 开头有 `if iter_index > 0` 分支：
+
+```python
+# 用 glob("02.fp/data.*") 检查前一轮 FP 是否已产出数据
+if _check_empty_iter(prev_iter):
+    # 前一轮 fp 无 data.* → 直接复制旧模型，静默跳过训练
+    copy_model(...)
+```
+
+**触发条件**：前一轮 `02.fp` 里没有 `data.*` 目录——比如 VASP 还在超算排队，或者自定义流程把数据移走了。
+
+**后果**：dpgen 打印"训练完成"，但模型完全没变。后续探索用的是旧模型，整个迭代白跑。
+
+**应用**：进入下一轮 `make_train` 之前，先确认前一轮数据已落盘：
+
+```bash
+ls iter.$(printf "%06d" $((N-1)))/02.fp/data.*
+```
+
+## 四、🔴 运行中改 machine.json = 重复提交
+
+`submission hash` **依赖 `resources`**。运行中修改 machine.json → `try_recover_from_json()` 匹配不到旧 hash → 当作全新 submission 重新提交 → **重复计算**。
+
+在按卡时计费的平台上，这就是**重复花钱**。
+
+**规则：必须等当前批次全部完成后再改。**
+
+## 五、🔴 iter.NNNNNN 必须在 dpgen 根目录
+
+把 `iter.00000X/` 移进 `iterations/` 子目录 → 断掉 `data.iters/` 与 `old/model.ckpt` 的**符号链接链** → old model 加载错误 → **训练发散（`rmse_e` 可达 2e15）**。
+
+可以整理的只有 `logs/`、`eval_*`、`melt_scan*` 这类辅助目录。
+
+## 六、sys_probs 原样透传，不补齐
+
+dpgen 源码里 `sys_probs` 相关处理**零出现**——它被原样透传给 deepmd 训练的 `input.json`，**长度不匹配不报错、不自动补齐**。
+
+长度 ≠ 系统数时，deepmd 采样 `np.random.choice(nsystems, p=probs)` 崩溃 → 训练子进程死。
+
+**应用**：每轮新增 FP 系统后，`sys_probs` 必须扩到新长度。
+
+> ⚠️ 校准 sys_probs 时用哪个帧数：必须是 deepmd **实际读到的帧数**，即 `glob("set.*")` 求和，**不是 `set.000` 单独的帧数**。目录里若残留 `set.000_backup`，两者会差一倍，配比直接失效。
+
+## 七、sys_idx 只索引 sys_configs
+
+- model_devi 的系统列表 = `sys_configs`（展开的 POSCAR）
+- `init_data_sys` 是训练数据，**不参与 model_devi**
+- 让 `sys_idx` 指向 `init_data_sys` 的索引 → `sys_configs[idx]` IndexError
+
+✅ 解法：把需要的起点构型转成 POSCAR 放进 `sys_configs`：
+
+```python
+import dpdata
+System('init_data/some_start', fmt='deepmd/npy').to('vasp/poscar', 'sys_configs/new_start')
+```
+
+## 八、同 sys_idx 的多条目会被去重
+
+dpgen 有去重逻辑，**只取第一条**。所以一个条目内列出所有温度：
+
+```json
+{ "sys_idx": [0], "temps": [300, 600, 1000], "press": [1, 1, 1] }
+```
+
+不要拆成三个条目分别写 300/600/1000。
+
+## 九、qdel 远程 job 后必须立即停 dpgen
+
+`run_fp` 轮询发现 job terminated 会 `fail_count+1` 并 **自动 resubmit**——你 qdel 了，它又给你提一遍。
+
+**改 FP 帧数的正确流程**：
+
+1. `qdel` 远程 job
+2. **立即**停 dpgen（`tmux kill-session` 或 `pkill -9 -f "dpgen run"`）
+3. 回退 `record.dpgen`（如 `head -n -2`）
+4. 清 `02.fp` 的 `task.*` 与 `*.out`（**保留 POTCAR**）
+5. 改 `param.json` 的 `fp_task_max`
+6. 重启 dpgen
+
+## 十、停 dpgen 要连根杀 wrapper 链
+
+只 kill master 进程后，`.sub` 链会残留继续训练；而 `flag_if_job_task_fail=1` 会把整个 job 判死。
+
+```bash
+pkill -9 -f "dpgen run"
+pkill -9 -f lmp
+pkill -9 -f "dp train"
+ps -ef | grep -E "dpgen|lmp|dp train" | grep -v grep   # 确认干净
+```
+
+## 十一、续跑启动脚本的铁律
+
+- **绝不清** `record.dpgen` / `iter.*`（checkpoint）
+- **只清** `dpgen_work/*` 与 `~/.dpdispatcher/submission/`（任务执行残留）
+
+清这两个地方是为了：防止 stale 恢复循环，以及防止旧 `model.ckpt` 被误当 restart。
+
+### 续跑语义
+
+加 `model_devi_jobs[N]` 后重启，dpgen 从 record 续该 iter 的 `make_model_devi`，**探索落在 `iter.N` 名下**（不是 N+1），随后 `iter.N+1` 才 `make_train` 吃新 FP 数据。已完成的 task 会跳过，不会重训。
+
+## 快速排查清单
+
+```bash
+tmux ls && ps aux | grep "dpgen run" | grep -v grep   # 进程活着吗
+tail -20 dpgen.log ; tail -5 record.dpgen              # 推进到哪一步
+ls -lt dpgen_work/ | head                              # 当前任务（最新 hash）
+tail -1 dpgen_work/*/lcurve.out                        # 训练实时进度
+tail dpgen_work/<hash>/task.*/model_devi.out           # 探索实时进度
+ls iter.*/02.fp/data.*                                 # 前一轮 FP 数据落盘了吗
+```
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"DP-GEN 运行状态、续跑与静默陷阱\",\"description\":\"record.dpgen 阶段语义、copy_model 静默跳过训练、submission hash 失配重复提交、iter 目录红线、sys_probs 透传等源码级机制\",\"datePublished\":\"2026-10-29\",\"dateModified\":\"2026-10-29\",\"keywords\":\"dpgen, 续跑, record.dpgen, copy_model, hash, 排查, 源码\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"dpgen-state-and-resume","builtinArticle":{"slug":"dpgen-state-and-resume","title":"DP-GEN 运行状态、续跑与静默陷阱","category":"dpgen-workflow","summary":"record.dpgen 阶段语义、copy_model 静默跳过训练、submission hash 失配重复提交、iter 目录红线、sys_probs 透传等源码级机制","content":"$3","tags":["dpgen","续跑","record.dpgen","copy_model","hash","排查","源码"],"sourceFiles":["dpgen-workflow-gotchas.md","06-machine.json-资源并发与运行状态.md"],"createdAt":"2026-10-29","updatedAt":"2026-10-29"},"prevArticle":{"slug":"candidate-health-check","title":"模型偏差与 candidate 健康判断"},"nextArticle":{"slug":"dpgen-practical-guidelines","title":"DP-GEN 实战指南：从参数配置到收敛判断"}}]],["$L4","$L5"],"$L6"]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QqfN4xwsPv693q9GKbJsN"}
+4:["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}]
+5:["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]
+6:["$","$L7",null,{"children":["$","$8",null,{"name":"Next.MetadataOutlet","children":"$@9"}]}]
+9:null

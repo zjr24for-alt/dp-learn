@@ -2,7 +2,7 @@
 2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
 4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 5:"$Sreact.suspense"
-3:T8f4,# VASP PBS 任务模板
+3:T8c3,# VASP PBS 任务模板
 
 ## 模板 1：独立简单任务
 
@@ -99,8 +99,8 @@ echo "All tasks finished at $(date)" >> "$SUCCESS_LOG"
 | JOB_NAME | TiC_fp / dpgen_fp |
 | QUEUE_NAME | batch |
 | NCORES | 52 |
-| INTEL_ENV_SCRIPT_PATH | /public/software/intel2020u2/intel2020u2_env.sh |
-| VASP_EXEC_PATH | /public/software/vasp.5.4.4/bin/vasp_std |
+| INTEL_ENV_SCRIPT_PATH | /path/to/intel_env.sh |
+| VASP_EXEC_PATH | /path/to/vasp_std |
 
 ## 提交前必做检查
 
@@ -110,5 +110,5 @@ chmod +x precheck_fp_kspacing.sh
 ./precheck_fp_kspacing.sh || exit 1
 qsub job.pbs
 ```
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"VASP PBS 任务模板（独立任务 + 批量FP）\",\"description\":\"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"VASP, PBS, 超算, job脚本, 批量计算\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"vasp-pbs-templates","builtinArticle":{"slug":"vasp-pbs-templates","title":"VASP PBS 任务模板（独立任务 + 批量FP）","category":"vasp-hpc","summary":"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单","content":"$3","tags":["VASP","PBS","超算","job脚本","批量计算"],"sourceFiles":["pbs脚本示例.md","job.pbs","手动fp.txt"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":null,"nextArticle":{"slug":"hpc-queue-limits","title":"超算队列资源限制"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"VASP PBS 任务模板（独立任务 + 批量FP）\",\"description\":\"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单\",\"datePublished\":\"2026-10-29\",\"dateModified\":\"2026-10-29\",\"keywords\":\"VASP, PBS, 超算, job脚本, 批量计算\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"vasp-pbs-templates","builtinArticle":{"slug":"vasp-pbs-templates","title":"VASP PBS 任务模板（独立任务 + 批量FP）","category":"vasp-hpc","summary":"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单","content":"$3","tags":["VASP","PBS","超算","job脚本","批量计算"],"sourceFiles":["pbs脚本示例.md","job.pbs","手动fp.txt"],"createdAt":"2026-10-29","updatedAt":"2026-10-29"},"prevArticle":null,"nextArticle":{"slug":"hpc-queue-limits","title":"超算队列资源限制"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QqfN4xwsPv693q9GKbJsN"}
 6:null

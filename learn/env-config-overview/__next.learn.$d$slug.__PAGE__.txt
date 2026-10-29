@@ -2,7 +2,7 @@
 2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
 4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
 5:"$Sreact.suspense"
-3:T571,# 环境配置总览
+3:T549,# 环境配置总览
 
 ## 本地环境
 
@@ -15,29 +15,29 @@
 
 ## 关键路径
 
-| 软件 | 路径 |
+| 软件 | 路径（示例，按自己环境替换） |
 |------|------|
-| dp (训练用) | /home/kobe/miniconda3/envs/deepmd/bin/dp |
-| dp (dpgen用) | /home/kobe/miniconda3/envs/deepmd2/bin/dp |
-| dpgen | /home/kobe/miniconda3/envs/deepmd2/bin/dpgen |
-| lmp (DeePMD版) | /home/kobe/miniconda3/envs/deepmd/bin/lmp |
-| VASP (本地备用) | /home/kobe/vasp.6.5.0/bin/vasp_std |
+| dp (训练用) | ~/miniconda3/envs/deepmd/bin/dp |
+| dp (dpgen 用) | ~/miniconda3/envs/deepmd2/bin/dp |
+| dpgen | ~/miniconda3/envs/deepmd2/bin/dpgen |
+| lmp (DeePMD 版) | ~/miniconda3/envs/deepmd/bin/lmp |
+| VASP (本地备用) | /opt/vasp/bin/vasp_std |
 | MPI | /usr/bin/mpirun -np 4 |
 
 ## 超算环境
 
 | 项目 | 详情 |
 |------|------|
-| 主机 | 10.157.197.40:22 |
+| 主机 | cluster.example.edu（替换为你的集群地址） |
 | 调度系统 | PBS (Torque 6) |
 | 队列 | batch |
 | 每节点核数 | 52 (nodes=1:ppn=52) |
 
 | 软件 | 路径 |
 |------|------|
-| VASP | /public/software/vasp.5.4.4/bin/vasp_std |
-| Intel 环境 | source /public/software/intel2020u2/intel2020u2_env.sh |
-| dpgen 工作目录 | /public/home/student2025/zhuangjingrun/dpgen_work/ |
+| VASP | /path/to/vasp_std |
+| Intel 环境 | source /path/to/intel_env.sh |
+| dpgen 工作目录 | /public/home/yourname/dpgen_work/ |
 
 ## 任务分工
 
@@ -49,5 +49,5 @@
 | LAMMPS explore | 笔记本 | deepmd 环境 lmp |
 | 数据处理转换 | 笔记本 | deepmd2 环境 |
 | 画图分析 | 笔记本 | analysis 环境 |
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"环境配置总览（本地 + 超算）\",\"description\":\"TiC MLP 项目的完整环境配置，本地 WSL2 Ubuntu + 超算服务器的路径、Conda 环境、软件版本对照\",\"datePublished\":\"2026-06-02\",\"dateModified\":\"2026-06-02\",\"keywords\":\"环境, 配置, 路径, 超算, WSL2\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"env-config-overview","builtinArticle":{"slug":"env-config-overview","title":"环境配置总览（本地 + 超算）","category":"env-config","summary":"TiC MLP 项目的完整环境配置，本地 WSL2 Ubuntu + 超算服务器的路径、Conda 环境、软件版本对照","content":"$3","tags":["环境","配置","路径","超算","WSL2"],"sourceFiles":["环境配置备忘录.md"],"createdAt":"2026-06-02","updatedAt":"2026-06-02"},"prevArticle":null,"nextArticle":{"slug":"conda-env-management","title":"Conda 环境分工与最佳实践"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"环境配置总览（本地 + 超算）\",\"description\":\"TiC MLP 项目的完整环境配置，本地 WSL2 Ubuntu + 超算服务器的路径、Conda 环境、软件版本对照\",\"datePublished\":\"2026-10-29\",\"dateModified\":\"2026-10-29\",\"keywords\":\"环境, 配置, 路径, 超算, WSL2\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"env-config-overview","builtinArticle":{"slug":"env-config-overview","title":"环境配置总览（本地 + 超算）","category":"env-config","summary":"TiC MLP 项目的完整环境配置，本地 WSL2 Ubuntu + 超算服务器的路径、Conda 环境、软件版本对照","content":"$3","tags":["环境","配置","路径","超算","WSL2"],"sourceFiles":["环境配置备忘录.md"],"createdAt":"2026-10-29","updatedAt":"2026-10-29"},"prevArticle":null,"nextArticle":{"slug":"conda-env-management","title":"Conda 环境分工与最佳实践"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QqfN4xwsPv693q9GKbJsN"}
 6:null

@@ -1,6 +1,74 @@
 1:"$Sreact.fragment"
 2:I[6327,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js","/dp-learn/_next/static/chunks/082kw5oquu3um.js","/dp-learn/_next/static/chunks/0_oev24-jx_xj.js"],"ArticleContent"]
-3:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
-4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"模型偏差与 candidate 健康判断\",\"description\":\"如何通过 candidate 比例和 failed 比例判断主动学习是否健康\",\"datePublished\":\"2026-07-31\",\"dateModified\":\"2026-07-31\",\"keywords\":\"dpgen, model_devi, candidate, 信任度, 调参\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"candidate-health-check","builtinArticle":{"slug":"candidate-health-check","title":"模型偏差与 candidate 健康判断","category":"dpgen-workflow","summary":"如何通过 candidate 比例和 failed 比例判断主动学习是否健康","content":"# 模型偏差与 candidate 健康判断\n\n## candidate 比例含义\n\n| 范围 | 状态 | 建议 |\n|------|------|------|\n| **< 5%** | 模型太差，探索无效 | 检查训练数据质量，可能需要更多初始数据 |\n| **10~30%** | 健康状态 | 模型在学习，正常推进 |\n| **> 50%** | 阈值太宽 | 可以收紧 trust_hi |\n| **failed > 90%** | 模型很差或结构崩溃 | 检查初始训练、POSCAR 合理性 |\n| **accurate > 80%** | 模型接近收敛 | 可以考虑停止主动学习 |\n\n## 关键参数调节\n\n在 `param.json` 的 `model_devi` 段：\n\n```json\n{\n  \"model_devi_dt\": 0.001,\n  \"model_devi_skip\": 200,\n  \"model_devi_f_trust_lo\": 0.05,\n  \"model_devi_f_trust_hi\": 0.35\n}\n```\n\n- `trust_lo`：低于此值的帧被认为准确\n- `trust_hi`：高于此值的帧被认为是 candidate（需要标注）\n- `trust_lo` ~ `trust_hi` 之间：被认为不够好但也不值得标注\n\n## 调参策略\n\n1. candidate 太少 → 降低 trust_lo、trust_hi\n2. candidate 太多 → 提高 trust_hi\n3. failed 太多 → 检查训练收敛性，可能需要增加训练步数\n","tags":["dpgen","model_devi","candidate","信任度","调参"],"sourceFiles":["dpgen常用检查指令.txt"],"createdAt":"2026-07-31","updatedAt":"2026-07-31"},"prevArticle":{"slug":"dpgen-clean-startup","title":"dpgen 启动脚本（干净环境）"},"nextArticle":{"slug":"dpgen-practical-guidelines","title":"DP-GEN 实战指南：从参数配置到收敛判断"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"ZUiKqrh7LTyetw4Ggy5XI"}
-5:null
+4:I[97367,["/dp-learn/_next/static/chunks/0r9oyfck1isk8.js","/dp-learn/_next/static/chunks/0t2xr05rlu96l.js"],"OutletBoundary"]
+5:"$Sreact.suspense"
+3:Td17,# 模型偏差与 candidate 健康判断
+
+## 先搞清楚三分类（最易记反）
+
+DP-GEN 对每一帧只做一件事：按 `f_trust_lo` / `f_trust_hi` 归类。
+
+| 判据 | 分类 | 去向 |
+|------|------|------|
+| `max_devi_f ≤ trust_lo` | **accurate** | 跳过 |
+| `trust_lo < max_devi_f ≤ trust_hi` | **candidate** | 送 VASP 标注 |
+| `max_devi_f > trust_hi` | **failed** | 丢弃 |
+
+> ⚠️ **不是"偏差越大越要标注"**。超过 `trust_hi` 的帧被判 failed 直接丢弃，只有落在带内的才是 candidate。这一条记反，所有比例判读都会跟着反。
+
+## candidate 比例怎么读
+
+比例本身没有绝对的好坏，**必须先看阈值是否校准**，否则读出来的数字不可比：
+
+| 现象 | 真实原因 | 建议 |
+|------|---------|------|
+| candidate 长期 > 80% | 多半是 `trust_lo` 定得过低，大量本该 accurate 的帧被塞进 candidate | **先按官方规则重算阈值**，再谈比例 |
+| candidate 10~30% | 阈值大致合理，模型在正常学习 | 正常推进 |
+| candidate < 5% | 模型已接近收敛，或探索范围太窄 | 可以判定收敛，或提高 MD 温度扩展探索 |
+| failed > 90% | 模型很差或结构崩溃（原子飞散） | 检查初始训练数据、POSCAR 合理性、MD 温度是否过高 |
+
+> 🔴 **反例警示**：某体系 `trust_lo=0.07` 时，accurate 只剩 0.76%、candidate 高达 90.78%。dpgen 每轮都"假装"模型什么都不懂，把大量本该判准确的帧送去算 FP——**循环能跑通，但 candidate 率这个健康度指标彻底失去意义**，且不可跨轮比较。这正是阈值没校准的典型症状，而不是"模型太差"。
+
+## 阈值校准：官方经验规则
+
+```python
+af = mean(|F|)              # 训练集所有原子-力分量的平均绝对值
+f_trust_lo = 0.2 * af
+f_trust_hi = 0.5 * af
+```
+
+**先算 mean|F|，再按 0.2 / 0.5 倍套。** 别凭感觉拍数。
+
+| 来源 | lo | hi |
+|------|----|----|
+| 官方经验规则（0.2× / 0.5× mean|F|） | 0.2·af | 0.5·af |
+| DP-GEN handson 教程示例 | 0.05 | 0.15 |
+| DP-GEN 论文 Cu 示例 | 0.05 | 0.20 |
+| dpgen README 通用示例 | 0.25 | 0.45 |
+
+> ⚠️ 官方明确提醒：**体系温度升高、力的幅度变大时，trust level 要相应调大。** 实测同一 `lo=0.25`，300 K 判 85.5% 准确，3200 K 只判 47.8%——高温体系必须单独设阈值。
+
+## 关键参数
+
+在 `param.json` 顶层（不在 `model_devi` 段内）：
+
+```json
+{
+  "model_devi_dt": 0.001,
+  "model_devi_skip": 200,
+  "model_devi_f_trust_lo": 0.25,
+  "model_devi_f_trust_hi": 0.62
+}
+```
+
+## 调参策略
+
+1. candidate 太多 → 先按 0.2×/0.5× 规则重算阈值，通常是把 **lo 抬高**
+2. candidate 太少 → 降低 trust_lo，或提高 MD 温度扩展探索
+3. failed 太多 → 检查训练收敛性与 MD 温度；failed 是"结构崩了"，不是"模型不会"
+4. 不同体系偏差尺度差异大 → 用 list/dict 形式**按 sys_idx 分别设阈值**
+5. 想直接控制每轮标多少帧 → 用 `model_devi_adapt_trust_lo` + `model_devi_numb_candi_f`
+
+> ⚠️ **改 param.json 前先确认它是否真的生效**。若探索阶段已改为手工脚本（自己拼 LAMMPS 输入、自己筛选候选），dpgen 根本不参与，**改 param.json 的 trust 键零效果**——真正的阈值硬编码在脚本里。
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"Article\",\"headline\":\"模型偏差与 candidate 健康判断\",\"description\":\"如何通过 candidate 比例和 failed 比例判断主动学习是否健康\",\"datePublished\":\"2026-10-29\",\"dateModified\":\"2026-10-29\",\"keywords\":\"dpgen, model_devi, candidate, 信任度, 调参\",\"author\":{\"@type\":\"Person\",\"name\":\"dp-learn\"}}"}}],["$","$L2",null,{"slug":"candidate-health-check","builtinArticle":{"slug":"candidate-health-check","title":"模型偏差与 candidate 健康判断","category":"dpgen-workflow","summary":"如何通过 candidate 比例和 failed 比例判断主动学习是否健康","content":"$3","tags":["dpgen","model_devi","candidate","信任度","调参"],"sourceFiles":["dpgen常用检查指令.txt"],"createdAt":"2026-10-29","updatedAt":"2026-10-29"},"prevArticle":{"slug":"dpgen-clean-startup","title":"dpgen 启动脚本（干净环境）"},"nextArticle":{"slug":"dpgen-state-and-resume","title":"DP-GEN 运行状态、续跑与静默陷阱"}}]],[["$","script","script-0",{"src":"/dp-learn/_next/static/chunks/082kw5oquu3um.js","async":true}],["$","script","script-1",{"src":"/dp-learn/_next/static/chunks/0_oev24-jx_xj.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"QqfN4xwsPv693q9GKbJsN"}
+6:null

@@ -170,70 +170,11 @@ TiC_MLP/
 | 数据回流 | set.xxx/ | 下一轮训练输入 |
 
 > 优先级：**OUTCAR > model_devi.out > graph.pb > set.xxx**
-`,tags:["dpgen","workflow","主动学习","目录结构","MLP"],sourceFiles:["工作流程以及模版文件夹.md"]},{slug:"dpgen-check-commands",title:"DP-GEN 常用检查指令",category:"dpgen-workflow",summary:"dpgen 运行中查看日志、训练进度、VASP状态、标注成功率的常用命令集合",content:`# DP-GEN 常用检查指令
-
-## 1. 查看最新日志（最常用）
-
-\`\`\`bash
-tail -20 ~/C_deepmd_workflow/04_dpgen/dpgen.log
-\`\`\`
-
-## 2. 查看当前轮次和任务
-
-\`\`\`bash
-cat ~/C_deepmd_workflow/04_dpgen/record.dpgen | tail -5
-\`\`\`
-
-## 3. 查看各轮 candidate 变化趋势
-
-\`\`\`bash
-grep "candidate" ~/C_deepmd_workflow/04_dpgen/dpgen.log
-\`\`\`
-
-## 4. 查看训练进度
-
-\`\`\`bash
-tail /tmp/dpgen_train/*/000/train.log 2>/dev/null | grep "batch"
-\`\`\`
-
-## 5. 查看 VASP 是否在计算
-
-\`\`\`bash
-grep "Elapsed time" ~/C_deepmd_workflow/04_dpgen/iter.000*/02.fp/task.*/OUTCAR 2>/dev/null | wc -l
-\`\`\`
-
-## 6. 查看 dpgen 进程是否还在跑
-
-\`\`\`bash
-ps aux | grep dpgen | grep -v grep
-\`\`\`
-
-## 7. 查看每轮标注成功率
-
-\`\`\`bash
-grep "failed frame|failed tasks" ~/C_deepmd_workflow/04_dpgen/dpgen.log | tail -10
-\`\`\`
-
-## 标准启动流程
-
-\`\`\`bash
-sudo hostname kobe-pc
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
-conda activate deepmd2
-cd ~/C_deepmd_workflow/04_dpgen
-dpgen run param.json machine.json 2>&1 | tee -a dpgen.log
-\`\`\`
-
-## 续跑前防重复提交
-
-\`\`\`bash
-rm -rf ~/.dpdispatcher
-\`\`\`
-`,tags:["dpgen","日志","监控","检查","命令"],sourceFiles:["dpgen常用检查指令.txt"]},{slug:"dpgen-watch-script",title:"DP-GEN 自动监控脚本",category:"dpgen-workflow",summary:"一个 bash 脚本实现 dpgen 进程存活检测、日志报错扫描、最新进度显示，带颜色和响铃报警",content:`# DP-GEN 自动监控脚本
+`,tags:["dpgen","workflow","主动学习","目录结构","MLP"],sourceFiles:["工作流程以及模版文件夹.md"]},{slug:"dpgen-check-commands",title:"DP-GEN 常用检查指令",category:"dpgen-workflow",summary:"dpgen 运行中查看日志、训练进度、VASP状态、标注成功率的常用命令集合",content:'# DP-GEN 常用检查指令\n\n## 1. 查看最新日志（最常用）\n\n```bash\ntail -20 dpgen.log\n```\n\n## 2. 查看当前轮次和任务\n\n```bash\ntail -5 record.dpgen\n```\n\n## 3. 查看各轮 candidate 变化趋势\n\n```bash\ngrep "candidate" dpgen.log\n```\n\n## 4. 查看训练进度（实时进度在 dpgen_work 里）\n\n```bash\ntail -1 dpgen_work/*/lcurve.out\n```\n\n## 5. 查看 VASP 是否在计算\n\n```bash\ngrep "Elapsed time" iter.000*/02.fp/task.*/OUTCAR 2>/dev/null | wc -l\n```\n\n## 6. 查看 dpgen 进程是否还在跑\n\n```bash\nps aux | grep "dpgen run" | grep -v grep\n```\n\n## 7. 查看每轮标注成功率\n\n```bash\ngrep "failed frame|failed tasks" dpgen.log | tail -10\n```\n\n## 标准启动流程\n\n```bash\nconda activate dpgen_env\ncd /path/to/your/dpgen\ndpgen run param.json machine.json 2>&1 | tee -a dpgen.log\n```\n\n## 续跑前防重复提交\n\n```bash\n# 只清任务执行残留，绝不清 record.dpgen 和 iter.*\nrm -rf ~/.dpdispatcher/submission/\n```\n\n> ⚠️ 不要 `rm -rf ~/.dpdispatcher` 整个目录，也不要清 `record.dpgen` / `iter.*`——那是 checkpoint，清掉等于从头重算。\n',tags:["dpgen","日志","监控","检查","命令"],sourceFiles:["dpgen常用检查指令.txt"]},{slug:"dpgen-watch-script",title:"DP-GEN 自动监控脚本",category:"dpgen-workflow",summary:"一个 bash 脚本实现 dpgen 进程存活检测、日志报错扫描、最新进度显示，带颜色和响铃报警",content:`# DP-GEN 自动监控脚本
 
 \`\`\`bash
 #!/bin/bash
-LOGFILE=/mnt/d/azuoye/vasp/TiC_MLP/dpgen/dpgen.log  # ← 改成实际路径
+LOGFILE=/path/to/your/dpgen/dpgen.log  # ← 改成实际路径
 INTERVAL=30  # 每30秒检查一次
 
 RED='\\033[0;31m'
@@ -411,10 +352,11 @@ ps -ef | grep -E "dpgen|lmp|vasp|deepmd|dp train"
 
 \`\`\`bash
 #!/bin/bash
-source /home/kobe/miniconda3/etc/profile.d/conda.sh
-conda activate dpgen_test_env
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate dpgen_env
 unset LD_LIBRARY_PATH
-export PATH=/home/kobe/miniconda3/envs/dpgen_test_env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kobe/vasp.5.4.4/bin
+# 显式重建 PATH，剔除 conda 的动态库影响
+export PATH=$HOME/miniconda3/envs/dpgen_env/bin:/usr/local/bin:/usr/bin:/bin:/opt/vasp/bin
 dpgen run param.json machine.json
 \`\`\`
 
@@ -430,39 +372,220 @@ VASP 是静态编译的 Fortran 程序，对动态库版本非常敏感。
 - 在 machine.json 的提交脚本里也要清理 LD_LIBRARY_PATH
 `,tags:["dpgen","环境变量","conda","VASP","启动"],sourceFiles:["run.sh"]},{slug:"candidate-health-check",title:"模型偏差与 candidate 健康判断",category:"dpgen-workflow",summary:"如何通过 candidate 比例和 failed 比例判断主动学习是否健康",content:`# 模型偏差与 candidate 健康判断
 
-## candidate 比例含义
+## 先搞清楚三分类（最易记反）
 
-| 范围 | 状态 | 建议 |
+DP-GEN 对每一帧只做一件事：按 \`f_trust_lo\` / \`f_trust_hi\` 归类。
+
+| 判据 | 分类 | 去向 |
 |------|------|------|
-| **< 5%** | 模型太差，探索无效 | 检查训练数据质量，可能需要更多初始数据 |
-| **10~30%** | 健康状态 | 模型在学习，正常推进 |
-| **> 50%** | 阈值太宽 | 可以收紧 trust_hi |
-| **failed > 90%** | 模型很差或结构崩溃 | 检查初始训练、POSCAR 合理性 |
-| **accurate > 80%** | 模型接近收敛 | 可以考虑停止主动学习 |
+| \`max_devi_f ≤ trust_lo\` | **accurate** | 跳过 |
+| \`trust_lo < max_devi_f ≤ trust_hi\` | **candidate** | 送 VASP 标注 |
+| \`max_devi_f > trust_hi\` | **failed** | 丢弃 |
 
-## 关键参数调节
+> ⚠️ **不是"偏差越大越要标注"**。超过 \`trust_hi\` 的帧被判 failed 直接丢弃，只有落在带内的才是 candidate。这一条记反，所有比例判读都会跟着反。
 
-在 \`param.json\` 的 \`model_devi\` 段：
+## candidate 比例怎么读
+
+比例本身没有绝对的好坏，**必须先看阈值是否校准**，否则读出来的数字不可比：
+
+| 现象 | 真实原因 | 建议 |
+|------|---------|------|
+| candidate 长期 > 80% | 多半是 \`trust_lo\` 定得过低，大量本该 accurate 的帧被塞进 candidate | **先按官方规则重算阈值**，再谈比例 |
+| candidate 10~30% | 阈值大致合理，模型在正常学习 | 正常推进 |
+| candidate < 5% | 模型已接近收敛，或探索范围太窄 | 可以判定收敛，或提高 MD 温度扩展探索 |
+| failed > 90% | 模型很差或结构崩溃（原子飞散） | 检查初始训练数据、POSCAR 合理性、MD 温度是否过高 |
+
+> 🔴 **反例警示**：某体系 \`trust_lo=0.07\` 时，accurate 只剩 0.76%、candidate 高达 90.78%。dpgen 每轮都"假装"模型什么都不懂，把大量本该判准确的帧送去算 FP——**循环能跑通，但 candidate 率这个健康度指标彻底失去意义**，且不可跨轮比较。这正是阈值没校准的典型症状，而不是"模型太差"。
+
+## 阈值校准：官方经验规则
+
+\`\`\`python
+af = mean(|F|)              # 训练集所有原子-力分量的平均绝对值
+f_trust_lo = 0.2 * af
+f_trust_hi = 0.5 * af
+\`\`\`
+
+**先算 mean|F|，再按 0.2 / 0.5 倍套。** 别凭感觉拍数。
+
+| 来源 | lo | hi |
+|------|----|----|
+| 官方经验规则（0.2\xd7 / 0.5\xd7 mean|F|） | 0.2\xb7af | 0.5\xb7af |
+| DP-GEN handson 教程示例 | 0.05 | 0.15 |
+| DP-GEN 论文 Cu 示例 | 0.05 | 0.20 |
+| dpgen README 通用示例 | 0.25 | 0.45 |
+
+> ⚠️ 官方明确提醒：**体系温度升高、力的幅度变大时，trust level 要相应调大。** 实测同一 \`lo=0.25\`，300 K 判 85.5% 准确，3200 K 只判 47.8%——高温体系必须单独设阈值。
+
+## 关键参数
+
+在 \`param.json\` 顶层（不在 \`model_devi\` 段内）：
 
 \`\`\`json
 {
   "model_devi_dt": 0.001,
   "model_devi_skip": 200,
-  "model_devi_f_trust_lo": 0.05,
-  "model_devi_f_trust_hi": 0.35
+  "model_devi_f_trust_lo": 0.25,
+  "model_devi_f_trust_hi": 0.62
 }
 \`\`\`
 
-- \`trust_lo\`：低于此值的帧被认为准确
-- \`trust_hi\`：高于此值的帧被认为是 candidate（需要标注）
-- \`trust_lo\` ~ \`trust_hi\` 之间：被认为不够好但也不值得标注
-
 ## 调参策略
 
-1. candidate 太少 → 降低 trust_lo、trust_hi
-2. candidate 太多 → 提高 trust_hi
-3. failed 太多 → 检查训练收敛性，可能需要增加训练步数
-`,tags:["dpgen","model_devi","candidate","信任度","调参"],sourceFiles:["dpgen常用检查指令.txt"]}],a=[{slug:"deepmd-training-params",title:"DeePMD 训练参数详解",category:"deepmd-training",summary:"TiC MLP 项目的完整训练参数配置（descriptor、fitting_net、学习率、batch_size 等）",content:`# DeePMD 训练参数详解
+1. candidate 太多 → 先按 0.2\xd7/0.5\xd7 规则重算阈值，通常是把 **lo 抬高**
+2. candidate 太少 → 降低 trust_lo，或提高 MD 温度扩展探索
+3. failed 太多 → 检查训练收敛性与 MD 温度；failed 是"结构崩了"，不是"模型不会"
+4. 不同体系偏差尺度差异大 → 用 list/dict 形式**按 sys_idx 分别设阈值**
+5. 想直接控制每轮标多少帧 → 用 \`model_devi_adapt_trust_lo\` + \`model_devi_numb_candi_f\`
+
+> ⚠️ **改 param.json 前先确认它是否真的生效**。若探索阶段已改为手工脚本（自己拼 LAMMPS 输入、自己筛选候选），dpgen 根本不参与，**改 param.json 的 trust 键零效果**——真正的阈值硬编码在脚本里。
+`,tags:["dpgen","model_devi","candidate","信任度","调参"],sourceFiles:["dpgen常用检查指令.txt"]},{slug:"dpgen-state-and-resume",title:"DP-GEN 运行状态、续跑与静默陷阱",category:"dpgen-workflow",summary:"record.dpgen 阶段语义、copy_model 静默跳过训练、submission hash 失配重复提交、iter 目录红线、sys_probs 透传等源码级机制",content:`# DP-GEN 运行状态、续跑与静默陷阱
+
+这一篇讲的是**"dpgen 没报错，但结果不对"**的那类问题。它们不会在日志里喊出来，只会让实验结论悄悄失效。
+
+## 一、状态记在哪：三个位置各管什么
+
+| 位置 | 是什么 | 用途 |
+|------|--------|------|
+| \`record.dpgen\` | 进度 checkpoint，每行 \`(迭代号 阶段号)\` | 判断跑到哪一步 |
+| \`dpgen_work/<hash>/\` | 执行缓存 | **实时进度看这里** |
+| \`iter.NNNNNN/\` | 最终产物 | collect 完成后才有完整文件 |
+
+### record.dpgen 的语义
+
+- 阶段号 0–8
+- **看到阶段号 N = 第 N 阶段已完成**，下一步执行 N+1
+- **绝不清 \`record.dpgen\` 和 \`iter.*\`**——那是 checkpoint，清掉等于从头重算
+
+### 三条反直觉判读
+
+| 现象 | 正确解读 |
+|------|---------|
+| 训练中 \`iter.N/00.train/000/\` 没有 \`frozen_model.pb\` | ✅ 正常，还没 collect 完，**不是失败** |
+| \`dpgen_work/<hash>/\` 任务目录空了 | ✅ 可能已 collect 完成，**不是失败** |
+| 找不到训练实时进度 | 去 \`dpgen_work/<hash>/\` 找 \`lcurve.out\`，不在 \`iter/\` |
+
+## 二、自然终止：某一轮"只重训没探索"
+
+\`make_model_devi\` 若发现 \`model_devi_jobs[iter]\` 不存在 → \`cont=False\` → break → 打印 \`finished\`。
+
+**所以"某一轮只训练没探索"不是出错，是该 iter 的 jobs 条目没加。**
+
+同理，\`model_devi_jobs\` 条目数必须 ≥ 迭代次数，否则 dpgen 提前报 Finished。
+
+## 三、🔴 copy_model：训练被静默跳过
+
+这是最隐蔽的坑。\`make_train\` 开头有 \`if iter_index > 0\` 分支：
+
+\`\`\`python
+# 用 glob("02.fp/data.*") 检查前一轮 FP 是否已产出数据
+if _check_empty_iter(prev_iter):
+    # 前一轮 fp 无 data.* → 直接复制旧模型，静默跳过训练
+    copy_model(...)
+\`\`\`
+
+**触发条件**：前一轮 \`02.fp\` 里没有 \`data.*\` 目录——比如 VASP 还在超算排队，或者自定义流程把数据移走了。
+
+**后果**：dpgen 打印"训练完成"，但模型完全没变。后续探索用的是旧模型，整个迭代白跑。
+
+**应用**：进入下一轮 \`make_train\` 之前，先确认前一轮数据已落盘：
+
+\`\`\`bash
+ls iter.$(printf "%06d" $((N-1)))/02.fp/data.*
+\`\`\`
+
+## 四、🔴 运行中改 machine.json = 重复提交
+
+\`submission hash\` **依赖 \`resources\`**。运行中修改 machine.json → \`try_recover_from_json()\` 匹配不到旧 hash → 当作全新 submission 重新提交 → **重复计算**。
+
+在按卡时计费的平台上，这就是**重复花钱**。
+
+**规则：必须等当前批次全部完成后再改。**
+
+## 五、🔴 iter.NNNNNN 必须在 dpgen 根目录
+
+把 \`iter.00000X/\` 移进 \`iterations/\` 子目录 → 断掉 \`data.iters/\` 与 \`old/model.ckpt\` 的**符号链接链** → old model 加载错误 → **训练发散（\`rmse_e\` 可达 2e15）**。
+
+可以整理的只有 \`logs/\`、\`eval_*\`、\`melt_scan*\` 这类辅助目录。
+
+## 六、sys_probs 原样透传，不补齐
+
+dpgen 源码里 \`sys_probs\` 相关处理**零出现**——它被原样透传给 deepmd 训练的 \`input.json\`，**长度不匹配不报错、不自动补齐**。
+
+长度 ≠ 系统数时，deepmd 采样 \`np.random.choice(nsystems, p=probs)\` 崩溃 → 训练子进程死。
+
+**应用**：每轮新增 FP 系统后，\`sys_probs\` 必须扩到新长度。
+
+> ⚠️ 校准 sys_probs 时用哪个帧数：必须是 deepmd **实际读到的帧数**，即 \`glob("set.*")\` 求和，**不是 \`set.000\` 单独的帧数**。目录里若残留 \`set.000_backup\`，两者会差一倍，配比直接失效。
+
+## 七、sys_idx 只索引 sys_configs
+
+- model_devi 的系统列表 = \`sys_configs\`（展开的 POSCAR）
+- \`init_data_sys\` 是训练数据，**不参与 model_devi**
+- 让 \`sys_idx\` 指向 \`init_data_sys\` 的索引 → \`sys_configs[idx]\` IndexError
+
+✅ 解法：把需要的起点构型转成 POSCAR 放进 \`sys_configs\`：
+
+\`\`\`python
+import dpdata
+System('init_data/some_start', fmt='deepmd/npy').to('vasp/poscar', 'sys_configs/new_start')
+\`\`\`
+
+## 八、同 sys_idx 的多条目会被去重
+
+dpgen 有去重逻辑，**只取第一条**。所以一个条目内列出所有温度：
+
+\`\`\`json
+{ "sys_idx": [0], "temps": [300, 600, 1000], "press": [1, 1, 1] }
+\`\`\`
+
+不要拆成三个条目分别写 300/600/1000。
+
+## 九、qdel 远程 job 后必须立即停 dpgen
+
+\`run_fp\` 轮询发现 job terminated 会 \`fail_count+1\` 并 **自动 resubmit**——你 qdel 了，它又给你提一遍。
+
+**改 FP 帧数的正确流程**：
+
+1. \`qdel\` 远程 job
+2. **立即**停 dpgen（\`tmux kill-session\` 或 \`pkill -9 -f "dpgen run"\`）
+3. 回退 \`record.dpgen\`（如 \`head -n -2\`）
+4. 清 \`02.fp\` 的 \`task.*\` 与 \`*.out\`（**保留 POTCAR**）
+5. 改 \`param.json\` 的 \`fp_task_max\`
+6. 重启 dpgen
+
+## 十、停 dpgen 要连根杀 wrapper 链
+
+只 kill master 进程后，\`.sub\` 链会残留继续训练；而 \`flag_if_job_task_fail=1\` 会把整个 job 判死。
+
+\`\`\`bash
+pkill -9 -f "dpgen run"
+pkill -9 -f lmp
+pkill -9 -f "dp train"
+ps -ef | grep -E "dpgen|lmp|dp train" | grep -v grep   # 确认干净
+\`\`\`
+
+## 十一、续跑启动脚本的铁律
+
+- **绝不清** \`record.dpgen\` / \`iter.*\`（checkpoint）
+- **只清** \`dpgen_work/*\` 与 \`~/.dpdispatcher/submission/\`（任务执行残留）
+
+清这两个地方是为了：防止 stale 恢复循环，以及防止旧 \`model.ckpt\` 被误当 restart。
+
+### 续跑语义
+
+加 \`model_devi_jobs[N]\` 后重启，dpgen 从 record 续该 iter 的 \`make_model_devi\`，**探索落在 \`iter.N\` 名下**（不是 N+1），随后 \`iter.N+1\` 才 \`make_train\` 吃新 FP 数据。已完成的 task 会跳过，不会重训。
+
+## 快速排查清单
+
+\`\`\`bash
+tmux ls && ps aux | grep "dpgen run" | grep -v grep   # 进程活着吗
+tail -20 dpgen.log ; tail -5 record.dpgen              # 推进到哪一步
+ls -lt dpgen_work/ | head                              # 当前任务（最新 hash）
+tail -1 dpgen_work/*/lcurve.out                        # 训练实时进度
+tail dpgen_work/<hash>/task.*/model_devi.out           # 探索实时进度
+ls iter.*/02.fp/data.*                                 # 前一轮 FP 数据落盘了吗
+\`\`\`
+`,tags:["dpgen","续跑","record.dpgen","copy_model","hash","排查","源码"],sourceFiles:["dpgen-workflow-gotchas.md","06-machine.json-资源并发与运行状态.md"]}],a=[{slug:"deepmd-training-params",title:"DeePMD 训练参数详解",category:"deepmd-training",summary:"TiC MLP 项目的完整训练参数配置（descriptor、fitting_net、学习率、batch_size 等）",content:`# DeePMD 训练参数详解
 
 ## 模型参数
 
@@ -519,23 +642,53 @@ VASP 是静态编译的 Fortran 程序，对动态库版本非常敏感。
 DP-GEN 使用 **committee model（委员会模型）** 策略：
 - 用相同数据、不同随机种子训练 4 个独立模型
 - 推理时，对同一结构分别用 4 个模型计算原子力
-- 计算 4 个模型的力之间的标准差 → **模型偏差（model deviation）**
+- 取 4 个模型预测力的最大差值 → **模型偏差（model deviation）**
 
-## 偏差的含义
+## 偏差的含义（三分类，官方源码口径）
 
-| 偏差大小 | 含义 | 行动 |
-|---------|------|------|
-| 小（< trust_lo） | 4 个模型一致，该区域已学好 | 无需标注 |
-| 中 | 模型不完全一致 | 不标注（边界情况） |
-| 大（> trust_hi） | 模型分歧大，该区域陌生 | 送去 VASP 标注 |
+DP-GEN 按 \`f_trust_lo\` / \`f_trust_hi\` 把每一帧划入**三类**，这是主动学习筛选的全部逻辑：
+
+| 判据 | 官方分类 | 含义 | 行动 |
+|------|---------|------|------|
+| \`max_devi_f ≤ f_trust_lo\` | **accurate** | 4 个模型一致，该区域已学好 | 跳过，不标注 |
+| \`f_trust_lo < max_devi_f ≤ f_trust_hi\` | **candidate** | 模型有分歧但仍在可信区间 | **送去 VASP 标注** |
+| \`max_devi_f > f_trust_hi\` | **failed** | 偏差过大，判定为不合理构型 | **丢弃，不标注** |
+
+> ⚠️ **最易记反的一条**：不是"偏差越大越要标注"。超过 \`trust_hi\` 的帧被判为 failed 直接丢弃，**只有落在 [lo, hi] 带内的才是 candidate**。搞反会让阈值完全失效。
 
 ## 偏差计算
 
-\`\`\`
-max_devi_f = max(σ_f)  # 每个原子的力标准差的最大值
+\`\`\`text
+max_devi_f = 对每个原子取各模型预测力的最大差值，再对所有原子取最大
 \`\`\`
 
-这个值记录在 \`model_devi.out\` 中，每列对应一个模型的偏差。
+即 \`max_i ( max_m F_{m,i} − min_m F_{m,i} )\`，**不是标准差**。这个值记在 \`model_devi.out\` 里。
+
+## 阈值怎么定（官方经验规则）
+
+官方给出的可复核校准规则：
+
+\`\`\`python
+af = mean(|F|)              # 训练集里所有原子-力分量的平均绝对值
+f_trust_lo = 0.2 * af
+f_trust_hi = 0.5 * af
+\`\`\`
+
+**先算 mean|F|，再按 0.2 / 0.5 倍套**，不要凭感觉拍数。另有一条关键提醒：
+
+> 体系温度升高、力的幅度变大时，trust level 要相应调大。
+
+同一套 \`lo\` 在不同温度下判出的准确率差异极大——实测某体系 \`lo=0.25\` 时，300 K 判 85.5% 准确，3200 K 只判 47.8%。**高温体系必须单独设阈值。**
+
+### 三个可用的进阶入口
+
+| 机制 | 用法 |
+|------|------|
+| 按体系设阈值 | \`f_trust_lo/hi\` 可传 **list 或 dict**（按 \`sys_idx\` 索引），应对不同体系偏差尺度差异 |
+| 按 job 覆盖 | \`model_devi_jobs\` 每个条目可自带 \`model_devi_f_trust_lo\`，优先于全局 |
+| 显式控帧数 | \`model_devi_adapt_trust_lo: true\` + \`model_devi_numb_candi_f\` / \`model_devi_perc_candi_f\`，把"选多少帧"变成显式参数 |
+
+> ⚠️ \`adapt_trust_lo\` **只换 lo 不换 hi**：hi 仍由 \`model_devi_f_trust_hi\` 决定。它报告出来的 \`f_trust_lo\` 是"选完之后倒推出的最小值"，是结果不是输入。
 
 ## 实际效果
 
@@ -624,7 +777,82 @@ set.001/
 - 确保 type_map 一致（Ti→0, C→1）
 - 检查 virial 是否提取成功（某些旧版 VASP OUTCAR 不含 virial）
 - 如果标注失败（OUTCAR 不完整），该 task 应跳过
-`,tags:["deepmd","数据回流","OUTCAR","dpdata","训练集"],sourceFiles:["工作流程以及模版文件夹.md"]}],n=[{slug:"vasp-pbs-templates",title:"VASP PBS 任务模板（独立任务 + 批量FP）",category:"vasp-hpc",summary:"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单",content:`# VASP PBS 任务模板
+`,tags:["deepmd","数据回流","OUTCAR","dpdata","训练集"],sourceFiles:["工作流程以及模版文件夹.md"]},{slug:"deepmd-ecosystem-2026",title:"DeePMD 生态进展（2026）：v3.2 与 DPA4",category:"deepmd-training",summary:"DeePMD-kit v3.2.0 新增能力、DPA4/SeZM 架构与性能、原生 ZBL 与拼接 ZBL 的区别、预训练微调路线与已知限制",content:`# DeePMD 生态进展（2026）
+
+## 一、DeePMD-kit v3.2.0
+
+| 项 | 内容 |
+|---|---|
+| \`pt_expt\` 后端 | Array API + \`torch.export\` + \`torch.compile\`；**旧 TorchScript 后端将被废弃** |
+| DPA4 / SeZM | 新描述符+模型，**仅 PyTorch**，导出走 \`.pt2\` |
+| DPA4C | 紧凑变体（可压缩） |
+| JAX 后端 | 首次支持**训练**（此前仅推理） |
+| \`.pt2\` 推理 | AOTInductor C/C++，支持 DPA1/2/3 |
+| LAMMPS | GNN 模型多 rank |
+| 训练 | 力 L2-norm / MAE loss、WSD 调度器、LMDB 数据集 |
+
+**已修复**：DPA2/DPA3 Hessian NaN、checkpoint 加载、CUDA OOM、近邻表死锁。
+
+**已知限制**：**DPA3 不支持 \`dp compress\`** —— 会影响部署体积，转 DPA3 前必须先确认。
+
+## 二、DPA4（arXiv:2606.02419）
+
+### 性能
+
+- Matbench Discovery **CPS 第 1**
+- 参数量 0.48M–25.2M，分 Air（5.1M）/ Plus（8.8M）/ Pro（25.2M）三档
+- 训练成本 ≈ DPA3 的 **1/10**，单张消费级旗舰卡一天可复现同精度
+
+### 架构
+
+- EMFA SO(2) 卷积 + 局部坐标注意力，降维处理转动等变
+- 严格满足平移/旋转/置换对称与能量守恒
+- **原生 ZBL**：\`E = E_NN + E_ZBL\`，单一标量微分 ⇒ 保守力
+
+### 原生 ZBL vs 拼接 ZBL（重要区别）
+
+传统做法是把 ZBL 与神经网络势**拼接**：在切换半径处做平滑过渡。这会产生**切换力伪影**——\`dλ/dR \xd7 (E_ZBL − E_NN)\` 这一项没有对应的物理来源。
+
+DPA4 的原生 ZBL 把两者放进同一个可微能量表达式，避免了这个伪影。学习分支在 ZBL 区受 C\xb3 钳制距离 + source-freeze gate 抑制。
+
+> ⚠️ **但原生 ZBL 只解决极近距（约 <1 \xc5）**。如果你的问题是**中等距离的排斥壁斜率偏低**（比如 1.3–1.5 \xc5 区段力偏软），那一段在 ZBL 生效区之外，仍由学习分支负责——**换模型不能替代针对该区间的数据补充**。
+
+## 三、预训练权重与微调
+
+\`\`\`bash
+# 下载预训练权重
+dp pretrained download DPA4-Neo-OMat24-v20260805
+
+# 微调
+dp --pt train input_finetune.json --finetune <ckpt>
+\`\`\`
+
+- 支持 DPA-4 **LoRA** 微调（仅 PyTorch 单任务）
+- ⚠️ **许可需逐个模型卡核对**：部分权重（如 OMat24 系列的分子版本）为 \`cc-by-nc-4.0\`，**禁止商用**
+
+### 什么时候值得走微调路线
+
+预训练微调特别适合**近平衡数据饥饿**的场景：如果训练集里低力（\`|F| < 0.05\`）帧占比极低（如 1–2%），模型在近平衡区会学不好；而大规模预训练基座在近平衡构型上覆盖充分，微调可直接继承这部分知识。
+
+**代价**：需要 PyTorch 后端 + \`.pt2\`，通常意味着重建整套环境分工（训练 / 探索 / dpdata 可能各用不同环境），并重验 LAMMPS 插件、重跑历史基线。
+
+> 4 模型 ensemble 机制本身不受影响——DPA4 同样可以训多个随机种子。
+
+## 四、版本选型建议
+
+| 优先级 | 动作 | 理由 |
+|---|---|---|
+| 观察 | 稳定版本不必急着升级 | 若当前 TF/常规路线稳定，收益主要集中在 DPA4 |
+| 评估 | 预训练微调 vs 从零训 | 唯一能直击近平衡数据饥饿的路线 |
+| 记录 | 转 DPA3 前先确认无 \`dp compress\` | 影响部署体积 |
+
+## 参考来源
+
+- DeePMD-kit v3.2.0 release: github.com/deepmodeling/deepmd-kit/releases/tag/v3.2.0
+- DPA4 论文: arxiv.org/abs/2606.02419
+- DPA4 blog: blogs.deepmodeling.com/DPA4_05_22_2026/
+- DP-GEN releases: github.com/deepmodeling/dpgen/releases
+`,tags:["deepmd","DPA4","v3.2","ZBL","微调","生态进展"],sourceFiles:["DeePMD-生态进展-2026-10.md"]}],n=[{slug:"vasp-pbs-templates",title:"VASP PBS 任务模板（独立任务 + 批量FP）",category:"vasp-hpc",summary:"两个万能 PBS 模板：独立单任务和 DP-GEN 批量 FP，含所有占位符替换清单",content:`# VASP PBS 任务模板
 
 ## 模板 1：独立简单任务
 
@@ -721,8 +949,8 @@ echo "All tasks finished at $(date)" >> "$SUCCESS_LOG"
 | JOB_NAME | TiC_fp / dpgen_fp |
 | QUEUE_NAME | batch |
 | NCORES | 52 |
-| INTEL_ENV_SCRIPT_PATH | /public/software/intel2020u2/intel2020u2_env.sh |
-| VASP_EXEC_PATH | /public/software/vasp.5.4.4/bin/vasp_std |
+| INTEL_ENV_SCRIPT_PATH | /path/to/intel_env.sh |
+| VASP_EXEC_PATH | /path/to/vasp_std |
 
 ## 提交前必做检查
 
@@ -759,18 +987,20 @@ mpirun -np 40
 
 | 项目 | 值 |
 |------|-----|
-| 主机 | 10.157.197.40 |
+| 主机 | cluster.example.edu |
 | 端口 | 22 |
-| 用户名 | student2025 |
+| 用户名 | yourname |
 | 调度系统 | PBS / Torque 6 |
+
+> 具体地址、用户名、队列限额请以你自己集群的文档为准。
 
 ## 查看队列状态的常用命令
 
 \`\`\`bash
-qstat -a           # 查看所有作业
-qstat -u student2025  # 只看自己的作业
-qdel <job_id>      # 删除作业
-pbsnodes -a        # 查看节点状态
+qstat -a              # 查看所有作业
+qstat -u $USER        # 只看自己的作业
+qdel <job_id>         # 删除作业
+pbsnodes -a           # 查看节点状态
 \`\`\`
 `,tags:["超算","PBS","队列","资源限制"],sourceFiles:["服务器队列限制.txt"]},{slug:"vasp-library-debug",title:"VASP 库依赖排查（conda 环境污染）",category:"vasp-hpc",summary:"conda 环境动态库污染导致 VASP SIGSEGV 的诊断与修复全流程",content:`# VASP 库依赖排查
 
@@ -785,7 +1015,7 @@ pbsnodes -a        # 查看节点状态
 ### 1. 查看依赖库来源
 
 \`\`\`bash
-ldd /home/kobe/vasp.5.4.4/bin/vasp_std
+ldd /opt/vasp/bin/vasp_std
 \`\`\`
 
 重点检查这些库的来源：
@@ -814,7 +1044,7 @@ hash -r
 
 # 单核测试
 cd task.000.000000
-/home/kobe/vasp.5.4.4/bin/vasp_std > vasp.clean.log 2>&1
+/opt/vasp/bin/vasp_std > vasp.clean.log 2>&1
 tail -100 vasp.clean.log
 \`\`\`
 
@@ -822,10 +1052,10 @@ tail -100 vasp.clean.log
 
 健康的 ldd 输出：所有库来自同一套环境（系统库或同一 conda 环境），不混杂。
 
-**病态特征**（你遇到过的情况）：
+**病态特征**（典型混搭）：
 - MPI 来自系统：\`/usr/lib/x86_64-linux-gnu/libmpi.so.40\`
-- 但 LAPACK 来自 conda：\`/home/kobe/miniconda3/envs/deepmd2/lib/liblapack.so.3\`
-- FFTW 也来自 conda：\`/home/kobe/miniconda3/envs/deepmd2/lib/libfftw3.so.3\`
+- 但 LAPACK 来自 conda：\`~/miniconda3/envs/deepmd2/lib/liblapack.so.3\`
+- FFTW 也来自 conda：\`~/miniconda3/envs/deepmd2/lib/libfftw3.so.3\`
 
 ## 修复方式
 
@@ -896,29 +1126,29 @@ qsub job.pbs
 
 ## 关键路径
 
-| 软件 | 路径 |
+| 软件 | 路径（示例，按自己环境替换） |
 |------|------|
-| dp (训练用) | /home/kobe/miniconda3/envs/deepmd/bin/dp |
-| dp (dpgen用) | /home/kobe/miniconda3/envs/deepmd2/bin/dp |
-| dpgen | /home/kobe/miniconda3/envs/deepmd2/bin/dpgen |
-| lmp (DeePMD版) | /home/kobe/miniconda3/envs/deepmd/bin/lmp |
-| VASP (本地备用) | /home/kobe/vasp.6.5.0/bin/vasp_std |
+| dp (训练用) | ~/miniconda3/envs/deepmd/bin/dp |
+| dp (dpgen 用) | ~/miniconda3/envs/deepmd2/bin/dp |
+| dpgen | ~/miniconda3/envs/deepmd2/bin/dpgen |
+| lmp (DeePMD 版) | ~/miniconda3/envs/deepmd/bin/lmp |
+| VASP (本地备用) | /opt/vasp/bin/vasp_std |
 | MPI | /usr/bin/mpirun -np 4 |
 
 ## 超算环境
 
 | 项目 | 详情 |
 |------|------|
-| 主机 | 10.157.197.40:22 |
+| 主机 | cluster.example.edu（替换为你的集群地址） |
 | 调度系统 | PBS (Torque 6) |
 | 队列 | batch |
 | 每节点核数 | 52 (nodes=1:ppn=52) |
 
 | 软件 | 路径 |
 |------|------|
-| VASP | /public/software/vasp.5.4.4/bin/vasp_std |
-| Intel 环境 | source /public/software/intel2020u2/intel2020u2_env.sh |
-| dpgen 工作目录 | /public/home/student2025/zhuangjingrun/dpgen_work/ |
+| VASP | /path/to/vasp_std |
+| Intel 环境 | source /path/to/intel_env.sh |
+| dpgen 工作目录 | /public/home/yourname/dpgen_work/ |
 
 ## 任务分工
 
@@ -1097,12 +1327,12 @@ param.json  machine.json  record.dpgen  dpgen.log
 
 \`\`\`
 问题：iter.000001 train后直接finish
-路径：/home/kobe/TiC_MLP/dpgen
+路径：/path/to/your/dpgen
 环境：WSL2 Ubuntu-24.04
 我要你做：定位原因并给修法
 可查文件：param.json machine.json record.dpgen dpgen.log
 \`\`\`
-`,tags:["AI","提问","dpgen","效率","模板"],sourceFiles:["codexask模版.yaml"]}],p=[{slug:"dft-materials-intro",title:"DFT 与材料计算基础",category:"comp-materials",summary:"从实战角度理解 Kohn-Sham 方程、交换关联泛函、截断能收敛与 k 点采样，不做理论推导只讲怎么用",content:`# DFT 与材料计算基础
+`,tags:["AI","提问","dpgen","效率","模板"],sourceFiles:["codexask模版.yaml"]}],r=[{slug:"dft-materials-intro",title:"DFT 与材料计算基础",category:"comp-materials",summary:"从实战角度理解 Kohn-Sham 方程、交换关联泛函、截断能收敛与 k 点采样，不做理论推导只讲怎么用",content:`# DFT 与材料计算基础
 
 ## 一句话理解 DFT
 
@@ -1802,7 +2032,7 @@ nebmake.pl  # 或 nebresults.pl
 | 找不到虚频 | 结构停在鞍点附近但不是鞍点，重新优化 |
 | 多个虚频 | 路径偏移了真实 MEP，用爬坡方法（\`climb\`）重找 |
 | 端点能量不一致 | 端点必须各自充分弛豫 |
-`,tags:["NEB","CI-NEB","迁移能垒","过渡态","VTST","扩散"],sourceFiles:["neb-migration-barrier.md"]}],r=[{slug:"md-fundamentals",title:"分子动力学模拟基础与实战要点",category:"atomistic-sim",summary:"Verlet 积分、系综选择、thermostat/barostat 原理、timestep 选择、平衡判断，从零理解 MD 核心概念",content:`# 分子动力学模拟基础与实战要点
+`,tags:["NEB","CI-NEB","迁移能垒","过渡态","VTST","扩散"],sourceFiles:["neb-migration-barrier.md"]}],p=[{slug:"md-fundamentals",title:"分子动力学模拟基础与实战要点",category:"atomistic-sim",summary:"Verlet 积分、系综选择、thermostat/barostat 原理、timestep 选择、平衡判断，从零理解 MD 核心概念",content:`# 分子动力学模拟基础与实战要点
 
 ## MD 在做什么
 
@@ -4123,95 +4353,122 @@ plt.tight_layout(); plt.savefig("lcurve.png", dpi=150); plt.show()
   - POTCAR 元素顺序是否与 type_map 一致
   - ENCUT 是否足够（≥ 1.3 \xd7 ENMAX）
   - 是否被 conda 的 LD_LIBRARY_PATH 污染
-`}],g=[{slug:"machine-json-guide",title:"DP-GEN machine.json 配置指南",category:"dpgen-workflow",summary:"machine.json 各字段详解：dispatcher_type、batch_type、context_type、本地/远程任务提交配置",tags:["dpgen","machine.json","配置","任务提交","HPC"],sourceFiles:["deepmodeling/dpgen/doc/run/mdata.rst"],content:`# DP-GEN machine.json 配置指南
+`}],g=[{slug:"machine-json-guide",title:"DP-GEN machine.json 配置指南",category:"dpgen-workflow",summary:"machine.json 各字段详解：batch_type、context_type、resources 的正确字段名、group_size 三处含义，以及运行状态与续跑机制",tags:["dpgen","machine.json","配置","任务提交","HPC","group_size"],sourceFiles:["deepmodeling/dpgen/doc/run/mdata.rst","deepmodeling/dpdispatcher"],content:`# DP-GEN machine.json 配置指南
 
-machine.json 控制 DP-GEN 如何将训练/探索/标注任务分发到计算资源。
+machine.json 管三件事：**在哪算、怎么并发、产物传回哪**。
 
-## 基本结构
+它**对模型精度零影响**，但配错会**静默改变实验结论**——重复提交、内存爆炸、产物找不到、断点续跑跑错，全都出在这一层。
+
+## 三段结构
+
+machine.json 为三个阶段分别配置，用 key 区分：
 
 \`\`\`json
 {
-  "train": [
-    {
-      "machine": {
-        "batch_type": "PBS",
-        "context_type": "local",
-        "local_root": "./",
-        "remote_root": "/home/user/dpgen_work"
-      },
-      "resources": {
-        "numb_node": 1,
-        "numb_gpu": 1,
-        "task_per_node": 4,
-        "queue_name": "gpuq",
-        "envs": {
-          "OMP_NUM_THREADS": "1"
-        }
-      },
-      "command": "dp train input.json",
-      "group_size": 1
-    }
-  ],
-  "model_devi": [...],
-  "fp": [...]
+  "train":      [{ "machine": {...}, "resources": {...}, "command": "..." }],
+  "model_devi": [{ "machine": {...}, "resources": {...}, "command": "..." }],
+  "fp":         [{ "machine": {...}, "resources": {...}, "command": "..." }]
 }
 \`\`\`
 
-## 关键字段
+> 也有官方示例写成**数组格式**（\`[config1, config2, config3]\`，靠位置区分 train/model_devi/fp）。两种写法都能用，但**对象格式更不容易排错**。
+
+## machine 段
+
+\`\`\`json
+"machine": {
+  "batch_type": "shell",
+  "context_type": "local",
+  "local_root": "./",
+  "remote_root": "/path/to/remote/workdir"
+}
+\`\`\`
 
 ### batch_type — 批处理系统
+
 | 值 | 适用集群 | 提交命令 |
 |---|---------|---------|
-| "PBS" | PBS/Torque | qsub |
-| "Slurm" | Slurm | sbatch |
-| "LSF" | IBM LSF | bsub |
-| "Shell" | 本地 | 直接执行 |
+| \`"shell"\` | 本地 / 无调度器 | 直接执行 |
+| \`"PBS"\` | PBS / Torque | \`qsub\` |
+| \`"Slurm"\` | Slurm | \`sbatch\` |
+| \`"LSF"\` | IBM LSF | \`bsub\` |
 
 ### context_type — 执行上下文
+
 | 值 | 说明 |
 |---|------|
-| "local" | 任务在本地执行（单机或本节点） |
-| "ssh" | 通过 SSH 提交到远程集群 |
-| "docker" | Docker 容器内执行 |
+| \`"local"\` | 任务在本机执行（单机 / WSL） |
+| \`"SSHContext"\` | 通过 SSH 提交到远程集群 |
+| \`"DockerContext"\` | Docker 容器内执行 |
+
+> ⚠️ 旧文档里的 \`"ssh"\` 是历史写法，**当前 dpdispatcher 用 \`"SSHContext"\`**。写错会导致 context 初始化失败。
 
 ### local_root / remote_root
-- local_root: 本地工作目录（通常是 "./"）
-- remote_root: 远程集群上的工作目录（如 "/public/home/user/dpgen_work"）
-- 仅 context_type="ssh" 时需要 remote_root
 
-### resources 资源配置
+- \`local_root\`：本地工作目录，通常写 \`"./"\`
+- \`remote_root\`：远程执行根目录，dpgen 把任务派发到 \`remote_root/<hash>/\`
+- **只要不是纯本地执行就需要 \`remote_root\`**（不只是 SSH）
+
+### remote_profile — 远程连接信息
+
+\`\`\`json
+"remote_profile": {
+  "hostname": "cluster.example.edu",
+  "port": 22,
+  "username": "yourname",
+  "key_filename": "~/.ssh/id_rsa"
+}
+\`\`\`
+
+## resources 段（字段名最容易写错）
+
 \`\`\`json
 "resources": {
-  "numb_node": 1,        // 节点数
-  "numb_gpu": 1,         // GPU 数（训练用）
-  "task_per_node": 4,    // 每节点 MPI 进程数
-  "cpus_per_task": 4,    // 每进程 CPU 数
-  "queue_name": "gpuq",  // 队列名
-  "partition": "gpu",    // Slurm 分区
-  "mem_limit": 32,       // 内存限制 (GB)
-  "walltime": "24:00:00", // 最大运行时间
-  "envs": {              // 环境变量
-    "OMP_NUM_THREADS": "1"
-  }
+  "number_node": 1,
+  "cpu_per_node": 20,
+  "gpu_per_node": 0,
+  "queue_name": "batch",
+  "group_size": 25,
+  "custom_flags": [
+    "#PBS -l nodes=1:ppn=20",
+    "#PBS -l walltime=48:00:00",
+    "#PBS -V"
+  ]
 }
 \`\`\`
 
-### 其他关键字段
-- command: 执行命令（训练="dp train input.json"，探索="lmp -in in.lammps"，标注="vasp_std"）
-- group_size: 每批提交的任务数（训练通常=1，标注可以=5-10）
-- clean_asap: 任务完成后立即清理远程文件（节省空间）
+| 字段 | 含义 |
+|------|------|
+| \`number_node\` | 节点数 |
+| \`cpu_per_node\` | 每节点 CPU 核数（= MPI 进程数） |
+| \`gpu_per_node\` | 每节点 GPU 数（训练用，CPU 任务填 0） |
+| \`queue_name\` | 队列名 / Slurm 分区名 |
+| \`group_size\` | **每批打包多少个任务**（见下一节，三处含义不同） |
+| \`custom_flags\` | 直接追加到提交脚本头的调度器指令 |
+| \`envs\` | 环境变量字典 |
+| \`source_list\` | 提交前 \`source\` 的环境脚本列表 |
 
-## 三段式配置
+> 🔴 **过时字段名警告**：老教程常见的 \`numb_node\` / \`numb_gpu\` / \`task_per_node\` / \`cpus_per_task\` 是 dpdispatcher 早期版本的命名，**当前版本已改为 \`number_node\` / \`gpu_per_node\` / \`cpu_per_node\`**。用旧名会报 unknown key 或被静默忽略。
 
-machine.json 需要为三个阶段分别配置：
+## 🔴 group_size 三处含义不同（最经典的坑）
 
-\`\`\`json
-{
-  "train": [{...}],      // 训练阶段（需要 GPU）
-  "model_devi": [{...}], // 探索阶段（需要 GPU + LAMMPS）
-  "fp": [{...}]          // 标注阶段（需要 CPU + VASP）
-}
-\`\`\`
+同一个名字，三个阶段三个意思：
+
+| 位置 | 含义 | 配错的后果 |
+|------|------|-----------|
+| \`train.resources.group_size\` | **训练并发** | 应 = **模型数**（4 模型串行）；设错会乱序 / OOM |
+| \`model_devi.resources.group_size\` | **LAMMPS 打包粒度**（越小并发越多） | 设成 1 → 全部 LAMMPS 任务同时跑 → **内存爆炸** |
+| \`fp.resources.group_size\` | **每个 job 装多少个 FP 任务** | 设太大 → 单 job 超时；设太小 → 排队任务数暴涨 |
+
+### 两个反直觉的源码事实
+
+1. **\`param.json\` 里的 \`model_devi_group_size\` 是死键**——dpgen 根本不读它，只读 machine.json。
+   \`\`\`python
+   # dpgen/remote/decide_machine.py —— convert_mdata()
+   group_size = task_data["resources"].get("group_size", 1)
+   mdata[task_type + "_group_size"] = group_size
+   \`\`\`
+2. **脚本里 \`make_submission(group_size=N)\` 的 N 会被忽略**——实际分组仍读 machine.json 的 \`resources.group_size\`。想控制每 job 帧数，改 machine.json，不是改脚本参数。
 
 ## 本地单机配置示例
 
@@ -4219,93 +4476,154 @@ machine.json 需要为三个阶段分别配置：
 {
   "train": [{
     "machine": {
-      "batch_type": "Shell",
+      "batch_type": "shell",
       "context_type": "local",
       "local_root": "./"
     },
     "resources": {
-      "numb_node": 1,
-      "numb_gpu": 1,
-      "task_per_node": 4
+      "number_node": 1,
+      "cpu_per_node": 4,
+      "gpu_per_node": 1,
+      "queue_name": "local",
+      "group_size": 4
     },
-    "command": "dp --pt train input.json",
-    "group_size": 1
+    "command": "dp --pt train input.json"
   }],
   "model_devi": [{
     "machine": {
-      "batch_type": "Shell",
+      "batch_type": "shell",
       "context_type": "local",
       "local_root": "./"
     },
     "resources": {
-      "numb_node": 1,
-      "numb_gpu": 1,
-      "task_per_node": 4
+      "number_node": 1,
+      "cpu_per_node": 2,
+      "gpu_per_node": 0,
+      "queue_name": "local",
+      "group_size": 40
     },
-    "command": "lmp -in in.lammps",
-    "group_size": 1
+    "command": "lmp -in in.lammps"
   }],
   "fp": [{
     "machine": {
-      "batch_type": "Shell",
+      "batch_type": "shell",
       "context_type": "local",
       "local_root": "./"
     },
     "resources": {
-      "numb_node": 1,
-      "task_per_node": 4
+      "number_node": 1,
+      "cpu_per_node": 4,
+      "gpu_per_node": 0,
+      "queue_name": "local",
+      "group_size": 5
     },
-    "command": "vasp_std",
-    "group_size": 5
+    "command": "vasp_std"
   }]
 }
 \`\`\`
 
-## SSH 远程集群配置
+> 注意 \`train.group_size = 4\` —— **等于模型数**，让 4 个模型串行训练。这不是"每批 4 个任务"的意思。
+
+## 远程 PBS 集群配置示例
 
 \`\`\`json
 {
-  "train": [{
+  "fp": [{
     "machine": {
-      "batch_type": "Slurm",
-      "context_type": "ssh",
+      "batch_type": "PBS",
+      "context_type": "SSHContext",
       "local_root": "./",
-      "remote_root": "/public/home/user/dpgen_work",
+      "remote_root": "/public/home/yourname/dpgen_work",
       "remote_profile": {
-        "hostname": "10.157.197.40",
-        "username": "user",
+        "hostname": "cluster.example.edu",
         "port": 22,
-        "timeout": 10
+        "username": "yourname",
+        "key_filename": "~/.ssh/id_rsa",
+        "execute_command": "source /etc/profile && export PATH=/opt/pbs/bin:$PATH"
       }
     },
     "resources": {
-      "numb_node": 1,
-      "numb_gpu": 1,
-      "task_per_node": 4,
-      "partition": "gpu",
-      "walltime": "24:00:00"
+      "number_node": 1,
+      "cpu_per_node": 20,
+      "gpu_per_node": 0,
+      "queue_name": "batch",
+      "group_size": 25,
+      "custom_flags": [
+        "#PBS -l nodes=1:ppn=20",
+        "#PBS -l walltime=48:00:00",
+        "#PBS -V",
+        "#PBS -S /bin/bash"
+      ]
     },
-    "command": "dp --pt train input.json",
-    "group_size": 1
+    "command": "NP=$(wc -l < $PBS_NODEFILE) && mpirun -np $NP vasp_std > vasp.out"
   }]
 }
 \`\`\`
 
+### 远程命令的两条禁忌
+
+- **不要用 \`bash -l -c\`**：会重置 PBS 环境变量，job 秒挂
+- **不要 \`cd $PBS_O_WORKDIR\`**：dpgen 已经 cd 到 task 目录，再 cd 会跑错地方
+
+## 运行状态机制（排查第一现场）
+
+配好之后，运行状态散在三个地方，**看错地方就会误判失败**：
+
+| 路径 | 是什么 |
+|------|--------|
+| \`record.dpgen\` | 进度记录，每行 = \`(迭代号 阶段号)\` |
+| \`dpgen_work/<hash>/\` | 执行缓存，**实时进度在这里** |
+| \`iter.NNNNNN/\` | 最终产物，collect 完成后才有完整文件 |
+
+### record.dpgen 语义
+
+- 每行 \`(迭代号 阶段号)\`，阶段号 0–8
+- **看到阶段号 N = 第 N 阶段已完成**，下一步执行 N+1
+- **绝不清 \`record.dpgen\` / \`iter.*\`**（那是 checkpoint）。清理只针对 \`dpgen_work/*\` 与 \`~/.dpdispatcher/submission/\`
+
+### 三条反直觉的判读规则
+
+| 现象 | 正确解读 |
+|------|---------|
+| 训练中 \`iter.N/00.train/000/\` 里没有 \`frozen_model.pb\` | ✅ 正常，还没 collect 完，别误判训练失败 |
+| \`dpgen_work/<hash>/\` 里的任务目录空了 | ✅ 可能已 collect 完成，不是失败 |
+| 想看实时进度 | 去 \`dpgen_work/<hash>/\`，**不是** \`iter/\` |
+
+### 🔴 运行中改 machine.json = 重复计算
+
+**submission hash 依赖 \`resources\`。** 运行中修改 machine.json → \`try_recover_from_json()\` 匹配不到旧 hash → 当作全新 submission 重新提交 → **重复计算**（按卡时计费的平台上就是重复花钱）。
+
+**规则：必须等当前批次全部完成后再改。**
+
+### 🔴 iter.NNNNNN 必须留在 dpgen 根目录
+
+把 \`iter.00000X/\` 移进 \`iterations/\` 子目录会断掉 \`data.iters/\` 与 \`old/model.ckpt\` 的**符号链接链** → old model 加载错误 → **训练发散（\`rmse_e\` 可达 2e15）**。
+
+可以整理的只有 \`logs/\`、\`eval_*\`、\`melt_scan*\` 这类辅助目录。
+
 ## 常见问题
 
-### 1. "command not found"
-- 远程集群上未安装对应软件
-- 解决：在 machine.json 的 envs 中指定 conda 环境激活命令
+### 1. command not found
+- 远程集群未安装对应软件，或 PATH 未加载
+- 解决：在 \`machine.json\` 的 \`envs\` 或 \`remote_profile.execute_command\` 里补上环境加载
 
 ### 2. 任务提交失败但无报错
-- 检查 remote_root 是否存在
-- 检查 SSH 连接是否正常
-- 检查队列名/分区名是否正确
+- 检查 \`remote_root\` 是否存在且有写权限
+- 检查 SSH 连接（手动 \`ssh\` 试一次）
+- 检查 \`queue_name\` / 分区名是否拼对
 
-### 3. clean_asap 导致数据丢失
-- clean_asap=true 会在任务完成后删除远程文件
-- 如果需要保留轨迹文件，设为 false
-`},{slug:"slurm-job-templates",title:"Slurm 作业模板：DP-GEN / VASP / LAMMPS",category:"vasp-hpc",summary:"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查",tags:["slurm","HPC","作业提交","sbatch","超算"],sourceFiles:["slurm.schedmd.com"],content:`# Slurm 作业模板
+### 3. 训练"完成"了但模型没变
+- 这是 \`copy_model\` 机制：前一轮 FP 没产出 \`data.*\`（还在排队），dpgen 会**静默跳过训练、直接复制旧模型**
+- 应用：进入下一轮前先 \`ls iter.(N-1)/02.fp/data.*\` 确认数据已落盘
+
+### 4. 内存爆炸
+- \`model_devi.resources.group_size\` 设成了 1
+- 解决：调到合理值（如 40），让 LAMMPS 任务分批执行
+
+### 5. clean_asap 导致数据丢失
+- \`clean_asap=true\` 会在任务完成后删除远程文件
+- 需要保留轨迹文件时设为 false
+`},{slug:"slurm-job-templates",title:"Slurm 作业模板：DP-GEN / VASP / LAMMPS",category:"vasp-hpc",summary:"Slurm 调度系统下的作业提交模板，含 sbatch/squeue/scancel 命令速查与 PBS 对照",tags:["slurm","HPC","作业提交","sbatch","超算"],sourceFiles:["slurm.schedmd.com"],content:`# Slurm 作业模板
 
 ## Slurm 常用命令速查
 
@@ -4330,7 +4648,6 @@ machine.json 需要为三个阶段分别配置：
 #SBATCH --output=vasp.out
 #SBATCH --error=vasp.err
 
-# 加载环境
 module purge
 module load intel/2020u2
 module load vasp/5.4.4
@@ -4338,7 +4655,6 @@ module load vasp/5.4.4
 # 清理 conda 污染
 unset LD_LIBRARY_PATH
 
-# 运行
 mpirun -np 16 vasp_std > vasp.out 2>&1
 \`\`\`
 
@@ -4357,7 +4673,6 @@ module load intel/2020u2
 module load vasp/5.4.4
 unset LD_LIBRARY_PATH
 
-# 遍历 task 目录并提交
 for task_dir in task.*; do
   cd "$task_dir"
   mpirun -np 16 vasp_std > vasp.out 2>&1 &
@@ -4377,7 +4692,7 @@ wait
 #SBATCH --gres=gpu:1
 #SBATCH --time=12:00:00
 
-source /home/user/miniconda3/etc/profile.d/conda.sh
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate deepmd
 unset LD_LIBRARY_PATH
 
@@ -4396,7 +4711,7 @@ lmp -in in.lammps -sf gpu
 #SBATCH --gres=gpu:1
 #SBATCH --time=48:00:00
 
-source /home/user/miniconda3/etc/profile.d/conda.sh
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate deepmd
 unset LD_LIBRARY_PATH
 
@@ -4407,18 +4722,23 @@ dp --pt train input.json
 
 \`\`\`json
 {
-  "batch_type": "Slurm",
-  "context_type": "local",
-  "local_root": "./",
+  "machine": {
+    "batch_type": "Slurm",
+    "context_type": "local",
+    "local_root": "./"
+  },
   "resources": {
-    "numb_node": 1,
-    "numb_gpu": 1,
-    "task_per_node": 4,
-    "partition": "gpu",
-    "walltime": "24:00:00"
+    "number_node": 1,
+    "cpu_per_node": 4,
+    "gpu_per_node": 1,
+    "queue_name": "gpu",
+    "group_size": 1,
+    "custom_flags": ["#SBATCH --time=24:00:00"]
   }
 }
 \`\`\`
+
+> 字段名用 \`number_node\` / \`cpu_per_node\` / \`gpu_per_node\`，不要用老的 \`numb_node\` / \`numb_gpu\` / \`task_per_node\`。
 
 ## PBS vs Slurm 命令对照
 
@@ -4434,14 +4754,14 @@ dp --pt train input.json
 | 时间 | #PBS -l walltime=24:00:00 | #SBATCH --time=24:00:00 |
 | 输出 | #PBS -o out.log | #SBATCH --output=out.log |
 | 队列名 | #PBS -q gpuq | #SBATCH -p gpu |
-`}],f=[{id:"cmd-dpgen-run",category:"command",label:"启动 dpgen",description:"在项目目录下启动 dpgen 主动学习",code:"dpgen run param.json machine.json 2>&1 | tee -a dpgen.log",tags:["dpgen","启动"]},{id:"cmd-dp-train",category:"command",label:"DeePMD 训练",description:"使用 input.json 训练 DeePMD 模型",code:"dp train input.json",tags:["deepmd","训练"]},{id:"cmd-dp-freeze",category:"command",label:"冻结模型",description:"将 checkpoint 转为 .pb 文件",code:"dp freeze -o graph.pb",tags:["deepmd","模型导出"]},{id:"cmd-lmp-deepmd",category:"command",label:"LAMMPS + DeePMD",description:"使用 DeePMD 势的 LAMMPS 运行",code:"lmp -in input.lammps",tags:["lammps","deepmd"]},{id:"cmd-vasp-run",category:"command",label:"运行 VASP",description:"标准 VASP 运行命令（单节点）",code:"mpirun -np $NP /path/to/vasp_std > vasp.out 2>&1",tags:["vasp","mpi"]},{id:"cmd-qsub",category:"command",label:"提交 PBS 作业",description:"提交作业到超算 batch 队列",code:"qsub job.pbs",tags:["pbs","超算"]},{id:"cmd-qstat",category:"command",label:"查看作业状态",description:"查看当前用户在 PBS 队列中的作业",code:"qstat -u student2025",tags:["pbs","监控"]},{id:"cmd-qdel",category:"command",label:"删除作业",description:"从 PBS 队列中删除指定作业",code:"qdel 12345",tags:["pbs","运维"]},{id:"cmd-tail-log",category:"command",label:"查看最新日志",description:"查看 dpgen 日志最后 20 行",code:"tail -20 dpgen.log",tags:["日志","监控"]},{id:"cmd-grep-error",category:"command",label:"搜索日志报错",description:"在 dpgen 日志中搜索错误关键词",code:'grep -iE "error|exception|killed|oom|segfault|traceback|failed" dpgen.log | tail -20',tags:["日志","调试"]},{id:"cmd-kill-all",category:"command",label:"停止所有 dpgen 进程",description:"一键杀掉训练+探索+标注",code:'pkill -9 -f "dpgen run"; pkill -9 -f lmp; pkill -9 -f vasp; pkill -9 -f deepmd; pkill -9 -f "dp train"',tags:["进程","运维"]},{id:"cmd-scp-upload",category:"command",label:"上传文件到超算",description:"用 scp 上传到超算服务器的 dpgen 工作目录",code:"scp file student2025@10.157.197.40:/public/home/student2025/zhuangjingrun/dpgen_work/",tags:["scp","超算","传输"]},{id:"cmd-conda-activate",category:"command",label:"激活 conda 环境",description:"训练用 deepmd，dpgen 用 deepmd2",code:"conda activate deepmd2  # dpgen\nconda activate deepmd   # train",tags:["conda","环境"]},{id:"param-trust-lo",category:"param",label:"model_devi_f_trust_lo",description:"力偏差下界（eV/Å），低于此值认为模型准确",code:'"model_devi_f_trust_lo": 0.05',tags:["dpgen","信任度"]},{id:"param-trust-hi",category:"param",label:"model_devi_f_trust_hi",description:"力偏差上界（eV/Å），高于此值触发 VASP 标注",code:'"model_devi_f_trust_hi": 0.35',tags:["dpgen","信任度"]},{id:"param-numb-models",category:"param",label:"numb_models",description:"Committee 模型数量，通常为 4",code:'"numb_models": 4',tags:["dpgen","训练"]},{id:"param-numb-steps",category:"param",label:"numb_steps",description:"每轮训练的总步数",code:'"numb_steps": 400000',tags:["deepmd","训练"]},{id:"param-rcut",category:"param",label:"rcut / rcut_smth",description:"截断半径与平滑截断起点（Å）",code:'"rcut": 6.5,\n"rcut_smth": 5.0',tags:["deepmd","descriptor"]},{id:"param-sel",category:"param",label:"sel (近邻数)",description:"每种元素的截断半径内最大近邻原子数",code:'"sel": [40, 40]',tags:["deepmd","descriptor"]},{id:"param-fp-task-max",category:"param",label:"fp_task_max / fp_task_min",description:"每轮最多/最少 VASP 标注数",code:'"fp_task_max": 50,\n"fp_task_min": 1',tags:["dpgen","fp"]},{id:"cmd-dp-neighbor-stat",category:"command",label:"dp neighbor-stat 统计近邻",description:"统计训练数据中每种原子的最大近邻数，用于确定 sel 参数",code:"# PyTorch 后端\ndp --pt neighbor-stat -s data -r 6.0 -t O H\n# 输出 max_nbor_size: [38, 72]\n# 含义：O 最多38个近邻，H 最多72个\n# sel 应设为更高值（如 [46, 92]），留余量给 MD 极端构型",tags:["deepmd","sel","neighbor-stat","近邻统计"]},{id:"cmd-dp-compress",category:"command",label:"dp compress 模型压缩",description:"压缩模型实现 2-4x 推理加速（五阶多项式查表 + 算子合并）",code:"# TensorFlow\ndp compress -i graph.pb -o graph-compressed.pb\n\n# PyTorch\ndp --pt compress -i model.pth -o model-compressed.pth\n\n# 压缩后精度损失极小，推荐生产环境使用",tags:["deepmd","压缩","加速","compress"]},{id:"cmd-dp-pretrained",category:"command",label:"dp pretrained 预训练模型",description:"下载官方预训练大模型（DPA-2/DPA-3），可直接用于推理或微调",code:'# 下载预训练模型\ndp pretrained download DPA-3.3-1M\ndp pretrained download DPA-3.2-5M\n\n# Python 中直接使用（自动下载）\nfrom deepmd.infer import DeepPot\npot = DeepPot("DPA-3.2-5M")',tags:["deepmd","预训练","DPA","pretrained"]},{id:"cmd-dp-freeze-pt",category:"command",label:"dp freeze (PyTorch)",description:"PyTorch 后端冻结模型，输出 .pth 文件",code:"# PyTorch 后端\ndp --pt freeze -o model.pth\n\n# 多任务训练时指定 head\ndp --pt freeze -o model_branch1.pth --head CHOSEN_BRANCH",tags:["deepmd","freeze","PyTorch"]},{id:"cmd-dp-test",category:"command",label:"dp test 模型测试",description:"在测试集上评估模型精度（能量/力 RMSE）",code:"dp test -m frozen_model.pb -s test_data/ -n 100\n# 输出：\n# Energy RMSE: 0.0008 eV/atom\n# Force  RMSE: 0.0460 eV/Å\n\n# PyTorch 后端\ndp --pt test -m model.pth -s test_data/",tags:["deepmd","测试","RMSE"]},{id:"cmd-dp-restart",category:"command",label:"dp train 恢复/初始化训练",description:"从 checkpoint 恢复训练，或从已有模型初始化",code:"# 从 checkpoint 恢复（中断后续跑）\ndp train input.json --restart model.ckpt.pt\n\n# 从已有模型初始化（迁移学习）\ndp train input.json --init-model model.ckpt\n\n# 从冻结模型初始化（调整 sel 等）\ndp train input.json --init-frz-model frozen_model.pb",tags:["deepmd","恢复","初始化","迁移学习"]},{id:"cmd-lcurve-viz",category:"command",label:"lcurve.out 训练曲线可视化",description:"用 matplotlib 可视化 lcurve.out 训练曲线",code:'import numpy as np\nimport matplotlib.pyplot as plt\n\ndata = np.genfromtxt("lcurve.out", names=True)\nfor name in data.dtype.names[1:-1]:\n    plt.plot(data["step"], data[name], label=name)\nplt.legend()\nplt.xlabel("Step")\nplt.ylabel("Loss")\nplt.xscale("symlog")\nplt.yscale("log")\nplt.grid()\nplt.show()',tags:["deepmd","可视化","lcurve","训练曲线"]},{id:"param-desc-se-e2-a",category:"param",label:"descriptor: se_e2_a",description:"最常用描述符：两体嵌入 + 角度信息（径向+角度），适合大多数体系",code:'"descriptor": {\n  "type": "se_e2_a",\n  "rcut": 6.0,        // 截断半径 (Å)\n  "rcut_smth": 0.5,   // 平滑截断起点 (Å)\n  "sel": [46, 92],     // 每种元素最大近邻数\n  "neuron": [25, 50, 100],  // 嵌入网络每层神经元\n  "axis_neuron": 16,   // 轴神经元数（子矩阵维度）\n  "type_one_side": true, // true=仅按邻居类型区分参数\n  "resnet_dt": false,  // ResNet 时间步\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e2_a","参数"]},{id:"param-desc-se-e2-r",category:"param",label:"descriptor: se_e2_r",description:"仅径向描述符：只用距离信息，不含角度，计算更快但精度稍低",code:'"descriptor": {\n  "type": "se_e2_r",\n  "rcut": 6.0,\n  "rcut_smth": 0.5,\n  "sel": [46, 92],\n  "neuron": [5, 10, 20],  // 网络比 se_e2_a 小\n  "type_one_side": true,\n  "resnet_dt": false,\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e2_r","参数"]},{id:"param-desc-se-e3",category:"param",label:"descriptor: se_e3",description:"三体嵌入描述符：含键角信息，精度更高但计算量更大",code:'"descriptor": {\n  "type": "se_e3",\n  "rcut": 6.0,\n  "rcut_smth": 0.5,\n  "sel": [40, 80],\n  "neuron": [2, 4, 8],  // 三体网络更小\n  "resnet_dt": false,\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e3","参数"]},{id:"param-desc-comparison",category:"param",label:"描述符选择对比",description:"se_e2_a(默认推荐) vs se_e2_r(快速) vs se_e3(高精度) vs hybrid(混合)：精度递增、速度递减",code:"se_e2_a  → 两体嵌入+角度，精度好速度适中（默认选择）\nse_e2_r  → 仅径向，速度快但精度低（大体系快速筛选）\nse_e3    → 三体嵌入+键角，精度最高但最慢（小体系高精度）\nhybrid   → 混合多种 descriptor，可设不同截断半径",tags:["deepmd","descriptor","选择","hybrid"]},{id:"param-desc-hybrid",category:"param",label:"descriptor: hybrid 混合描述符",description:"将多种 descriptor 拼接，可组合不同截断半径和类型",code:'"descriptor": {\n  "type": "hybrid",\n  "list": [\n    { "type": "se_e2_a", "rcut": 6.0, ... },\n    { "type": "se_e2_r", "rcut": 8.0, ... }\n  ]\n}',tags:["deepmd","descriptor","hybrid","混合"]},{id:"param-net-size-guide",category:"param",label:"网络大小调优经验",description:"fitting_net 缩小影响小（<5%），embedding_net 缩小影响大（50%+）",code:"官方 benchmark (Al₂O₃ 力 RMSE eV/Å):\n\nfitting_net 变化（embedding=[25,50,100]固定）:\n[240,240,240] → 0.040\n[80,80,80]   → 0.040\n[20,20,20]   → 0.041\n[] (线性)    → 0.054\n\nembedding_net 变化（fitting=[240,240,240]固定）:\n[25,50,100]  → 0.040\n[10,20,40]   → 0.047\n[4,8,16]     → 0.073\n[1,2,4]      → 0.097\n\n策略：优先保证 embedding_net 够大",tags:["deepmd","网络大小","调优","benchmark"]},{id:"param-lcurve-columns",category:"param",label:"lcurve.out 列含义",description:"训练曲线文件各列的含义和单位",code:"列顺序:\nstep         训练步数\nrmse_val     验证集总损失\nrmse_trn     训练集总损失\nrmse_e_val   验证集能量 RMSE (eV/atom)\nrmse_e_trn   训练集能量 RMSE (eV/atom)\nrmse_f_val   验证集力 RMSE (eV/Å)\nrmse_f_trn   训练集力 RMSE (eV/Å)\nlr           当前学习率\n\n正常: loss 持续下降, val≈trn\n异常: loss 震荡/跳高/不收敛",tags:["deepmd","lcurve","训练曲线","诊断"]},{id:"param-fitting-net",category:"param",label:"fitting_net 拟合网络",description:"将 descriptor 映射到原子能量的神经网络",code:'"fitting_net": {\n  "neuron": [240, 240, 240],  // 每层神经元数\n  "resnet_dt": true,          // ResNet 时间步（推荐 true）\n  "seed": 1,\n  "precision": "float64"      // float64(高精度) 或 float32(混合精度)\n}',tags:["deepmd","fitting_net","参数"]},{id:"param-lr-exp",category:"param",label:"学习率: exp 指数衰减",description:"默认学习率策略，lr = start_lr × decay_rate^(step/decay_steps)",code:'"learning_rate": {\n  "type": "exp",\n  "start_lr": 0.001,    // 初始学习率\n  "stop_lr": 1e-6,      // 终止学习率\n  "decay_steps": 5000,  // 衰减步数\n  "decay_rate": 0.95,   // 衰减率（可选，自动计算）\n  "smooth": false,      // true=平滑衰减，false=阶梯衰减\n  "warmup_steps": 0     // 预热步数（可选）\n}',tags:["deepmd","学习率","exp","参数"]},{id:"param-lr-cosine",category:"param",label:"学习率: cosine 余弦退火",description:"余弦曲线衰减，通常比指数衰减收敛更平滑",code:'"learning_rate": {\n  "type": "cosine",\n  "start_lr": 0.001,\n  "stop_lr": 1e-6,\n  "warmup_steps": 5000  // 预热阶段线性增加\n}',tags:["deepmd","学习率","cosine","参数"]},{id:"param-lr-wsd",category:"param",label:"学习率: wsd 预热-稳定-衰减",description:"大部分时间保持 start_lr，最后 decay_phase_ratio 比例做衰减",code:'"learning_rate": {\n  "type": "wsd",\n  "start_lr": 0.001,\n  "stop_lr": 1e-6,\n  "decay_phase_ratio": 0.1,  // 最后10%步数做衰减\n  "decay_type": "inverse_linear"  // 衰减类型：inverse_linear/cosine/linear\n}',tags:["deepmd","学习率","wsd","参数"]},{id:"param-loss-prefactors",category:"param",label:"loss 损失权重",description:"能量/力/virial 损失的权重系数，随学习率线性变化",code:'"loss": {\n  "start_pref_e": 0.02,   // 能量损失初始权重\n  "limit_pref_e": 1,      // 能量损失最终权重\n  "start_pref_f": 1000,   // 力损失初始权重（重点学力）\n  "limit_pref_f": 1,      // 力损失最终权重\n  "start_pref_v": 0,      // virial 初始权重（通常为0）\n  "limit_pref_v": 0,      // virial 最终权重\n  "loss_func": "mse",     // mse(L2) 或 mae(L1, 抗异常值)\n  "intensive_ener_virial": false  // true=按N²归一化（多体系推荐）\n}',tags:["deepmd","loss","权重","参数"]},{id:"param-training-section",category:"param",label:"training 训练配置",description:"训练步数、数据、验证、混合精度等核心设置",code:'"training": {\n  "training_data": {\n    "systems": ["data0/", "data1/"],  // 训练数据路径\n    "batch_size": "auto",  // auto:N → batch×原子数≥N\n    "auto_prob": "prob_sys_size"  // 按系统大小分配概率\n  },\n  "validation_data": {\n    "systems": ["data_val/"],\n    "batch_size": 1,\n    "numb_btch": 3\n  },\n  "numb_steps": 400000,\n  "seed": 1,\n  "disp_file": "lcurve.out",\n  "disp_freq": 100,\n  "save_freq": 1000,\n  "mixed_precision": {  // 可选：混合精度训练\n    "output_prec": "float32",\n    "compute_prec": "float16"\n  }\n}',tags:["deepmd","training","batch_size","参数"]},{id:"param-optimizer",category:"param",label:"optimizer 优化器",description:"训练优化器选择：Adam(默认), AdamW, LKF, AdaMuon(仅PyTorch)",code:'"optimizer": {\n  "type": "Adam",      // TF: 仅Adam; PT: Adam/AdamW/LKF/AdaMuon\n  "adam_beta1": 0.9,   // Adam 一阶矩衰减率\n  "adam_beta2": 0.999, // Adam 二阶矩衰减率\n  "weight_decay": 0     // L2 正则化权重（AdamW 解耦）\n}',tags:["deepmd","optimizer","Adam","参数"]},{id:"param-model-devi-jobs",category:"param",label:"model_devi_jobs 探索任务",description:"DP-GEN MD 探索配置：温度、压力、步长、系综",code:'"model_devi_jobs": [{\n  "sys_idx": [0],       // 使用第0组初始结构\n  "temps": [300, 600, 1000],  // 温度列表 (K)\n  "press": [1.0],       // 压力列表 (bar)\n  "trj_freq": 10,       // 每10步保存一帧\n  "nsteps": 3000,       // MD 总步数\n  "ensemble": "nvt",    // 系综: nvt/npt/nve\n  "_idx": "00"          // 迭代编号\n}]',tags:["dpgen","model_devi","MD","探索"]},{id:"param-model-devi-dt",category:"param",label:"model_devi_dt / model_devi_skip",description:"MD 时间步长(ps)和跳过帧数（每隔skip帧保存）",code:'"model_devi_dt": 0.002,    // 时间步长 0.002 ps = 2 fs\n"model_devi_skip": 0,      // 跳过前N帧（0=全部保存）\n"model_devi_clean_traj": true  // 清理轨迹文件节省空间',tags:["dpgen","model_devi","时间步"]},{id:"path-local-dp-train",category:"path",label:"dp (训练)",description:"deepmd 环境中的 dp 可执行文件",code:"/home/kobe/miniconda3/envs/deepmd/bin/dp",tags:["deepmd","本地路径"]},{id:"path-local-dpgen",category:"path",label:"dpgen",description:"deepmd2 环境中的 dpgen 可执行文件",code:"/home/kobe/miniconda3/envs/deepmd2/bin/dpgen",tags:["dpgen","本地路径"]},{id:"path-local-lmp",category:"path",label:"lmp (DeePMD版)",description:"deepmd 环境中的 LAMMPS",code:"/home/kobe/miniconda3/envs/deepmd/bin/lmp",tags:["lammps","本地路径"]},{id:"path-hpc-vasp",category:"path",label:"vasp_std (超算)",description:"超算上的 VASP 可执行文件",code:"/public/software/vasp.5.4.4/bin/vasp_std",tags:["vasp","超算路径"]},{id:"path-hpc-intel",category:"path",label:"Intel 环境 (超算)",description:"超算 Intel 编译环境初始化脚本",code:"source /public/software/intel2020u2/intel2020u2_env.sh",tags:["超算路径","环境"]},{id:"path-hpc-work",category:"path",label:"dpgen 工作目录 (超算)",description:"超算上 dpgen 的 remote_root",code:"/public/home/student2025/zhuangjingrun/dpgen_work/",tags:["dpgen","超算路径"]},{id:"path-local-project",category:"path",label:"项目根目录",description:"TiC MLP 项目的本地根目录",code:"~/vasp_run/TiC_MLP/",tags:["项目","本地路径"]},{id:"script-clean-startup",category:"script",label:"干净环境启动",description:"避免 conda 污染 VASP 动态库的启动脚本",code:`#!/bin/bash
-source /home/kobe/miniconda3/etc/profile.d/conda.sh
-conda activate dpgen_test_env
+`}],f=[{id:"cmd-dpgen-run",category:"command",label:"启动 dpgen",description:"在项目目录下启动 dpgen 主动学习",code:"dpgen run param.json machine.json 2>&1 | tee -a dpgen.log",tags:["dpgen","启动"]},{id:"cmd-dp-train",category:"command",label:"DeePMD 训练",description:"使用 input.json 训练 DeePMD 模型",code:"dp train input.json",tags:["deepmd","训练"]},{id:"cmd-dp-freeze",category:"command",label:"冻结模型",description:"将 checkpoint 转为 .pb 文件",code:"dp freeze -o graph.pb",tags:["deepmd","模型导出"]},{id:"cmd-lmp-deepmd",category:"command",label:"LAMMPS + DeePMD",description:"使用 DeePMD 势的 LAMMPS 运行",code:"lmp -in input.lammps",tags:["lammps","deepmd"]},{id:"cmd-vasp-run",category:"command",label:"运行 VASP",description:"标准 VASP 运行命令（单节点）",code:"mpirun -np $NP /path/to/vasp_std > vasp.out 2>&1",tags:["vasp","mpi"]},{id:"cmd-qsub",category:"command",label:"提交 PBS 作业",description:"提交作业到超算 batch 队列",code:"qsub job.pbs",tags:["pbs","超算"]},{id:"cmd-qstat",category:"command",label:"查看作业状态",description:"查看当前用户在 PBS 队列中的作业",code:"qstat -u $USER",tags:["pbs","监控"]},{id:"cmd-qdel",category:"command",label:"删除作业",description:"从 PBS 队列中删除指定作业",code:"qdel 12345",tags:["pbs","运维"]},{id:"cmd-tail-log",category:"command",label:"查看最新日志",description:"查看 dpgen 日志最后 20 行",code:"tail -20 dpgen.log",tags:["日志","监控"]},{id:"cmd-grep-error",category:"command",label:"搜索日志报错",description:"在 dpgen 日志中搜索错误关键词",code:'grep -iE "error|exception|killed|oom|segfault|traceback|failed" dpgen.log | tail -20',tags:["日志","调试"]},{id:"cmd-kill-all",category:"command",label:"停止所有 dpgen 进程",description:"一键杀掉训练+探索+标注",code:'pkill -9 -f "dpgen run"; pkill -9 -f lmp; pkill -9 -f vasp; pkill -9 -f deepmd; pkill -9 -f "dp train"',tags:["进程","运维"]},{id:"cmd-scp-upload",category:"command",label:"上传文件到超算",description:"用 scp 上传到超算服务器的 dpgen 工作目录",code:"scp file yourname@cluster.example.edu:/public/home/yourname/dpgen_work/",tags:["scp","超算","传输"]},{id:"cmd-conda-activate",category:"command",label:"激活 conda 环境",description:"训练用 deepmd，dpgen 用 deepmd2",code:"conda activate deepmd2  # dpgen\nconda activate deepmd   # train",tags:["conda","环境"]},{id:"param-trust-lo",category:"param",label:"model_devi_f_trust_lo",description:"力偏差下界（eV/Å），≤此值判为 accurate 跳过；官方建议 0.2×mean|F|",code:'"model_devi_f_trust_lo": 0.25',tags:["dpgen","信任度"]},{id:"param-trust-hi",category:"param",label:"model_devi_f_trust_hi",description:"力偏差上界（eV/Å），>此值判为 failed 丢弃；lo~hi 之间才是 candidate（送标注）。官方建议 0.5×mean|F|",code:'"model_devi_f_trust_hi": 0.62',tags:["dpgen","信任度"]},{id:"param-numb-models",category:"param",label:"numb_models",description:"Committee 模型数量，通常为 4",code:'"numb_models": 4',tags:["dpgen","训练"]},{id:"param-numb-steps",category:"param",label:"numb_steps",description:"每轮训练的总步数",code:'"numb_steps": 400000',tags:["deepmd","训练"]},{id:"param-rcut",category:"param",label:"rcut / rcut_smth",description:"截断半径与平滑截断起点（Å）",code:'"rcut": 6.5,\n"rcut_smth": 5.0',tags:["deepmd","descriptor"]},{id:"param-sel",category:"param",label:"sel (近邻数)",description:"每种元素的截断半径内最大近邻原子数",code:'"sel": [40, 40]',tags:["deepmd","descriptor"]},{id:"param-fp-task-max",category:"param",label:"fp_task_max / fp_task_min",description:"每轮最多/最少 VASP 标注数",code:'"fp_task_max": 50,\n"fp_task_min": 1',tags:["dpgen","fp"]},{id:"cmd-dp-neighbor-stat",category:"command",label:"dp neighbor-stat 统计近邻",description:"统计训练数据中每种原子的最大近邻数，用于确定 sel 参数",code:"# PyTorch 后端\ndp --pt neighbor-stat -s data -r 6.0 -t O H\n# 输出 max_nbor_size: [38, 72]\n# 含义：O 最多38个近邻，H 最多72个\n# sel 应设为更高值（如 [46, 92]），留余量给 MD 极端构型",tags:["deepmd","sel","neighbor-stat","近邻统计"]},{id:"cmd-dp-compress",category:"command",label:"dp compress 模型压缩",description:"压缩模型实现 2-4x 推理加速（五阶多项式查表 + 算子合并）",code:"# TensorFlow\ndp compress -i graph.pb -o graph-compressed.pb\n\n# PyTorch\ndp --pt compress -i model.pth -o model-compressed.pth\n\n# 压缩后精度损失极小，推荐生产环境使用",tags:["deepmd","压缩","加速","compress"]},{id:"cmd-dp-pretrained",category:"command",label:"dp pretrained 预训练模型",description:"下载官方预训练大模型（DPA-2/DPA-3），可直接用于推理或微调",code:'# 下载预训练模型\ndp pretrained download DPA-3.3-1M\ndp pretrained download DPA-3.2-5M\n\n# Python 中直接使用（自动下载）\nfrom deepmd.infer import DeepPot\npot = DeepPot("DPA-3.2-5M")',tags:["deepmd","预训练","DPA","pretrained"]},{id:"cmd-dp-freeze-pt",category:"command",label:"dp freeze (PyTorch)",description:"PyTorch 后端冻结模型，输出 .pth 文件",code:"# PyTorch 后端\ndp --pt freeze -o model.pth\n\n# 多任务训练时指定 head\ndp --pt freeze -o model_branch1.pth --head CHOSEN_BRANCH",tags:["deepmd","freeze","PyTorch"]},{id:"cmd-dp-test",category:"command",label:"dp test 模型测试",description:"在测试集上评估模型精度（能量/力 RMSE）",code:"dp test -m frozen_model.pb -s test_data/ -n 100\n# 输出：\n# Energy RMSE: 0.0008 eV/atom\n# Force  RMSE: 0.0460 eV/Å\n\n# PyTorch 后端\ndp --pt test -m model.pth -s test_data/",tags:["deepmd","测试","RMSE"]},{id:"cmd-dp-restart",category:"command",label:"dp train 恢复/初始化训练",description:"从 checkpoint 恢复训练，或从已有模型初始化",code:"# 从 checkpoint 恢复（中断后续跑）\ndp train input.json --restart model.ckpt.pt\n\n# 从已有模型初始化（迁移学习）\ndp train input.json --init-model model.ckpt\n\n# 从冻结模型初始化（调整 sel 等）\ndp train input.json --init-frz-model frozen_model.pb",tags:["deepmd","恢复","初始化","迁移学习"]},{id:"cmd-lcurve-viz",category:"command",label:"lcurve.out 训练曲线可视化",description:"用 matplotlib 可视化 lcurve.out 训练曲线",code:'import numpy as np\nimport matplotlib.pyplot as plt\n\ndata = np.genfromtxt("lcurve.out", names=True)\nfor name in data.dtype.names[1:-1]:\n    plt.plot(data["step"], data[name], label=name)\nplt.legend()\nplt.xlabel("Step")\nplt.ylabel("Loss")\nplt.xscale("symlog")\nplt.yscale("log")\nplt.grid()\nplt.show()',tags:["deepmd","可视化","lcurve","训练曲线"]},{id:"param-desc-se-e2-a",category:"param",label:"descriptor: se_e2_a",description:"最常用描述符：两体嵌入 + 角度信息（径向+角度），适合大多数体系",code:'"descriptor": {\n  "type": "se_e2_a",\n  "rcut": 6.0,        // 截断半径 (Å)\n  "rcut_smth": 0.5,   // 平滑截断起点 (Å)\n  "sel": [46, 92],     // 每种元素最大近邻数\n  "neuron": [25, 50, 100],  // 嵌入网络每层神经元\n  "axis_neuron": 16,   // 轴神经元数（子矩阵维度）\n  "type_one_side": true, // true=仅按邻居类型区分参数\n  "resnet_dt": false,  // ResNet 时间步\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e2_a","参数"]},{id:"param-desc-se-e2-r",category:"param",label:"descriptor: se_e2_r",description:"仅径向描述符：只用距离信息，不含角度，计算更快但精度稍低",code:'"descriptor": {\n  "type": "se_e2_r",\n  "rcut": 6.0,\n  "rcut_smth": 0.5,\n  "sel": [46, 92],\n  "neuron": [5, 10, 20],  // 网络比 se_e2_a 小\n  "type_one_side": true,\n  "resnet_dt": false,\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e2_r","参数"]},{id:"param-desc-se-e3",category:"param",label:"descriptor: se_e3",description:"三体嵌入描述符：含键角信息，精度更高但计算量更大",code:'"descriptor": {\n  "type": "se_e3",\n  "rcut": 6.0,\n  "rcut_smth": 0.5,\n  "sel": [40, 80],\n  "neuron": [2, 4, 8],  // 三体网络更小\n  "resnet_dt": false,\n  "seed": 1\n}',tags:["deepmd","descriptor","se_e3","参数"]},{id:"param-desc-comparison",category:"param",label:"描述符选择对比",description:"se_e2_a(默认推荐) vs se_e2_r(快速) vs se_e3(高精度) vs hybrid(混合)：精度递增、速度递减",code:"se_e2_a  → 两体嵌入+角度，精度好速度适中（默认选择）\nse_e2_r  → 仅径向，速度快但精度低（大体系快速筛选）\nse_e3    → 三体嵌入+键角，精度最高但最慢（小体系高精度）\nhybrid   → 混合多种 descriptor，可设不同截断半径",tags:["deepmd","descriptor","选择","hybrid"]},{id:"param-desc-hybrid",category:"param",label:"descriptor: hybrid 混合描述符",description:"将多种 descriptor 拼接，可组合不同截断半径和类型",code:'"descriptor": {\n  "type": "hybrid",\n  "list": [\n    { "type": "se_e2_a", "rcut": 6.0, ... },\n    { "type": "se_e2_r", "rcut": 8.0, ... }\n  ]\n}',tags:["deepmd","descriptor","hybrid","混合"]},{id:"param-net-size-guide",category:"param",label:"网络大小调优经验",description:"fitting_net 缩小影响小（<5%），embedding_net 缩小影响大（50%+）",code:"官方 benchmark (Al₂O₃ 力 RMSE eV/Å):\n\nfitting_net 变化（embedding=[25,50,100]固定）:\n[240,240,240] → 0.040\n[80,80,80]   → 0.040\n[20,20,20]   → 0.041\n[] (线性)    → 0.054\n\nembedding_net 变化（fitting=[240,240,240]固定）:\n[25,50,100]  → 0.040\n[10,20,40]   → 0.047\n[4,8,16]     → 0.073\n[1,2,4]      → 0.097\n\n策略：优先保证 embedding_net 够大",tags:["deepmd","网络大小","调优","benchmark"]},{id:"param-lcurve-columns",category:"param",label:"lcurve.out 列含义",description:"训练曲线文件各列的含义和单位",code:"列顺序:\nstep         训练步数\nrmse_val     验证集总损失\nrmse_trn     训练集总损失\nrmse_e_val   验证集能量 RMSE (eV/atom)\nrmse_e_trn   训练集能量 RMSE (eV/atom)\nrmse_f_val   验证集力 RMSE (eV/Å)\nrmse_f_trn   训练集力 RMSE (eV/Å)\nlr           当前学习率\n\n正常: loss 持续下降, val≈trn\n异常: loss 震荡/跳高/不收敛",tags:["deepmd","lcurve","训练曲线","诊断"]},{id:"param-fitting-net",category:"param",label:"fitting_net 拟合网络",description:"将 descriptor 映射到原子能量的神经网络",code:'"fitting_net": {\n  "neuron": [240, 240, 240],  // 每层神经元数\n  "resnet_dt": true,          // ResNet 时间步（推荐 true）\n  "seed": 1,\n  "precision": "float64"      // float64(高精度) 或 float32(混合精度)\n}',tags:["deepmd","fitting_net","参数"]},{id:"param-lr-exp",category:"param",label:"学习率: exp 指数衰减",description:"默认学习率策略，lr = start_lr × decay_rate^(step/decay_steps)",code:'"learning_rate": {\n  "type": "exp",\n  "start_lr": 0.001,    // 初始学习率\n  "stop_lr": 1e-6,      // 终止学习率\n  "decay_steps": 5000,  // 衰减步数\n  "decay_rate": 0.95,   // 衰减率（可选，自动计算）\n  "smooth": false,      // true=平滑衰减，false=阶梯衰减\n  "warmup_steps": 0     // 预热步数（可选）\n}',tags:["deepmd","学习率","exp","参数"]},{id:"param-lr-cosine",category:"param",label:"学习率: cosine 余弦退火",description:"余弦曲线衰减，通常比指数衰减收敛更平滑",code:'"learning_rate": {\n  "type": "cosine",\n  "start_lr": 0.001,\n  "stop_lr": 1e-6,\n  "warmup_steps": 5000  // 预热阶段线性增加\n}',tags:["deepmd","学习率","cosine","参数"]},{id:"param-lr-wsd",category:"param",label:"学习率: wsd 预热-稳定-衰减",description:"大部分时间保持 start_lr，最后 decay_phase_ratio 比例做衰减",code:'"learning_rate": {\n  "type": "wsd",\n  "start_lr": 0.001,\n  "stop_lr": 1e-6,\n  "decay_phase_ratio": 0.1,  // 最后10%步数做衰减\n  "decay_type": "inverse_linear"  // 衰减类型：inverse_linear/cosine/linear\n}',tags:["deepmd","学习率","wsd","参数"]},{id:"param-loss-prefactors",category:"param",label:"loss 损失权重",description:"能量/力/virial 损失的权重系数，随学习率线性变化",code:'"loss": {\n  "start_pref_e": 0.02,   // 能量损失初始权重\n  "limit_pref_e": 1,      // 能量损失最终权重\n  "start_pref_f": 1000,   // 力损失初始权重（重点学力）\n  "limit_pref_f": 1,      // 力损失最终权重\n  "start_pref_v": 0,      // virial 初始权重（通常为0）\n  "limit_pref_v": 0,      // virial 最终权重\n  "loss_func": "mse",     // mse(L2) 或 mae(L1, 抗异常值)\n  "intensive_ener_virial": false  // true=按N²归一化（多体系推荐）\n}',tags:["deepmd","loss","权重","参数"]},{id:"param-training-section",category:"param",label:"training 训练配置",description:"训练步数、数据、验证、混合精度等核心设置",code:'"training": {\n  "training_data": {\n    "systems": ["data0/", "data1/"],  // 训练数据路径\n    "batch_size": "auto",  // auto:N → batch×原子数≥N\n    "auto_prob": "prob_sys_size"  // 按系统大小分配概率\n  },\n  "validation_data": {\n    "systems": ["data_val/"],\n    "batch_size": 1,\n    "numb_btch": 3\n  },\n  "numb_steps": 400000,\n  "seed": 1,\n  "disp_file": "lcurve.out",\n  "disp_freq": 100,\n  "save_freq": 1000,\n  "mixed_precision": {  // 可选：混合精度训练\n    "output_prec": "float32",\n    "compute_prec": "float16"\n  }\n}',tags:["deepmd","training","batch_size","参数"]},{id:"param-optimizer",category:"param",label:"optimizer 优化器",description:"训练优化器选择：Adam(默认), AdamW, LKF, AdaMuon(仅PyTorch)",code:'"optimizer": {\n  "type": "Adam",      // TF: 仅Adam; PT: Adam/AdamW/LKF/AdaMuon\n  "adam_beta1": 0.9,   // Adam 一阶矩衰减率\n  "adam_beta2": 0.999, // Adam 二阶矩衰减率\n  "weight_decay": 0     // L2 正则化权重（AdamW 解耦）\n}',tags:["deepmd","optimizer","Adam","参数"]},{id:"param-model-devi-jobs",category:"param",label:"model_devi_jobs 探索任务",description:"DP-GEN MD 探索配置：温度、压力、步长、系综",code:'"model_devi_jobs": [{\n  "sys_idx": [0],       // 使用第0组初始结构\n  "temps": [300, 600, 1000],  // 温度列表 (K)\n  "press": [1.0],       // 压力列表 (bar)\n  "trj_freq": 10,       // 每10步保存一帧\n  "nsteps": 3000,       // MD 总步数\n  "ensemble": "nvt",    // 系综: nvt/npt/nve\n  "_idx": "00"          // 迭代编号\n}]',tags:["dpgen","model_devi","MD","探索"]},{id:"param-model-devi-dt",category:"param",label:"model_devi_dt / model_devi_skip",description:"MD 时间步长(ps)和跳过帧数（每隔skip帧保存）",code:'"model_devi_dt": 0.002,    // 时间步长 0.002 ps = 2 fs\n"model_devi_skip": 0,      // 跳过前N帧（0=全部保存）\n"model_devi_clean_traj": true  // 清理轨迹文件节省空间',tags:["dpgen","model_devi","时间步"]},{id:"path-local-dp-train",category:"path",label:"dp (训练)",description:"deepmd 环境中的 dp 可执行文件",code:"~/miniconda3/envs/deepmd/bin/dp",tags:["deepmd","本地路径"]},{id:"path-local-dpgen",category:"path",label:"dpgen",description:"dpgen 环境中的 dpgen 可执行文件",code:"~/miniconda3/envs/deepmd2/bin/dpgen",tags:["dpgen","本地路径"]},{id:"path-local-lmp",category:"path",label:"lmp (DeePMD版)",description:"deepmd 环境中的 LAMMPS",code:"~/miniconda3/envs/deepmd/bin/lmp",tags:["lammps","本地路径"]},{id:"path-hpc-vasp",category:"path",label:"vasp_std (超算)",description:"超算上的 VASP 可执行文件（按自己集群替换）",code:"/path/to/vasp_std",tags:["vasp","超算路径"]},{id:"path-hpc-intel",category:"path",label:"Intel 环境 (超算)",description:"超算 Intel 编译环境初始化脚本",code:"source /path/to/intel_env.sh",tags:["超算路径","环境"]},{id:"path-hpc-work",category:"path",label:"dpgen 工作目录 (超算)",description:"超算上 dpgen 的 remote_root",code:"/public/home/yourname/dpgen_work/",tags:["dpgen","超算路径"]},{id:"path-local-project",category:"path",label:"项目根目录",description:"dpgen 项目根目录（param.json / machine.json / record.dpgen 所在处）",code:"~/dpgen/",tags:["项目","本地路径"]},{id:"script-clean-startup",category:"script",label:"干净环境启动",description:"避免 conda 污染 VASP 动态库的启动脚本",code:`#!/bin/bash
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate dpgen_env
 unset LD_LIBRARY_PATH
-export PATH=/home/kobe/miniconda3/envs/dpgen_test_env/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=$HOME/miniconda3/envs/dpgen_env/bin:/usr/local/bin:/usr/bin:/bin
 dpgen run param.json machine.json`,tags:["启动","脚本","环境"]},{id:"script-watch-dpgen",category:"script",label:"dpgen 监控脚本",description:"每30秒检查进程存活+报错扫描+进度显示",code:`#!/bin/bash
 while true; do
   pgrep -f "dpgen run" > /dev/null && echo "✅ running" || echo "❌ dead"
   tail -100 dpgen.log | grep -iE "error|failed" | tail -5
   sleep 30
-done`,tags:["监控","脚本","dpgen"]},{id:"cmd-sbatch",category:"command",label:"提交 Slurm 作业",description:"用 sbatch 提交作业到 Slurm 集群",code:"sbatch job.slurm",tags:["slurm","超算","提交"]},{id:"cmd-squeue",category:"command",label:"查看 Slurm 作业",description:"查看当前用户的 Slurm 作业状态",code:"squeue -u $USER",tags:["slurm","监控"]},{id:"cmd-scancel",category:"command",label:"取消 Slurm 作业",description:"取消指定的 Slurm 作业",code:"scancel 12345",tags:["slurm","运维"]},{id:"param-machine-json-batch",category:"param",label:"machine.json batch_type",description:"DP-GEN 任务批处理类型：PBS/Slurm/LSF/Shell",code:'"batch_type": "Slurm"  # Slurm 集群\n"batch_type": "PBS"     # PBS/Torque 集群\n"batch_type": "Shell"   # 本地直接执行',tags:["dpgen","machine.json","slurm","pbs"]},{id:"cmd-dpdata-read-outcar",category:"command",label:"dpdata 读取 OUTCAR",description:"用 dpdata 从 VASP OUTCAR 提取训练数据",code:'import dpdata\ns = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")\nprint(f"帧数: {len(s)}, 原子数: {s.get_natoms()}")',tags:["dpdata","VASP","数据转换"]},{id:"cmd-dpdata-export-npy",category:"command",label:"dpdata 导出 DeePMD 格式",description:"将 LabeledSystem 导出为 DeePMD numpy 训练格式",code:'s.to_deepmd_npy("training_data/")\n# 生成 set.000/ 目录：box.npy, coord.npy, energy.npy, force.npy, virial.npy',tags:["dpdata","deepmd","数据转换"]},{id:"cmd-dpdata-merge",category:"command",label:"dpdata 合并多个系统",description:"合并多个 OUTCAR 的数据（DP-GEN 数据回流核心操作）",code:'merged = dpdata.LabeledSystem("OUTCAR_1")\nfor f in ["OUTCAR_2", "OUTCAR_3"]:\n    merged.append(dpdata.LabeledSystem(f))\nmerged.to_deepmd_npy("merged_data/")',tags:["dpdata","合并","数据回流"]},{id:"cmd-dpdata-vasprun",category:"command",label:"dpdata 读取 vasprun.xml",description:"从 vasprun.xml 读取（比 OUTCAR 更稳定）",code:'s = dpdata.LabeledSystem("vasprun.xml", fmt="vasp/xml")',tags:["dpdata","VASP","xml"]},{id:"cmd-dpdata-subsystem",category:"command",label:"dpdata 切分数据",description:"按索引切分子集（训练/测试分离）",code:'import numpy as np\nidx = np.random.permutation(len(s))[:80]\ntrain = s.sub_system(idx)\ntrain.to_deepmd_npy("train/")',tags:["dpdata","切分","训练集"]},{id:"cmd-dpdata-batch-collect",category:"command",label:"批量收集 FP OUTCAR",description:"DP-GEN 一轮迭代后批量收集标注数据",code:'from pathlib import Path\nsystems = []\nfor d in sorted(Path("iter.000000/02.fp").glob("task.*")):\n    if (d/"OUTCAR").exists():\n        systems.append(dpdata.LabeledSystem(str(d/"OUTCAR")))\nm = systems[0]\nfor s in systems[1:]: m.append(s)\nm.to_deepmd_npy("new_data/")',tags:["dpdata","dpgen","批量","数据回流"]},{id:"param-dpdata-formats",category:"param",label:"dpdata 支持格式全表",description:"dpdata 支持的所有输入/输出格式（25+种）",code:"读取格式 (fmt 参数):\nvasp/outcar    VASP OUTCAR\nvasp/xml       VASP vasprun.xml\nvasp/poscar    VASP POSCAR\ndeepmd/npy     DeePMD numpy\ndeepmd/raw     DeePMD 文本\ngaussian/log   Gaussian 日志\ncp2k/output    CP2K 输出\nqe/pw/scf      Quantum ESPRESSO\nlammps/dump    LAMMPS dump\nlammps/data    LAMMPS data\nfhi_aims/output FHI-aims\nsiesta/output  SIESTA\nabacus/md      ABACUS\nquip/gap/xyz   QUIP/GAP\nxyz            通用 XYZ\n\n导出方法:\n.to_deepmd_npy() .to_deepmd_raw()\n.to_vasp_poscar() .to_lammps_lmp()",tags:["dpdata","格式","API"]},{id:"cmd-dpdata-quality-check",category:"command",label:"dpdata 数据质量检查",description:"检查训练数据的力/能量分布，排除异常帧",code:'import numpy as np\nforces = system.data["forces"]  # (n_frames, n_atoms, 3)\nforce_max = np.abs(forces).max(axis=(1,2))\nbad = np.where(force_max > 50)[0]  # 力>50 eV/Å为异常\nprint(f"异常帧: {len(bad)}/{len(system)}")\nif len(bad): print(f"索引: {bad.tolist()}")',tags:["dpdata","质量检查","异常值"]},{id:"cmd-dpdata-energy-shift",category:"command",label:"dpdata 能量参考对齐",description:"不同 DFT 计算的能量参考不一致时，需要对齐能量零点",code:'import numpy as np\n# 计算每原子平均能量作为参考\ne_per_atom = system.data["energies"] / system.get_natoms()\nref_e = np.mean(e_per_atom)  # 或用已知参考值\n# 手动偏移（dpdata 暂无内置方法）\nsystem.data["energies"] -= shift_value',tags:["dpdata","能量对齐","参考"]},{id:"cmd-ovito-python",category:"command",label:"OVITO Python 管线",description:"导入 LAMMPS dump 并进行 PTM 结构分析",code:"from ovito.io import import_file\nfrom ovito.modifiers import PolyhedralTemplateMatchingModifier\n\npipeline = import_file('dump.lammpstrj')\npipeline.modifiers.append(PolyhedralTemplateMatchingModifier())",tags:["ovito","python","PTM"]},{id:"cmd-ovito-dxa",category:"command",label:"DXA 位错分析",description:"Python 脚本做位错提取与密度统计",code:"from ovito.modifiers import DislocationAnalysisModifier\n\npipeline.modifiers.append(DislocationAnalysisModifier())\ndata = pipeline.compute()\nL = data.attributes['DislocationAnalysis.total_line_length']\nV = data.attributes['DislocationAnalysis.cell_volume']\nprint(f'Dislocation density: {L/V:.3e} A^-2')",tags:["ovito","DXA","位错"]},{id:"cmd-ovito-tachyon",category:"command",label:"Tachyon 高质量渲染",description:"使用 OVITO Tachyon 渲染发表级图像",code:"from ovito.vis import Viewport, TachyonRenderer\n\nvp = Viewport(type=Viewport.Type.Perspective)\nvp.render_image(size=(1920,1080), filename='render.png',\n  renderer=TachyonRenderer(ambient_occlusion=True, shadows=True))",tags:["ovito","渲染","Tachyon"]},{id:"cmd-ase-build",category:"command",label:"ASE 构建超胞/表面",description:"用 ASE 创建晶体结构、切表面、做超胞",code:"from ase.build import bulk, fcc111, make_supercell\n\ncu = bulk('Cu', 'fcc', a=3.61)\ncu_sc = cu * (3, 3, 3)  # 超胞\ncu111 = fcc111('Cu', a=3.61, size=(2,2,4), vacuum=10.0)  # 表面",tags:["ase","结构","表面"]},{id:"cmd-ase-relax",category:"command",label:"ASE 结构弛豫",description:"对接 VASP/GPAW 做 BFGS 弛豫",code:"from ase.optimize import BFGS\nfrom ase.calculators.vasp import Vasp\n\natoms.calc = Vasp(xc='PBE', encut=500, kpts=(4,4,1), directory='relax')\nopt = BFGS(atoms)\nopt.run(fmax=0.02)  # eV/A",tags:["ase","弛豫","DFT"]},{id:"cmd-lmp-npt",category:"command",label:"LAMMPS NPT 分子动力学",description:"等温等压系综 MD 运行（含弛豫）",code:"units metal\ntimestep 0.001\nvelocity all create 300 12345\nfix npt all npt temp 300 300 0.1 iso 0 0 1.0\nrun 100000",tags:["lammps","NPT","MD"]},{id:"cmd-lmp-minimize",category:"command",label:"LAMMPS 能量最小化",description:"MD 前先做能量最小化消除坏接触",code:"minimize 1.0e-10 1.0e-10 10000 100000",tags:["lammps","最小化","MD"]},{id:"param-encut-convergence",category:"param",label:"ENCUT 截断能",description:"PBE 泛函推荐 ENCUT = 1.3 × max(ENMAX)，弹性常数建议 1.5×",code:"ENCUT = 500  # 1.3 × ENMAX\n# 收敛测试: for ENCUT in 300 400 500 600",tags:["dft","encut","收敛"]},{id:"param-kpoint-density",category:"param",label:"K 点密度",description:"k_i × a_i ≈ 30-40 Å 为精确计算，能带用高对称路径，DOS 加密 2-3×",code:"# vaspkit -task 102 生成 KPOINTS\n# 输入密度 ~0.04 (精确) 或 ~0.03 (DOS)",tags:["dft","kpoints","收敛"]},{id:"param-smearing",category:"param",label:"ISMEAR / SIGMA",description:"半导体 ISMEAR=0, SIGMA=0.05；金属 ISMEAR=1；能带/DOS 用 ISMEAR=-5 (四面体)",code:"ISMEAR = 0    # 半导体: Gaussian\nSIGMA = 0.05\nISMEAR = 1    # 金属: Methfessel-Paxton\nISMEAR = -5   # DOS/能带: 四面体方法",tags:["dft","smearing","VASP"]}];e.s(["cheatsheetItems",0,f],95228);let y={"dpgen-workflow":"2026-07-31","dpgen-handson":"2026-06-04","deepmd-training":"2026-06-04","deepmd-quickstart":"2026-06-04","deepmd-tuning":"2026-06-04","lammps-deepmd":"2026-06-04","dpdata-guide":"2026-06-04","machine-config":"2026-06-04","vasp-hpc":"2026-06-02","comp-materials":"2026-06-02","atomistic-sim":"2026-06-02","ovito-tips":"2026-06-02","env-config":"2026-06-02","linux-tips":"2026-06-02",methodology:"2026-06-02"};function P(e,t){let a=y[t]??"2026-06-02";return e.map(e=>({...e,createdAt:e.createdAt??a,updatedAt:e.updatedAt??a}))}let h=[...P(t,"dpgen-workflow"),...P(m,"dpgen-handson"),...P(a,"deepmd-training"),...P(l,"deepmd-quickstart"),...P(n,"vasp-hpc"),...P(o,"env-config"),...P(s,"linux-tips"),...P(i,"methodology"),...P(p,"comp-materials"),...P(r,"atomistic-sim"),...P(d,"ovito-tips"),...P(c,"lammps-deepmd"),...P(_,"dpdata-guide"),...P(u,"deepmd-tuning"),...P(g,"machine-config")];e.s(["allArticles",0,h],94757)}]);
+done`,tags:["监控","脚本","dpgen"]},{id:"cmd-sbatch",category:"command",label:"提交 Slurm 作业",description:"用 sbatch 提交作业到 Slurm 集群",code:"sbatch job.slurm",tags:["slurm","超算","提交"]},{id:"cmd-squeue",category:"command",label:"查看 Slurm 作业",description:"查看当前用户的 Slurm 作业状态",code:"squeue -u $USER",tags:["slurm","监控"]},{id:"cmd-scancel",category:"command",label:"取消 Slurm 作业",description:"取消指定的 Slurm 作业",code:"scancel 12345",tags:["slurm","运维"]},{id:"param-machine-json-batch",category:"param",label:"machine.json batch_type",description:"DP-GEN 任务批处理类型：PBS/Slurm/LSF/Shell",code:'"batch_type": "Slurm"  # Slurm 集群\n"batch_type": "PBS"     # PBS/Torque 集群\n"batch_type": "Shell"   # 本地直接执行',tags:["dpgen","machine.json","slurm","pbs"]},{id:"cmd-dpdata-read-outcar",category:"command",label:"dpdata 读取 OUTCAR",description:"用 dpdata 从 VASP OUTCAR 提取训练数据",code:'import dpdata\ns = dpdata.LabeledSystem("OUTCAR", fmt="vasp/outcar")\nprint(f"帧数: {len(s)}, 原子数: {s.get_natoms()}")',tags:["dpdata","VASP","数据转换"]},{id:"cmd-dpdata-export-npy",category:"command",label:"dpdata 导出 DeePMD 格式",description:"将 LabeledSystem 导出为 DeePMD numpy 训练格式",code:'s.to_deepmd_npy("training_data/")\n# 生成 set.000/ 目录：box.npy, coord.npy, energy.npy, force.npy, virial.npy',tags:["dpdata","deepmd","数据转换"]},{id:"cmd-dpdata-merge",category:"command",label:"dpdata 合并多个系统",description:"合并多个 OUTCAR 的数据（DP-GEN 数据回流核心操作）",code:'merged = dpdata.LabeledSystem("OUTCAR_1")\nfor f in ["OUTCAR_2", "OUTCAR_3"]:\n    merged.append(dpdata.LabeledSystem(f))\nmerged.to_deepmd_npy("merged_data/")',tags:["dpdata","合并","数据回流"]},{id:"cmd-dpdata-vasprun",category:"command",label:"dpdata 读取 vasprun.xml",description:"从 vasprun.xml 读取（比 OUTCAR 更稳定）",code:'s = dpdata.LabeledSystem("vasprun.xml", fmt="vasp/xml")',tags:["dpdata","VASP","xml"]},{id:"cmd-dpdata-subsystem",category:"command",label:"dpdata 切分数据",description:"按索引切分子集（训练/测试分离）",code:'import numpy as np\nidx = np.random.permutation(len(s))[:80]\ntrain = s.sub_system(idx)\ntrain.to_deepmd_npy("train/")',tags:["dpdata","切分","训练集"]},{id:"cmd-dpdata-batch-collect",category:"command",label:"批量收集 FP OUTCAR",description:"DP-GEN 一轮迭代后批量收集标注数据",code:'from pathlib import Path\nsystems = []\nfor d in sorted(Path("iter.000000/02.fp").glob("task.*")):\n    if (d/"OUTCAR").exists():\n        systems.append(dpdata.LabeledSystem(str(d/"OUTCAR")))\nm = systems[0]\nfor s in systems[1:]: m.append(s)\nm.to_deepmd_npy("new_data/")',tags:["dpdata","dpgen","批量","数据回流"]},{id:"param-dpdata-formats",category:"param",label:"dpdata 支持格式全表",description:"dpdata 支持的所有输入/输出格式（25+种）",code:"读取格式 (fmt 参数):\nvasp/outcar    VASP OUTCAR\nvasp/xml       VASP vasprun.xml\nvasp/poscar    VASP POSCAR\ndeepmd/npy     DeePMD numpy\ndeepmd/raw     DeePMD 文本\ngaussian/log   Gaussian 日志\ncp2k/output    CP2K 输出\nqe/pw/scf      Quantum ESPRESSO\nlammps/dump    LAMMPS dump\nlammps/data    LAMMPS data\nfhi_aims/output FHI-aims\nsiesta/output  SIESTA\nabacus/md      ABACUS\nquip/gap/xyz   QUIP/GAP\nxyz            通用 XYZ\n\n导出方法:\n.to_deepmd_npy() .to_deepmd_raw()\n.to_vasp_poscar() .to_lammps_lmp()",tags:["dpdata","格式","API"]},{id:"cmd-dpdata-quality-check",category:"command",label:"dpdata 数据质量检查",description:"检查训练数据的力/能量分布，排除异常帧",code:'import numpy as np\nforces = system.data["forces"]  # (n_frames, n_atoms, 3)\nforce_max = np.abs(forces).max(axis=(1,2))\nbad = np.where(force_max > 50)[0]  # 力>50 eV/Å为异常\nprint(f"异常帧: {len(bad)}/{len(system)}")\nif len(bad): print(f"索引: {bad.tolist()}")',tags:["dpdata","质量检查","异常值"]},{id:"cmd-dpdata-energy-shift",category:"command",label:"dpdata 能量参考对齐",description:"不同 DFT 计算的能量参考不一致时，需要对齐能量零点",code:'import numpy as np\n# 计算每原子平均能量作为参考\ne_per_atom = system.data["energies"] / system.get_natoms()\nref_e = np.mean(e_per_atom)  # 或用已知参考值\n# 手动偏移（dpdata 暂无内置方法）\nsystem.data["energies"] -= shift_value',tags:["dpdata","能量对齐","参考"]},{id:"cmd-ovito-python",category:"command",label:"OVITO Python 管线",description:"导入 LAMMPS dump 并进行 PTM 结构分析",code:"from ovito.io import import_file\nfrom ovito.modifiers import PolyhedralTemplateMatchingModifier\n\npipeline = import_file('dump.lammpstrj')\npipeline.modifiers.append(PolyhedralTemplateMatchingModifier())",tags:["ovito","python","PTM"]},{id:"cmd-ovito-dxa",category:"command",label:"DXA 位错分析",description:"Python 脚本做位错提取与密度统计",code:"from ovito.modifiers import DislocationAnalysisModifier\n\npipeline.modifiers.append(DislocationAnalysisModifier())\ndata = pipeline.compute()\nL = data.attributes['DislocationAnalysis.total_line_length']\nV = data.attributes['DislocationAnalysis.cell_volume']\nprint(f'Dislocation density: {L/V:.3e} A^-2')",tags:["ovito","DXA","位错"]},{id:"cmd-ovito-tachyon",category:"command",label:"Tachyon 高质量渲染",description:"使用 OVITO Tachyon 渲染发表级图像",code:"from ovito.vis import Viewport, TachyonRenderer\n\nvp = Viewport(type=Viewport.Type.Perspective)\nvp.render_image(size=(1920,1080), filename='render.png',\n  renderer=TachyonRenderer(ambient_occlusion=True, shadows=True))",tags:["ovito","渲染","Tachyon"]},{id:"cmd-ase-build",category:"command",label:"ASE 构建超胞/表面",description:"用 ASE 创建晶体结构、切表面、做超胞",code:"from ase.build import bulk, fcc111, make_supercell\n\ncu = bulk('Cu', 'fcc', a=3.61)\ncu_sc = cu * (3, 3, 3)  # 超胞\ncu111 = fcc111('Cu', a=3.61, size=(2,2,4), vacuum=10.0)  # 表面",tags:["ase","结构","表面"]},{id:"cmd-ase-relax",category:"command",label:"ASE 结构弛豫",description:"对接 VASP/GPAW 做 BFGS 弛豫",code:"from ase.optimize import BFGS\nfrom ase.calculators.vasp import Vasp\n\natoms.calc = Vasp(xc='PBE', encut=500, kpts=(4,4,1), directory='relax')\nopt = BFGS(atoms)\nopt.run(fmax=0.02)  # eV/A",tags:["ase","弛豫","DFT"]},{id:"cmd-lmp-npt",category:"command",label:"LAMMPS NPT 分子动力学",description:"等温等压系综 MD 运行（含弛豫）",code:"units metal\ntimestep 0.001\nvelocity all create 300 12345\nfix npt all npt temp 300 300 0.1 iso 0 0 1.0\nrun 100000",tags:["lammps","NPT","MD"]},{id:"cmd-lmp-minimize",category:"command",label:"LAMMPS 能量最小化",description:"MD 前先做能量最小化消除坏接触",code:"minimize 1.0e-10 1.0e-10 10000 100000",tags:["lammps","最小化","MD"]},{id:"param-encut-convergence",category:"param",label:"ENCUT 截断能",description:"PBE 泛函推荐 ENCUT = 1.3 × max(ENMAX)，弹性常数建议 1.5×",code:"ENCUT = 500  # 1.3 × ENMAX\n# 收敛测试: for ENCUT in 300 400 500 600",tags:["dft","encut","收敛"]},{id:"param-kpoint-density",category:"param",label:"K 点密度",description:"k_i × a_i ≈ 30-40 Å 为精确计算，能带用高对称路径，DOS 加密 2-3×",code:"# vaspkit -task 102 生成 KPOINTS\n# 输入密度 ~0.04 (精确) 或 ~0.03 (DOS)",tags:["dft","kpoints","收敛"]},{id:"param-smearing",category:"param",label:"ISMEAR / SIGMA",description:"半导体 ISMEAR=0, SIGMA=0.05；金属 ISMEAR=1；能带/DOS 用 ISMEAR=-5 (四面体)",code:"ISMEAR = 0    # 半导体: Gaussian\nSIGMA = 0.05\nISMEAR = 1    # 金属: Methfessel-Paxton\nISMEAR = -5   # DOS/能带: 四面体方法",tags:["dft","smearing","VASP"]}];e.s(["cheatsheetItems",0,f],95228);let y={"dpgen-workflow":"2026-10-29","deepmd-training":"2026-10-29","machine-config":"2026-10-29","env-config":"2026-10-29","vasp-hpc":"2026-10-29",methodology:"2026-10-29","dpgen-handson":"2026-06-04","deepmd-quickstart":"2026-06-04","deepmd-tuning":"2026-06-04","lammps-deepmd":"2026-06-04","dpdata-guide":"2026-06-04","comp-materials":"2026-06-02","atomistic-sim":"2026-06-02","ovito-tips":"2026-06-02","linux-tips":"2026-06-02"};function P(e,t){let a=y[t]??"2026-06-02";return e.map(e=>({...e,createdAt:e.createdAt??a,updatedAt:e.updatedAt??a}))}let h=[...P(t,"dpgen-workflow"),...P(m,"dpgen-handson"),...P(a,"deepmd-training"),...P(l,"deepmd-quickstart"),...P(n,"vasp-hpc"),...P(o,"env-config"),...P(s,"linux-tips"),...P(i,"methodology"),...P(r,"comp-materials"),...P(p,"atomistic-sim"),...P(d,"ovito-tips"),...P(c,"lammps-deepmd"),...P(_,"dpdata-guide"),...P(u,"deepmd-tuning"),...P(g,"machine-config")];e.s(["allArticles",0,h],94757)}]);
