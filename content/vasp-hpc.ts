@@ -103,8 +103,8 @@ echo "All tasks finished at $(date)" >> "$SUCCESS_LOG"
 | JOB_NAME | TiC_fp / dpgen_fp |
 | QUEUE_NAME | batch |
 | NCORES | 52 |
-| INTEL_ENV_SCRIPT_PATH | /public/software/intel2020u2/intel2020u2_env.sh |
-| VASP_EXEC_PATH | /public/software/vasp.5.4.4/bin/vasp_std |
+| INTEL_ENV_SCRIPT_PATH | /path/to/intel_env.sh |
+| VASP_EXEC_PATH | /path/to/vasp_std |
 
 ## 提交前必做检查
 
@@ -150,18 +150,20 @@ mpirun -np 40
 
 | 项目 | 值 |
 |------|-----|
-| 主机 | 10.157.197.40 |
+| 主机 | cluster.example.edu |
 | 端口 | 22 |
-| 用户名 | student2025 |
+| 用户名 | yourname |
 | 调度系统 | PBS / Torque 6 |
+
+> 具体地址、用户名、队列限额请以你自己集群的文档为准。
 
 ## 查看队列状态的常用命令
 
 \`\`\`bash
-qstat -a           # 查看所有作业
-qstat -u student2025  # 只看自己的作业
-qdel <job_id>      # 删除作业
-pbsnodes -a        # 查看节点状态
+qstat -a              # 查看所有作业
+qstat -u $USER        # 只看自己的作业
+qdel <job_id>         # 删除作业
+pbsnodes -a           # 查看节点状态
 \`\`\`
 `,
     tags: ["超算", "PBS", "队列", "资源限制"],
@@ -185,7 +187,7 @@ pbsnodes -a        # 查看节点状态
 ### 1. 查看依赖库来源
 
 \`\`\`bash
-ldd /home/kobe/vasp.5.4.4/bin/vasp_std
+ldd /opt/vasp/bin/vasp_std
 \`\`\`
 
 重点检查这些库的来源：
@@ -214,7 +216,7 @@ hash -r
 
 # 单核测试
 cd task.000.000000
-/home/kobe/vasp.5.4.4/bin/vasp_std > vasp.clean.log 2>&1
+/opt/vasp/bin/vasp_std > vasp.clean.log 2>&1
 tail -100 vasp.clean.log
 \`\`\`
 
@@ -222,10 +224,10 @@ tail -100 vasp.clean.log
 
 健康的 ldd 输出：所有库来自同一套环境（系统库或同一 conda 环境），不混杂。
 
-**病态特征**（你遇到过的情况）：
+**病态特征**（典型混搭）：
 - MPI 来自系统：\`/usr/lib/x86_64-linux-gnu/libmpi.so.40\`
-- 但 LAPACK 来自 conda：\`/home/kobe/miniconda3/envs/deepmd2/lib/liblapack.so.3\`
-- FFTW 也来自 conda：\`/home/kobe/miniconda3/envs/deepmd2/lib/libfftw3.so.3\`
+- 但 LAPACK 来自 conda：\`~/miniconda3/envs/deepmd2/lib/liblapack.so.3\`
+- FFTW 也来自 conda：\`~/miniconda3/envs/deepmd2/lib/libfftw3.so.3\`
 
 ## 修复方式
 

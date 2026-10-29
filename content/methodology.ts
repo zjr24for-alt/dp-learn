@@ -104,7 +104,7 @@ param.json  machine.json  record.dpgen  dpgen.log
 
 \`\`\`
 问题：iter.000001 train后直接finish
-路径：/home/kobe/TiC_MLP/dpgen
+路径：/path/to/your/dpgen
 环境：WSL2 Ubuntu-24.04
 我要你做：定位原因并给修法
 可查文件：param.json machine.json record.dpgen dpgen.log

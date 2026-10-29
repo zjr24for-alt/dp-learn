@@ -19,29 +19,29 @@ export const envConfigArticles: Article[] = [
 
 ## 关键路径
 
-| 软件 | 路径 |
+| 软件 | 路径（示例，按自己环境替换） |
 |------|------|
-| dp (训练用) | /home/kobe/miniconda3/envs/deepmd/bin/dp |
-| dp (dpgen用) | /home/kobe/miniconda3/envs/deepmd2/bin/dp |
-| dpgen | /home/kobe/miniconda3/envs/deepmd2/bin/dpgen |
-| lmp (DeePMD版) | /home/kobe/miniconda3/envs/deepmd/bin/lmp |
-| VASP (本地备用) | /home/kobe/vasp.6.5.0/bin/vasp_std |
+| dp (训练用) | ~/miniconda3/envs/deepmd/bin/dp |
+| dp (dpgen 用) | ~/miniconda3/envs/deepmd2/bin/dp |
+| dpgen | ~/miniconda3/envs/deepmd2/bin/dpgen |
+| lmp (DeePMD 版) | ~/miniconda3/envs/deepmd/bin/lmp |
+| VASP (本地备用) | /opt/vasp/bin/vasp_std |
 | MPI | /usr/bin/mpirun -np 4 |
 
 ## 超算环境
 
 | 项目 | 详情 |
 |------|------|
-| 主机 | 10.157.197.40:22 |
+| 主机 | cluster.example.edu（替换为你的集群地址） |
 | 调度系统 | PBS (Torque 6) |
 | 队列 | batch |
 | 每节点核数 | 52 (nodes=1:ppn=52) |
 
 | 软件 | 路径 |
 |------|------|
-| VASP | /public/software/vasp.5.4.4/bin/vasp_std |
-| Intel 环境 | source /public/software/intel2020u2/intel2020u2_env.sh |
-| dpgen 工作目录 | /public/home/student2025/zhuangjingrun/dpgen_work/ |
+| VASP | /path/to/vasp_std |
+| Intel 环境 | source /path/to/intel_env.sh |
+| dpgen 工作目录 | /public/home/yourname/dpgen_work/ |
 
 ## 任务分工
 

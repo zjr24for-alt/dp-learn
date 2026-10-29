@@ -55,7 +55,7 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "command",
     label: "查看作业状态",
     description: "查看当前用户在 PBS 队列中的作业",
-    code: "qstat -u student2025",
+    code: "qstat -u $USER",
     tags: ["pbs", "监控"],
   },
   {
@@ -95,7 +95,7 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "command",
     label: "上传文件到超算",
     description: "用 scp 上传到超算服务器的 dpgen 工作目录",
-    code: "scp file student2025@10.157.197.40:/public/home/student2025/zhuangjingrun/dpgen_work/",
+    code: "scp file yourname@cluster.example.edu:/public/home/yourname/dpgen_work/",
     tags: ["scp", "超算", "传输"],
   },
   {
@@ -112,16 +112,16 @@ export const cheatsheetItems: CheatsheetItem[] = [
     id: "param-trust-lo",
     category: "param",
     label: "model_devi_f_trust_lo",
-    description: "力偏差下界（eV/Å），低于此值认为模型准确",
-    code: '"model_devi_f_trust_lo": 0.05',
+    description: "力偏差下界（eV/Å），≤此值判为 accurate 跳过；官方建议 0.2×mean|F|",
+    code: '"model_devi_f_trust_lo": 0.25',
     tags: ["dpgen", "信任度"],
   },
   {
     id: "param-trust-hi",
     category: "param",
     label: "model_devi_f_trust_hi",
-    description: "力偏差上界（eV/Å），高于此值触发 VASP 标注",
-    code: '"model_devi_f_trust_hi": 0.35',
+    description: "力偏差上界（eV/Å），>此值判为 failed 丢弃；lo~hi 之间才是 candidate（送标注）。官方建议 0.5×mean|F|",
+    code: '"model_devi_f_trust_hi": 0.62',
     tags: ["dpgen", "信任度"],
   },
   {
@@ -363,15 +363,15 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "path",
     label: "dp (训练)",
     description: "deepmd 环境中的 dp 可执行文件",
-    code: "/home/kobe/miniconda3/envs/deepmd/bin/dp",
+    code: "~/miniconda3/envs/deepmd/bin/dp",
     tags: ["deepmd", "本地路径"],
   },
   {
     id: "path-local-dpgen",
     category: "path",
     label: "dpgen",
-    description: "deepmd2 环境中的 dpgen 可执行文件",
-    code: "/home/kobe/miniconda3/envs/deepmd2/bin/dpgen",
+    description: "dpgen 环境中的 dpgen 可执行文件",
+    code: "~/miniconda3/envs/deepmd2/bin/dpgen",
     tags: ["dpgen", "本地路径"],
   },
   {
@@ -379,15 +379,15 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "path",
     label: "lmp (DeePMD版)",
     description: "deepmd 环境中的 LAMMPS",
-    code: "/home/kobe/miniconda3/envs/deepmd/bin/lmp",
+    code: "~/miniconda3/envs/deepmd/bin/lmp",
     tags: ["lammps", "本地路径"],
   },
   {
     id: "path-hpc-vasp",
     category: "path",
     label: "vasp_std (超算)",
-    description: "超算上的 VASP 可执行文件",
-    code: "/public/software/vasp.5.4.4/bin/vasp_std",
+    description: "超算上的 VASP 可执行文件（按自己集群替换）",
+    code: "/path/to/vasp_std",
     tags: ["vasp", "超算路径"],
   },
   {
@@ -395,7 +395,7 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "path",
     label: "Intel 环境 (超算)",
     description: "超算 Intel 编译环境初始化脚本",
-    code: "source /public/software/intel2020u2/intel2020u2_env.sh",
+    code: "source /path/to/intel_env.sh",
     tags: ["超算路径", "环境"],
   },
   {
@@ -403,15 +403,15 @@ export const cheatsheetItems: CheatsheetItem[] = [
     category: "path",
     label: "dpgen 工作目录 (超算)",
     description: "超算上 dpgen 的 remote_root",
-    code: "/public/home/student2025/zhuangjingrun/dpgen_work/",
+    code: "/public/home/yourname/dpgen_work/",
     tags: ["dpgen", "超算路径"],
   },
   {
     id: "path-local-project",
     category: "path",
     label: "项目根目录",
-    description: "TiC MLP 项目的本地根目录",
-    code: "~/vasp_run/TiC_MLP/",
+    description: "dpgen 项目根目录（param.json / machine.json / record.dpgen 所在处）",
+    code: "~/dpgen/",
     tags: ["项目", "本地路径"],
   },
 
@@ -422,10 +422,10 @@ export const cheatsheetItems: CheatsheetItem[] = [
     label: "干净环境启动",
     description: "避免 conda 污染 VASP 动态库的启动脚本",
     code: `#!/bin/bash
-source /home/kobe/miniconda3/etc/profile.d/conda.sh
-conda activate dpgen_test_env
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate dpgen_env
 unset LD_LIBRARY_PATH
-export PATH=/home/kobe/miniconda3/envs/dpgen_test_env/bin:/usr/local/bin:/usr/bin:/bin
+export PATH=$HOME/miniconda3/envs/dpgen_env/bin:/usr/local/bin:/usr/bin:/bin
 dpgen run param.json machine.json`,
     tags: ["启动", "脚本", "环境"],
   },

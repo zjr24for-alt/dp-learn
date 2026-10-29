@@ -192,60 +192,61 @@ TiC_MLP/
 ## 1. 查看最新日志（最常用）
 
 \`\`\`bash
-tail -20 ~/C_deepmd_workflow/04_dpgen/dpgen.log
+tail -20 dpgen.log
 \`\`\`
 
 ## 2. 查看当前轮次和任务
 
 \`\`\`bash
-cat ~/C_deepmd_workflow/04_dpgen/record.dpgen | tail -5
+tail -5 record.dpgen
 \`\`\`
 
 ## 3. 查看各轮 candidate 变化趋势
 
 \`\`\`bash
-grep "candidate" ~/C_deepmd_workflow/04_dpgen/dpgen.log
+grep "candidate" dpgen.log
 \`\`\`
 
-## 4. 查看训练进度
+## 4. 查看训练进度（实时进度在 dpgen_work 里）
 
 \`\`\`bash
-tail /tmp/dpgen_train/*/000/train.log 2>/dev/null | grep "batch"
+tail -1 dpgen_work/*/lcurve.out
 \`\`\`
 
 ## 5. 查看 VASP 是否在计算
 
 \`\`\`bash
-grep "Elapsed time" ~/C_deepmd_workflow/04_dpgen/iter.000*/02.fp/task.*/OUTCAR 2>/dev/null | wc -l
+grep "Elapsed time" iter.000*/02.fp/task.*/OUTCAR 2>/dev/null | wc -l
 \`\`\`
 
 ## 6. 查看 dpgen 进程是否还在跑
 
 \`\`\`bash
-ps aux | grep dpgen | grep -v grep
+ps aux | grep "dpgen run" | grep -v grep
 \`\`\`
 
 ## 7. 查看每轮标注成功率
 
 \`\`\`bash
-grep "failed frame\|failed tasks" ~/C_deepmd_workflow/04_dpgen/dpgen.log | tail -10
+grep "failed frame\|failed tasks" dpgen.log | tail -10
 \`\`\`
 
 ## 标准启动流程
 
 \`\`\`bash
-sudo hostname kobe-pc
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
-conda activate deepmd2
-cd ~/C_deepmd_workflow/04_dpgen
+conda activate dpgen_env
+cd /path/to/your/dpgen
 dpgen run param.json machine.json 2>&1 | tee -a dpgen.log
 \`\`\`
 
 ## 续跑前防重复提交
 
 \`\`\`bash
-rm -rf ~/.dpdispatcher
+# 只清任务执行残留，绝不清 record.dpgen 和 iter.*
+rm -rf ~/.dpdispatcher/submission/
 \`\`\`
+
+> ⚠️ 不要 \`rm -rf ~/.dpdispatcher\` 整个目录，也不要清 \`record.dpgen\` / \`iter.*\`——那是 checkpoint，清掉等于从头重算。
 `,
     tags: ["dpgen", "日志", "监控", "检查", "命令"],
     sourceFiles: ["dpgen常用检查指令.txt"],
@@ -259,7 +260,7 @@ rm -rf ~/.dpdispatcher
 
 \`\`\`bash
 #!/bin/bash
-LOGFILE=/mnt/d/azuoye/vasp/TiC_MLP/dpgen/dpgen.log  # ← 改成实际路径
+LOGFILE=/path/to/your/dpgen/dpgen.log  # ← 改成实际路径
 INTERVAL=30  # 每30秒检查一次
 
 RED='\\033[0;31m'
@@ -464,10 +465,11 @@ ps -ef | grep -E "dpgen|lmp|vasp|deepmd|dp train"
 
 \`\`\`bash
 #!/bin/bash
-source /home/kobe/miniconda3/etc/profile.d/conda.sh
-conda activate dpgen_test_env
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate dpgen_env
 unset LD_LIBRARY_PATH
-export PATH=/home/kobe/miniconda3/envs/dpgen_test_env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/kobe/vasp.5.4.4/bin
+# 显式重建 PATH，剔除 conda 的动态库影响
+export PATH=$HOME/miniconda3/envs/dpgen_env/bin:/usr/local/bin:/usr/bin:/bin:/opt/vasp/bin
 dpgen run param.json machine.json
 \`\`\`
 
@@ -492,40 +494,230 @@ VASP 是静态编译的 Fortran 程序，对动态库版本非常敏感。
     summary: "如何通过 candidate 比例和 failed 比例判断主动学习是否健康",
     content: `# 模型偏差与 candidate 健康判断
 
-## candidate 比例含义
+## 先搞清楚三分类（最易记反）
 
-| 范围 | 状态 | 建议 |
+DP-GEN 对每一帧只做一件事：按 \`f_trust_lo\` / \`f_trust_hi\` 归类。
+
+| 判据 | 分类 | 去向 |
 |------|------|------|
-| **< 5%** | 模型太差，探索无效 | 检查训练数据质量，可能需要更多初始数据 |
-| **10~30%** | 健康状态 | 模型在学习，正常推进 |
-| **> 50%** | 阈值太宽 | 可以收紧 trust_hi |
-| **failed > 90%** | 模型很差或结构崩溃 | 检查初始训练、POSCAR 合理性 |
-| **accurate > 80%** | 模型接近收敛 | 可以考虑停止主动学习 |
+| \`max_devi_f ≤ trust_lo\` | **accurate** | 跳过 |
+| \`trust_lo < max_devi_f ≤ trust_hi\` | **candidate** | 送 VASP 标注 |
+| \`max_devi_f > trust_hi\` | **failed** | 丢弃 |
 
-## 关键参数调节
+> ⚠️ **不是"偏差越大越要标注"**。超过 \`trust_hi\` 的帧被判 failed 直接丢弃，只有落在带内的才是 candidate。这一条记反，所有比例判读都会跟着反。
 
-在 \`param.json\` 的 \`model_devi\` 段：
+## candidate 比例怎么读
+
+比例本身没有绝对的好坏，**必须先看阈值是否校准**，否则读出来的数字不可比：
+
+| 现象 | 真实原因 | 建议 |
+|------|---------|------|
+| candidate 长期 > 80% | 多半是 \`trust_lo\` 定得过低，大量本该 accurate 的帧被塞进 candidate | **先按官方规则重算阈值**，再谈比例 |
+| candidate 10~30% | 阈值大致合理，模型在正常学习 | 正常推进 |
+| candidate < 5% | 模型已接近收敛，或探索范围太窄 | 可以判定收敛，或提高 MD 温度扩展探索 |
+| failed > 90% | 模型很差或结构崩溃（原子飞散） | 检查初始训练数据、POSCAR 合理性、MD 温度是否过高 |
+
+> 🔴 **反例警示**：某体系 \`trust_lo=0.07\` 时，accurate 只剩 0.76%、candidate 高达 90.78%。dpgen 每轮都"假装"模型什么都不懂，把大量本该判准确的帧送去算 FP——**循环能跑通，但 candidate 率这个健康度指标彻底失去意义**，且不可跨轮比较。这正是阈值没校准的典型症状，而不是"模型太差"。
+
+## 阈值校准：官方经验规则
+
+\`\`\`python
+af = mean(|F|)              # 训练集所有原子-力分量的平均绝对值
+f_trust_lo = 0.2 * af
+f_trust_hi = 0.5 * af
+\`\`\`
+
+**先算 mean|F|，再按 0.2 / 0.5 倍套。** 别凭感觉拍数。
+
+| 来源 | lo | hi |
+|------|----|----|
+| 官方经验规则（0.2× / 0.5× mean\|F\|） | 0.2·af | 0.5·af |
+| DP-GEN handson 教程示例 | 0.05 | 0.15 |
+| DP-GEN 论文 Cu 示例 | 0.05 | 0.20 |
+| dpgen README 通用示例 | 0.25 | 0.45 |
+
+> ⚠️ 官方明确提醒：**体系温度升高、力的幅度变大时，trust level 要相应调大。** 实测同一 \`lo=0.25\`，300 K 判 85.5% 准确，3200 K 只判 47.8%——高温体系必须单独设阈值。
+
+## 关键参数
+
+在 \`param.json\` 顶层（不在 \`model_devi\` 段内）：
 
 \`\`\`json
 {
   "model_devi_dt": 0.001,
   "model_devi_skip": 200,
-  "model_devi_f_trust_lo": 0.05,
-  "model_devi_f_trust_hi": 0.35
+  "model_devi_f_trust_lo": 0.25,
+  "model_devi_f_trust_hi": 0.62
 }
 \`\`\`
 
-- \`trust_lo\`：低于此值的帧被认为准确
-- \`trust_hi\`：高于此值的帧被认为是 candidate（需要标注）
-- \`trust_lo\` ~ \`trust_hi\` 之间：被认为不够好但也不值得标注
-
 ## 调参策略
 
-1. candidate 太少 → 降低 trust_lo、trust_hi
-2. candidate 太多 → 提高 trust_hi
-3. failed 太多 → 检查训练收敛性，可能需要增加训练步数
+1. candidate 太多 → 先按 0.2×/0.5× 规则重算阈值，通常是把 **lo 抬高**
+2. candidate 太少 → 降低 trust_lo，或提高 MD 温度扩展探索
+3. failed 太多 → 检查训练收敛性与 MD 温度；failed 是"结构崩了"，不是"模型不会"
+4. 不同体系偏差尺度差异大 → 用 list/dict 形式**按 sys_idx 分别设阈值**
+5. 想直接控制每轮标多少帧 → 用 \`model_devi_adapt_trust_lo\` + \`model_devi_numb_candi_f\`
+
+> ⚠️ **改 param.json 前先确认它是否真的生效**。若探索阶段已改为手工脚本（自己拼 LAMMPS 输入、自己筛选候选），dpgen 根本不参与，**改 param.json 的 trust 键零效果**——真正的阈值硬编码在脚本里。
 `,
     tags: ["dpgen", "model_devi", "candidate", "信任度", "调参"],
     sourceFiles: ["dpgen常用检查指令.txt"],
+  },
+  {
+    slug: "dpgen-state-and-resume",
+    title: "DP-GEN 运行状态、续跑与静默陷阱",
+    category: "dpgen-workflow",
+    summary: "record.dpgen 阶段语义、copy_model 静默跳过训练、submission hash 失配重复提交、iter 目录红线、sys_probs 透传等源码级机制",
+    content: `# DP-GEN 运行状态、续跑与静默陷阱
+
+这一篇讲的是**"dpgen 没报错，但结果不对"**的那类问题。它们不会在日志里喊出来，只会让实验结论悄悄失效。
+
+## 一、状态记在哪：三个位置各管什么
+
+| 位置 | 是什么 | 用途 |
+|------|--------|------|
+| \`record.dpgen\` | 进度 checkpoint，每行 \`(迭代号 阶段号)\` | 判断跑到哪一步 |
+| \`dpgen_work/<hash>/\` | 执行缓存 | **实时进度看这里** |
+| \`iter.NNNNNN/\` | 最终产物 | collect 完成后才有完整文件 |
+
+### record.dpgen 的语义
+
+- 阶段号 0–8
+- **看到阶段号 N = 第 N 阶段已完成**，下一步执行 N+1
+- **绝不清 \`record.dpgen\` 和 \`iter.*\`**——那是 checkpoint，清掉等于从头重算
+
+### 三条反直觉判读
+
+| 现象 | 正确解读 |
+|------|---------|
+| 训练中 \`iter.N/00.train/000/\` 没有 \`frozen_model.pb\` | ✅ 正常，还没 collect 完，**不是失败** |
+| \`dpgen_work/<hash>/\` 任务目录空了 | ✅ 可能已 collect 完成，**不是失败** |
+| 找不到训练实时进度 | 去 \`dpgen_work/<hash>/\` 找 \`lcurve.out\`，不在 \`iter/\` |
+
+## 二、自然终止：某一轮"只重训没探索"
+
+\`make_model_devi\` 若发现 \`model_devi_jobs[iter]\` 不存在 → \`cont=False\` → break → 打印 \`finished\`。
+
+**所以"某一轮只训练没探索"不是出错，是该 iter 的 jobs 条目没加。**
+
+同理，\`model_devi_jobs\` 条目数必须 ≥ 迭代次数，否则 dpgen 提前报 Finished。
+
+## 三、🔴 copy_model：训练被静默跳过
+
+这是最隐蔽的坑。\`make_train\` 开头有 \`if iter_index > 0\` 分支：
+
+\`\`\`python
+# 用 glob("02.fp/data.*") 检查前一轮 FP 是否已产出数据
+if _check_empty_iter(prev_iter):
+    # 前一轮 fp 无 data.* → 直接复制旧模型，静默跳过训练
+    copy_model(...)
+\`\`\`
+
+**触发条件**：前一轮 \`02.fp\` 里没有 \`data.*\` 目录——比如 VASP 还在超算排队，或者自定义流程把数据移走了。
+
+**后果**：dpgen 打印"训练完成"，但模型完全没变。后续探索用的是旧模型，整个迭代白跑。
+
+**应用**：进入下一轮 \`make_train\` 之前，先确认前一轮数据已落盘：
+
+\`\`\`bash
+ls iter.$(printf "%06d" $((N-1)))/02.fp/data.*
+\`\`\`
+
+## 四、🔴 运行中改 machine.json = 重复提交
+
+\`submission hash\` **依赖 \`resources\`**。运行中修改 machine.json → \`try_recover_from_json()\` 匹配不到旧 hash → 当作全新 submission 重新提交 → **重复计算**。
+
+在按卡时计费的平台上，这就是**重复花钱**。
+
+**规则：必须等当前批次全部完成后再改。**
+
+## 五、🔴 iter.NNNNNN 必须在 dpgen 根目录
+
+把 \`iter.00000X/\` 移进 \`iterations/\` 子目录 → 断掉 \`data.iters/\` 与 \`old/model.ckpt\` 的**符号链接链** → old model 加载错误 → **训练发散（\`rmse_e\` 可达 2e15）**。
+
+可以整理的只有 \`logs/\`、\`eval_*\`、\`melt_scan*\` 这类辅助目录。
+
+## 六、sys_probs 原样透传，不补齐
+
+dpgen 源码里 \`sys_probs\` 相关处理**零出现**——它被原样透传给 deepmd 训练的 \`input.json\`，**长度不匹配不报错、不自动补齐**。
+
+长度 ≠ 系统数时，deepmd 采样 \`np.random.choice(nsystems, p=probs)\` 崩溃 → 训练子进程死。
+
+**应用**：每轮新增 FP 系统后，\`sys_probs\` 必须扩到新长度。
+
+> ⚠️ 校准 sys_probs 时用哪个帧数：必须是 deepmd **实际读到的帧数**，即 \`glob("set.*")\` 求和，**不是 \`set.000\` 单独的帧数**。目录里若残留 \`set.000_backup\`，两者会差一倍，配比直接失效。
+
+## 七、sys_idx 只索引 sys_configs
+
+- model_devi 的系统列表 = \`sys_configs\`（展开的 POSCAR）
+- \`init_data_sys\` 是训练数据，**不参与 model_devi**
+- 让 \`sys_idx\` 指向 \`init_data_sys\` 的索引 → \`sys_configs[idx]\` IndexError
+
+✅ 解法：把需要的起点构型转成 POSCAR 放进 \`sys_configs\`：
+
+\`\`\`python
+import dpdata
+System('init_data/some_start', fmt='deepmd/npy').to('vasp/poscar', 'sys_configs/new_start')
+\`\`\`
+
+## 八、同 sys_idx 的多条目会被去重
+
+dpgen 有去重逻辑，**只取第一条**。所以一个条目内列出所有温度：
+
+\`\`\`json
+{ "sys_idx": [0], "temps": [300, 600, 1000], "press": [1, 1, 1] }
+\`\`\`
+
+不要拆成三个条目分别写 300/600/1000。
+
+## 九、qdel 远程 job 后必须立即停 dpgen
+
+\`run_fp\` 轮询发现 job terminated 会 \`fail_count+1\` 并 **自动 resubmit**——你 qdel 了，它又给你提一遍。
+
+**改 FP 帧数的正确流程**：
+
+1. \`qdel\` 远程 job
+2. **立即**停 dpgen（\`tmux kill-session\` 或 \`pkill -9 -f "dpgen run"\`）
+3. 回退 \`record.dpgen\`（如 \`head -n -2\`）
+4. 清 \`02.fp\` 的 \`task.*\` 与 \`*.out\`（**保留 POTCAR**）
+5. 改 \`param.json\` 的 \`fp_task_max\`
+6. 重启 dpgen
+
+## 十、停 dpgen 要连根杀 wrapper 链
+
+只 kill master 进程后，\`.sub\` 链会残留继续训练；而 \`flag_if_job_task_fail=1\` 会把整个 job 判死。
+
+\`\`\`bash
+pkill -9 -f "dpgen run"
+pkill -9 -f lmp
+pkill -9 -f "dp train"
+ps -ef | grep -E "dpgen|lmp|dp train" | grep -v grep   # 确认干净
+\`\`\`
+
+## 十一、续跑启动脚本的铁律
+
+- **绝不清** \`record.dpgen\` / \`iter.*\`（checkpoint）
+- **只清** \`dpgen_work/*\` 与 \`~/.dpdispatcher/submission/\`（任务执行残留）
+
+清这两个地方是为了：防止 stale 恢复循环，以及防止旧 \`model.ckpt\` 被误当 restart。
+
+### 续跑语义
+
+加 \`model_devi_jobs[N]\` 后重启，dpgen 从 record 续该 iter 的 \`make_model_devi\`，**探索落在 \`iter.N\` 名下**（不是 N+1），随后 \`iter.N+1\` 才 \`make_train\` 吃新 FP 数据。已完成的 task 会跳过，不会重训。
+
+## 快速排查清单
+
+\`\`\`bash
+tmux ls && ps aux | grep "dpgen run" | grep -v grep   # 进程活着吗
+tail -20 dpgen.log ; tail -5 record.dpgen              # 推进到哪一步
+ls -lt dpgen_work/ | head                              # 当前任务（最新 hash）
+tail -1 dpgen_work/*/lcurve.out                        # 训练实时进度
+tail dpgen_work/<hash>/task.*/model_devi.out           # 探索实时进度
+ls iter.*/02.fp/data.*                                 # 前一轮 FP 数据落盘了吗
+\`\`\`
+`,
+    tags: ["dpgen", "续跑", "record.dpgen", "copy_model", "hash", "排查", "源码"],
+    sourceFiles: ["dpgen-workflow-gotchas.md", "06-machine.json-资源并发与运行状态.md"],
   },
 ];

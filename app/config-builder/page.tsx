@@ -75,24 +75,24 @@ function mergeMachineSegments(
   return { ok: true, json: JSON.stringify(parts, null, 2) };
 }
 
-// Default param.json from their actual project
+// 默认 param.json 模板（TiC 体系示例，路径请按实际项目修改）
 const DEFAULT_PARAM = `{
   "type_map": ["Ti", "C"],
   "mass_map": [47.867, 12.011],
-  "init_data_prefix": "/home/kobe/TiC_aimd_64/dpgen/init_data_B",
+  "init_data_prefix": "~/TiC_aimd_64/dpgen/init_data_B",
   "init_data_sys": ["bulk_300k", "bulk_600k", "bulk_1000k"],
-  "sys_configs_prefix": "/home/kobe/TiC_aimd_64/dpgen/sys_configs",
+  "sys_configs_prefix": "~/TiC_aimd_64/dpgen/sys_configs",
   "sys_configs": [["bulk_64/POSCAR"]],
   "init_fp_style": "vasp",
   "init_bulk": {
     "stages": [1, 2, 3, 4],
     "from_poscar": true,
-    "from_poscar_path": "/home/kobe/TiC_aimd_64/dpgen/sys_configs/bulk_64/POSCAR",
+    "from_poscar_path": "~/TiC_aimd_64/dpgen/sys_configs/bulk_64/POSCAR",
     "super_cell": [1, 1, 1],
     "elements": ["Ti", "C"],
-    "potcars": ["/home/kobe/TiC_aimd_64/dpgen/POTCAR_Ti", "/home/kobe/TiC_aimd_64/dpgen/POTCAR_C"],
-    "relax_incar": "/home/kobe/TiC_aimd_64/dpgen/INCAR_rlx",
-    "md_incar": "/home/kobe/TiC_aimd_64/dpgen/INCAR_md",
+    "potcars": ["~/TiC_aimd_64/dpgen/POTCAR_Ti", "~/TiC_aimd_64/dpgen/POTCAR_C"],
+    "relax_incar": "~/TiC_aimd_64/dpgen/INCAR_rlx",
+    "md_incar": "~/TiC_aimd_64/dpgen/INCAR_md",
     "scale": [1.0, 0.98, 1.02],
     "skip_relax": false,
     "pert_numb": 2,
@@ -175,9 +175,9 @@ const DEFAULT_PARAM = `{
   "fp_task_max": 50,
   "fp_task_min": 1,
   "fp_fail_count": 100,
-  "fp_pp_path": "/home/kobe/TiC_aimd_64/dpgen",
+  "fp_pp_path": "~/TiC_aimd_64/dpgen",
   "fp_pp_files": ["POTCAR_Ti", "POTCAR_C"],
-  "fp_incar": "/home/kobe/TiC_aimd_64/dpgen/INCAR_fp",
+  "fp_incar": "~/TiC_aimd_64/dpgen/INCAR_fp",
   "fp_kspacing": 0.2,
   "fp_kgamma": true
 }`;

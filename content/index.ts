@@ -23,21 +23,21 @@ import { officialDocs } from "./official-docs/index";
  * 新内容文件补进来时，在此追加对应日期即可。
  */
 const FILE_UPDATED_AT: Record<string, string> = {
-  "dpgen-workflow": "2026-07-31",
+  "dpgen-workflow": "2026-10-29",
+  "deepmd-training": "2026-10-29",
+  "machine-config": "2026-10-29",
+  "env-config": "2026-10-29",
+  "vasp-hpc": "2026-10-29",
+  methodology: "2026-10-29",
   "dpgen-handson": "2026-06-04",
-  "deepmd-training": "2026-06-04",
   "deepmd-quickstart": "2026-06-04",
   "deepmd-tuning": "2026-06-04",
   "lammps-deepmd": "2026-06-04",
   "dpdata-guide": "2026-06-04",
-  "machine-config": "2026-06-04",
-  "vasp-hpc": "2026-06-02",
   "comp-materials": "2026-06-02",
   "atomistic-sim": "2026-06-02",
   "ovito-tips": "2026-06-02",
-  "env-config": "2026-06-02",
   "linux-tips": "2026-06-02",
-  methodology: "2026-06-02",
 };
 
 /** 给一组文章注入 createdAt/updatedAt（按来源文件的最后修改日期） */

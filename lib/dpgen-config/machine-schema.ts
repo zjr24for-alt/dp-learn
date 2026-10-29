@@ -98,7 +98,7 @@ export const MACHINE_SCHEMA: Record<string, ParamField[]> = {
       key: "local_root", label: "本地根目录", type: "string", default: "./", description: "本地工作根目录", required: true,
     },
     {
-      key: "remote_root", label: "远程根目录", type: "string", default: "/home/kobe/dpgen_work", description: "远程工作目录", required: false,
+      key: "remote_root", label: "远程根目录", type: "string", default: "~/dpgen_work", description: "远程工作目录", required: false,
     },
     {
       key: "resources",
@@ -114,7 +114,7 @@ export const MACHINE_SCHEMA: Record<string, ParamField[]> = {
       ],
     },
     {
-      key: "command", label: "LAMMPS 命令", type: "string", default: "/home/kobe/miniconda3/envs/deepmd/bin/lmp", description: "LAMMPS 可执行文件路径", required: true,
+      key: "command", label: "LAMMPS 命令", type: "string", default: "~/miniconda3/envs/deepmd/bin/lmp", description: "LAMMPS 可执行文件路径", required: true,
     },
   ],
   fp: [
@@ -139,10 +139,10 @@ export const MACHINE_SCHEMA: Record<string, ParamField[]> = {
       type: "object", default: "-", description: "SSH 连接超算的信息",
       required: true,
       children: [
-        { key: "remote_profile.hostname", label: "主机地址", type: "string", default: "10.157.197.40", description: "超算登录节点 IP", required: true },
+        { key: "remote_profile.hostname", label: "主机地址", type: "string", default: "cluster.example.edu", description: "超算登录节点地址", required: true },
         { key: "remote_profile.port", label: "端口", type: "number", default: "22", description: "SSH 端口", required: false },
-        { key: "remote_profile.username", label: "用户名", type: "string", default: "student2025", description: "超算账号", required: true },
-        { key: "remote_profile.key_filename", label: "密钥路径", type: "string", default: "/home/kobe/.ssh/id_rsa", description: "SSH 私钥路径", required: false },
+        { key: "remote_profile.username", label: "用户名", type: "string", default: "yourname", description: "超算账号", required: true },
+        { key: "remote_profile.key_filename", label: "密钥路径", type: "string", default: "~/.ssh/id_rsa", description: "SSH 私钥路径", required: false },
         { key: "remote_profile.execute_command", label: "初始化命令", type: "string", default: "-", description: "SSH 连接后执行的初始化命令（加载环境变量等）", required: false },
       ],
     },
@@ -173,7 +173,7 @@ export function getMachineDefaults(segment: string): string {
         batch_type: "shell",
         context_type: "local",
         local_root: "./",
-        remote_root: "/home/kobe/dpgen_work",
+        remote_root: "~/dpgen_work",
       },
       resources: {
         number_node: 1,
@@ -182,7 +182,7 @@ export function getMachineDefaults(segment: string): string {
         queue_name: "local",
         group_size: 4,
       },
-      command: "/home/kobe/miniconda3/envs/deepmd3/bin/dp_wrapper",
+      command: "~/miniconda3/envs/deepmd3/bin/dp_wrapper",
     }], null, 2);
   }
   if (segment === "model_devi") {
@@ -191,7 +191,7 @@ export function getMachineDefaults(segment: string): string {
         batch_type: "shell",
         context_type: "local",
         local_root: "./",
-        remote_root: "/home/kobe/dpgen_work",
+        remote_root: "~/dpgen_work",
       },
       resources: {
         number_node: 1,
@@ -200,7 +200,7 @@ export function getMachineDefaults(segment: string): string {
         queue_name: "local",
         group_size: 4,
       },
-      command: "/home/kobe/miniconda3/envs/deepmd/bin/lmp",
+      command: "~/miniconda3/envs/deepmd/bin/lmp",
     }], null, 2);
   }
   if (segment === "fp") {
@@ -209,12 +209,12 @@ export function getMachineDefaults(segment: string): string {
         batch_type: "Torque",
         context_type: "SSHContext",
         local_root: "./",
-        remote_root: "/public/home/student2025/zhuangjingrun/TiC_aimd_64/dpgen",
+        remote_root: "/public/home/yourname/dpgen_work",
         remote_profile: {
-          hostname: "10.157.197.40",
+          hostname: "cluster.example.edu",
           port: 22,
-          username: "student2025",
-          key_filename: "/home/kobe/.ssh/id_rsa",
+          username: "yourname",
+          key_filename: "~/.ssh/id_rsa",
         },
       },
       resources: {
@@ -230,7 +230,7 @@ export function getMachineDefaults(segment: string): string {
           "#PBS -S /bin/bash",
         ],
       },
-      command: 'NP=$(wc -l < $PBS_NODEFILE) && source /public/software/intel2020u2/intel2020u2_env.sh && mpirun -machinefile $PBS_NODEFILE -np $NP /public/software/vasp.5.4.4/bin/vasp_std > vasp.out',
+      command: 'NP=$(wc -l < $PBS_NODEFILE) && source /path/to/intel_env.sh && mpirun -machinefile $PBS_NODEFILE -np $NP vasp_std > vasp.out',
     }], null, 2);
   }
   return "[]";
